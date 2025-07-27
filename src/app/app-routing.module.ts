@@ -8,7 +8,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'onboarding',
     pathMatch: 'full'
   },
   {
@@ -17,8 +17,13 @@ const routes: Routes = [
   },
   {
     path: 'onboarding',
-    loadChildren: () => import('./onboarding/onboarding.module').then( m => m.OnboardingPageModule)
+    loadChildren: () => import('./newflow/onboarding/onboarding.module').then( m => m.OnboardingPageModule)
   },
+  {
+    path: 'setup-profile',
+    loadChildren: () => import('./newflow/setup-profile/setup-profile.module').then( m => m.SetupProfilePageModule)
+  },
+
 ];
 
 @NgModule({

@@ -3,15 +3,15 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword
 } from 'firebase/auth';
-import { auth } from '../app.module';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { FirebaseService } from '../services/firebase.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  standalone:false
+  standalone: false,
 })
 export class HomePage {
   email: string = '';
@@ -21,12 +21,12 @@ export class HomePage {
 
   constructor(
     private toastController: ToastController,
-    private router: Router
+    private router: Router,
+    private firebaseService: FirebaseService // ✅ Inject the service
   ) {}
 
   toggleRegister() {
     this.showRegister = !this.showRegister;
-    // clear fields when switching
     this.email = '';
     this.password = '';
     this.confirmPassword = '';
@@ -35,18 +35,23 @@ export class HomePage {
   async signIn() {
     try {
       const userCred = await signInWithEmailAndPassword(
-        auth,
+        this.firebaseService.auth, //  injected auth instance
         this.email,
         this.password
       );
       const user = userCred.user;
       const toast = await this.toastController.create({
-        message: `Login successful! Welcome, ${user.email}`,
+        message: `Login successful! Welcome, ${user.email} ${user.uid}`,
         duration: 2000,
         color: 'success',
       });
       await toast.present();
-      this.router.navigate(['/dashboard']);
+      if (!(await this.firebaseService.userProfileExists(user.uid))) {
+        this.router.navigate(['/setup-profile']);
+      } else {
+        this.router.navigate(['/dashboard']);
+      }
+
     } catch (error: any) {
       const toast = await this.toastController.create({
         message: `Login failed: ${error.message}`,
@@ -58,7 +63,6 @@ export class HomePage {
   }
 
   async register() {
-    // extra check just in case
     if (this.password !== this.confirmPassword) {
       const toast = await this.toastController.create({
         message: `Passwords do not match.`,
@@ -71,7 +75,7 @@ export class HomePage {
 
     try {
       const userCred = await createUserWithEmailAndPassword(
-        auth,
+        this.firebaseService.auth, // ✅ Use the injected auth instance
         this.email,
         this.password
       );
@@ -82,7 +86,8 @@ export class HomePage {
         color: 'success',
       });
       await toast.present();
-      this.toggleRegister(); // switch back to login
+
+      this.toggleRegister();
     } catch (error: any) {
       const toast = await this.toastController.create({
         message: `Registration failed: ${error.message}`,
