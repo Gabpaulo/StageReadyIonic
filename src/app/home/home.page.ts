@@ -22,7 +22,7 @@ export class HomePage {
   constructor(
     private toastController: ToastController,
     private router: Router,
-    private firebaseService: FirebaseService // ✅ Inject the service
+    private firebaseService: FirebaseService 
   ) {}
 
   toggleRegister() {
@@ -35,7 +35,7 @@ export class HomePage {
   async signIn() {
     try {
       const userCred = await signInWithEmailAndPassword(
-        this.firebaseService.auth, //  injected auth instance
+        this.firebaseService.auth, 
         this.email,
         this.password
       );
@@ -75,13 +75,13 @@ export class HomePage {
 
     try {
       const userCred = await createUserWithEmailAndPassword(
-        this.firebaseService.auth, // ✅ Use the injected auth instance
+        this.firebaseService.auth, 
         this.email,
         this.password
       );
       const user = userCred.user;
       const toast = await this.toastController.create({
-        message: `Registration successful! You can now log in as ${user.email}`,
+        message: `Registration successful`,
         duration: 2000,
         color: 'success',
       });

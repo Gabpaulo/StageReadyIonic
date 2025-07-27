@@ -1,13 +1,31 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>setup-profile</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="ion-padding">
+  <ion-item>
+    <ion-input placeholder="First Name" [(ngModel)]="firstName"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-input placeholder="Last Name" [(ngModel)]="lastName"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-input type="number" placeholder="Age" [(ngModel)]="age"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-input placeholder="Phone Number" [(ngModel)]="phoneNumber"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-select placeholder="Gender" [(ngModel)]="gender">
+      <ion-select-option value="Male">Male</ion-select-option>
+      <ion-select-option value="Female">Female</ion-select-option>
+      <ion-select-option value="Other">Other</ion-select-option>
+    </ion-select>
+  </ion-item>
+  <ion-item>
+  <ion-label>Interests</ion-label>
+  <ion-select [(ngModel)]="interests" multiple="true" interface="popover" placeholder="Select interests">
+    <ion-select-option *ngFor="let option of interestOptions" [value]="option">
+      {{ option }}
+    </ion-select-option>
+  </ion-select>
+</ion-item>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">setup-profile</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-button expand="block" (click)="saveProfile()">Save Profile</ion-button>
 </ion-content>
