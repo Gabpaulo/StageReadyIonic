@@ -1,82 +1,76 @@
 
 
-<ion-content class="ion-padding">
-  <ion-card *ngIf="!showRegister">
-    <ion-card-header>
-      <ion-card-title>Login</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="email"
-          type="email"
-          placeholder="Enter your email"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="password"
-          type="password"
-          placeholder="Enter your password"
-        ></ion-input>
-      </ion-item>
-      <ion-button expand="block" (click)="signIn()">Log In</ion-button>
-      <ion-button fill="clear" expand="block" (click)="toggleRegister()">
-        Don’t have an account? Register
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card *ngIf="showRegister">
-    <ion-card-header>
-      <ion-card-title>Register</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="email"
-          type="email"
-          placeholder="Enter your email"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="password"
-          type="password"
-          placeholder="Enter your password"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="confirmPassword"
-          type="password"
-          placeholder="Re‑enter your password"
-        ></ion-input>
-      </ion-item>
-
-      <p
-        *ngIf="password && confirmPassword && password !== confirmPassword"
-        class="error-text"
-      >
-        Passwords don’t match.
-      </p>
-
-      <!-- disable until emails + both passwords are non‑empty AND match -->
-      <ion-button
-        expand="block"
-        (click)="register()"
-        [disabled]="
-          !email ||
-          !password ||
-          !confirmPassword ||
-          password !== confirmPassword
-        "
-      >
-        Register
-      </ion-button>
-      <ion-button fill="clear" expand="block" (click)="toggleRegister()">
-        Back to Login
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="login-bg">
+  <div class="login-container">
+    <h1 class="login-title">Stage Ready</h1>
+    <h2 class="login-subtitle">Your AI Public Speaking Coach</h2>
+    <ion-card class="login-card" *ngIf="!showRegister">
+      <ion-card-header>
+        <ion-card-title>Login</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-input
+            [(ngModel)]="email"
+            type="email"
+            placeholder="Enter your email"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-input
+            [(ngModel)]="password"
+            type="password"
+            placeholder="Enter your password"
+          ></ion-input>
+        </ion-item>
+        <ion-button expand="block" color="primary" (click)="signIn()">Log In</ion-button>
+        <ion-button fill="clear" expand="block" (click)="toggleRegister()">
+          Don’t have an account? Register
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+    <ion-card class="login-card" *ngIf="showRegister">
+      <ion-card-header>
+        <ion-card-title>Register</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-input
+            [(ngModel)]="email"
+            type="email"
+            placeholder="Enter your email"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-input
+            [(ngModel)]="password"
+            type="password"
+            placeholder="Enter your password"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-input
+            [(ngModel)]="confirmPassword"
+            type="password"
+            placeholder="Re‑enter your password"
+          ></ion-input>
+        </ion-item>
+        <p
+          *ngIf="password && confirmPassword && password !== confirmPassword"
+          class="error-text"
+        >
+          Passwords don’t match.
+        </p>
+        <ion-button expand="block" color="primary" (click)="register()">Register</ion-button>
+        <ion-button fill="clear" expand="block" (click)="toggleRegister()">
+          Already have an account? Log In
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

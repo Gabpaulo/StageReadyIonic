@@ -31,4 +31,22 @@ export class FirebaseService {
       updatedAt: Timestamp.now(),
     });
   }
+
+  async updateUserProfile(uid: string, data: any): Promise<void> {
+    const userRef = doc(this.firestore, `users/${uid}`);
+    await setDoc(userRef, {
+      ...data,
+      updatedAt: Timestamp.now(),
+    }, { merge: true });
+  }
+
+  async getUserProfile(uid: string): Promise<any | null> {
+    if (!uid) return null;
+    const docRef = doc(this.firestore, `users/${uid}`);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+    return null;
+  }
 }

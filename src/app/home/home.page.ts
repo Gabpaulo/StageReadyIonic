@@ -49,7 +49,7 @@ export class HomePage {
       if (!(await this.firebaseService.userProfileExists(user.uid))) {
         this.router.navigate(['/setup-profile']);
       } else {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/tabs/dashboard']);
       }
 
     } catch (error: any) {

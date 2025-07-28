@@ -1,5 +1,86 @@
-.error-text {
-  color: var(--ion-color-danger);
-  font-size: 0.9rem;
-  margin: 0.5rem 0 1rem;
+.login-bg {
+  --background: #1A2633;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.login-container {
+  width: 90%;
+  max-width: 400px;
+  margin: auto;
+  padding-top: 3rem;
+  color: #ffffff;
+  text-align: center;
+}
+
+.login-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #29ABE2;
+  margin-bottom: 0.3rem;
+}
+
+.login-subtitle {
+  font-size: 1.1rem;
+  color: #cccccc;
+  margin-bottom: 2rem;
+}
+
+.login-card {
+  background-color: #263544;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+ion-card-title {
+  font-size: 1.5rem;
+  color: #ffffff;
+}
+
+ion-card-content {
+  padding-top: 0.5rem;
+
+  ion-item {
+    --background: transparent;
+    --highlight-color-focused: #29ABE2;
+    border: 1px solid #3c4b5c;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    color: #ffffff;
+
+    ion-icon {
+      color: #29ABE2;
+    }
+
+    ion-input {
+      color: #ffffff;
+    }
+  }
+
+  ion-button {
+    margin-top: 0.5rem;
+  }
+
+  .error-text {
+    color: #FF6B6B;
+    font-size: 0.9rem;
+    margin: 0.5rem 0 1rem;
+  }
+}
+
+ion-button[color="primary"] {
+  --background: #29ABE2;
+  --background-activated: #1e9ad1;
+  --background-focused: #1e9ad1;
+  --background-hover: #1e9ad1;
+  --color: #ffffff;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+ion-button[fill="clear"] {
+  color: #fcfcfc;
+  font-weight: 500;
 }
