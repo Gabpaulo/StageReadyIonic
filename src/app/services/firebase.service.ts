@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, GoogleAuthProvider, signInWithPopup, UserCredential } from 'firebase/auth';
 import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 
@@ -48,5 +48,10 @@ export class FirebaseService {
       return docSnap.data();
     }
     return null;
+  }
+
+  async signInWithGoogle(): Promise<UserCredential> {
+    const provider = new GoogleAuthProvider();
+    return signInWithPopup(this.auth, provider);
   }
 }

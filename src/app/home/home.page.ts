@@ -97,4 +97,31 @@ export class HomePage {
       await toast.present();
     }
   }
+
+  async signInWithGoogle() {
+    try {
+      const userCred = await this.firebaseService.signInWithGoogle();
+      const user = userCred.user;
+      const toast = await this.toastController.create({
+        message: `Login successful! Welcome, ${user.displayName || user.email}`,
+        duration: 2000,
+        color: 'success',
+      });
+      await toast.present();
+      if (!(await this.firebaseService.userProfileExists(user.uid))) {
+        await this.firebaseService.createUserProfile(user.uid, {
+          email: user.email,
+          displayName: user.displayName || '',
+        });
+      }
+      this.router.navigate(['/tabs/dashboard']);
+    } catch (error: any) {
+      const toast = await this.toastController.create({
+        message: `Google login failed: ${error.message}`,
+        duration: 3000,
+        color: 'danger',
+      });
+      await toast.present();
+    }
+  }
 }

@@ -26,6 +26,10 @@
           ></ion-input>
         </ion-item>
         <ion-button expand="block" color="primary" (click)="signIn()">Log In</ion-button>
+        <div class="google-login-link" (click)="signInWithGoogle()">
+          <ion-icon name="logo-google"></ion-icon>
+          <span>Log in with Google</span>
+        </div>
         <ion-button fill="clear" expand="block" (click)="toggleRegister()">
           Don’t have an account? Register
         </ion-button>
