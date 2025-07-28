@@ -31,6 +31,12 @@ const routes: Routes = [
     path: 'tabs',
     loadChildren: () => import('./pages/tabs/tabs.module').then(m => m.TabsPageModule)
   },
+  {
+    path: 'speech-analysis',
+    loadChildren: () => import('./pages/speech-analysis/speech-analysis.module').then( m => m.SpeechAnalysisPageModule)
+  },
+ 
+
 
 ];
 
