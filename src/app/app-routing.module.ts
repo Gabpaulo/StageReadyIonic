@@ -23,6 +23,10 @@ const routes: Routes = [
     path: 'setup-profile',
     loadChildren: () => import('./newflow/setup-profile/setup-profile.module').then( m => m.SetupProfilePageModule)
   },
+  {
+    path: 'profile',
+    loadChildren: () => import('./pages/profile/profile.module').then( m => m.ProfilePageModule)
+  },
 
 ];
 
