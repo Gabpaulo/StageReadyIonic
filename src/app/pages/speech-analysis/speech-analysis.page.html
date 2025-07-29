@@ -9,12 +9,11 @@
     <ion-card-header>
       <ion-card-title>Speech Analysis</ion-card-title>
       <ion-card-subtitle>
-        Record your speech below to get AI-powered feedback on pace, tone, clarity, and more.
+        Record your speech below to get AI‐powered feedback on pace, tone, clarity, and filler words.
       </ion-card-subtitle>
     </ion-card-header>
-
     <ion-card-content>
-      <!-- START/STOP (no URL yet) -->
+      <!-- RECORDING CONTROLS -->
       <div *ngIf="!audioUrl">
         <ion-button expand="block"
                     (click)="isRecording ? stopRecording() : startRecording()">
@@ -27,62 +26,65 @@
         </div>
       </div>
 
-      <!-- PREVIEW + ACTIONS -->
+      <!-- PREVIEW & ACTIONS -->
       <div *ngIf="audioUrl">
-        <!-- DEBUG: show URL text and link -->
-        <p>🔗 URL: {{ audioUrl }}</p>
-        <p>
-          <a [href]="audioUrl"
-             target="_blank"
-             download="recording.webm">
-            Download/Open Recording
-          </a>
-        </p>
-
-        <!-- actual audio player -->
-        <audio [src]="audioUrl"
-               controls
-               style="width:100%; margin-bottom:1em;">
-          Your browser doesn’t support <code>audio</code>.
-        </audio>
-
-        <ion-button expand="block"
-                    (click)="analyzeRecording()"
-                    [disabled]="isLoading">
-          <ion-icon name="sparkles" slot="start"></ion-icon>
+        <audio [src]="audioUrl" controls style="width:100%; margin-bottom:1em;"></audio>
+        <ion-button expand="block" (click)="analyzeRecording()" [disabled]="isLoading">
+          <ion-icon name="play-circle" slot="start"></ion-icon>
           Analyze Recording
         </ion-button>
-        <ion-button expand="block"
-                    fill="outline"
-                    (click)="resetRecording()">
+        <ion-button expand="block" fill="outline" (click)="resetRecording()">
           <ion-icon name="refresh" slot="start"></ion-icon>
           Record Again
         </ion-button>
       </div>
 
-      <!-- LOADING SPINNER -->
+      <!-- LOADING -->
       <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
 
-      <!-- DISPLAY FEEDBACK -->
+      <!-- FEEDBACK DISPLAY -->
       <div *ngIf="feedback">
         <ion-card>
           <ion-card-header>
             <ion-card-title>Transcription</ion-card-title>
           </ion-card-header>
-          <ion-card-content>
-            {{ feedback.transcript || feedback.transcription }}
-          </ion-card-content>
+          <ion-card-content>{{ feedback.transcript }}</ion-card-content>
         </ion-card>
 
         <ion-card>
           <ion-card-header>
-            <ion-card-title>Overall Feedback</ion-card-title>
+            <ion-card-title>Pace</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>{{ feedback.pace }}</ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Tone</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>{{ feedback.tone }}</ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Clarity</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>{{ feedback.clarity }}</ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Filler Words</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            {{ feedback.overall?.feedback }}
+            <p>{{ feedback.fillerWords.feedback }}</p>
+            <ul>
+              <li *ngFor="let w of feedback.fillerWords.words">
+                {{ w.word }} at {{ w.timestamp | number:'1.1-1' }}s
+              </li>
+            </ul>
           </ion-card-content>
         </ion-card>
-        <!-- more cards… -->
       </div>
     </ion-card-content>
   </ion-card>

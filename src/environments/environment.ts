@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  geminiApiKey: 'AIzaSyD8nBbHBYumicRaQgNf2muEhBamMB-ck3E',
   firebaseConfig: {
     apiKey: "AIzaSyA-gBJBJRTvJNlnMQXRoW-tBj1NI10_qZE",
     authDomain: "stagereadydb.firebaseapp.com",
