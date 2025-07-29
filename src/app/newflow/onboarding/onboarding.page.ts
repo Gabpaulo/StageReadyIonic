@@ -11,7 +11,7 @@ export class OnboardingPage implements OnInit {
 
   onboardingSlides = [
     {
-      image: 'assets/img/onboarding1.svg',
+      image: 'assets/onboarding/onboarding1.svg',
       title: 'Welcome to Stage Ready',
       description: 'Your companion for confident, polished performances.',
     },
