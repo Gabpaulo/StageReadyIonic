@@ -1,5 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subscription }               from 'rxjs';
+import { Router }                     from '@angular/router';
 import { AudioRecorderService }       from '../../services/audio-recorder.service';
 import { SpeechAnalysisService }      from '../../services/genai.service';
 import { AnalyzeSpeechForFeedbackOutput }
@@ -16,13 +17,13 @@ export class SpeechAnalysisPage implements OnDestroy {
   audioBlob: Blob | null = null;
   audioUrl:  string | null = null;
   isLoading = false;
-  feedback!: AnalyzeSpeechForFeedbackOutput;
 
   private subs: Subscription[] = [];
 
   constructor(
     public recorder: AudioRecorderService,
-    private analysis: SpeechAnalysisService
+    private analysis: SpeechAnalysisService,
+    private router: Router
   ) {
     this.subs.push(
       this.recorder.isRecording$
@@ -35,21 +36,26 @@ export class SpeechAnalysisPage implements OnDestroy {
     );
   }
 
-  startRecording() { this.recorder.startRecording(); }
-  stopRecording()  { this.recorder.stopRecording(); }
+  startRecording()  { this.recorder.startRecording(); }
+  stopRecording()   { this.recorder.stopRecording(); }
+
   resetRecording() {
     this.recorder.reset();
-    // clear previous feedback
-    this.feedback = {} as any;
   }
 
   analyzeRecording() {
-    if (!this.audioBlob) return;
+    if (!this.audioBlob) { return; }
     this.isLoading = true;
+
     this.analysis.analyzeAudioBlob(this.audioBlob).subscribe({
-      next: fb => {
-        this.feedback = fb;
+      next: feedback => {
+        // turn off the spinner
         this.isLoading = false;
+        // navigate to the feedback page, passing the feedback in state
+        this.router.navigate(
+          ['/speech-feedback'],
+          { state: { feedback } }
+        );
       },
       error: err => {
         console.error('Analysis error', err);

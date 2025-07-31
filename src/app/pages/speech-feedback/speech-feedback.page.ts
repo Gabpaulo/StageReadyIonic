@@ -1,0 +1,32 @@
+// src/app/pages/speech-feedback/speech-feedback.page.ts
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AnalyzeSpeechForFeedbackOutput } from '../speech-analysis/model';
+
+@Component({
+  selector: 'app-speech-feedback',
+  templateUrl: './speech-feedback.page.html',
+  styleUrls: ['./speech-feedback.page.scss'],
+  standalone:false
+})
+export class SpeechFeedbackPage implements OnInit {
+  feedback!: AnalyzeSpeechForFeedbackOutput;
+
+  constructor(public router: Router) {
+    const nav = this.router.getCurrentNavigation();
+    // cast state to known shape
+    const state = (nav?.extras?.state as { feedback?: AnalyzeSpeechForFeedbackOutput }) || {};
+    if (!state.feedback) {
+      // if no feedback in state, go back
+      this.router.navigateByUrl('/speech-analysis');
+      return;
+    }
+    this.feedback = state.feedback;
+  }
+
+  ngOnInit() {}
+  
+  tryAgain() {
+    this.router.navigateByUrl('/speech-analysis');
+  }
+}

@@ -1,3 +1,5 @@
+// src/app/pages/speech-analysis/speech-analysis.page.scss
+
 // Variables
 $primary-color: #29ABE2;
 $primary-hover: #1E8EC4;
@@ -25,35 +27,72 @@ $danger-hover: #C0392B;
 @mixin button-base {
   font-weight: 600;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-// Global Styles
+@mixin glass-effect {
+  background: rgba($card-background, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba($primary-color, 0.1);
+}
+
+// Page Structure
 .custom-header {
   --background: #{$background-color};
   --color: #{$text-primary};
+  
+  ion-toolbar {
+    --background: transparent;
+    
+    ion-title {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  }
 }
 
 .custom-content {
   --background: #{$background-color};
   --color: #{$text-primary};
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    background: radial-gradient(ellipse at top, rgba($primary-color, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
 }
 
 // Hero Section
 .hero-section {
   text-align: center;
-  padding: 2rem 1rem;
-  background: linear-gradient(135deg, $background-color 0%, $card-background 100%);
+  padding: 3rem 1rem 2rem;
+  background: linear-gradient(180deg, rgba($card-background, 0.5) 0%, transparent 100%);
+  position: relative;
+  z-index: 1;
   
   h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
     color: $text-primary;
+    background: linear-gradient(135deg, $text-primary 0%, $primary-color 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeInDown 0.8s ease-out;
   }
   
   p {
     color: $text-secondary;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
   }
 }
 
@@ -62,22 +101,25 @@ $danger-hover: #C0392B;
   padding: 1rem;
   max-width: 600px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 // Recording Section
 .recording-section {
   text-align: center;
   padding: 3rem 0;
+  animation: fadeIn 1s ease-out;
   
   .mic-container {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 150px;
+    height: 150px;
     margin: 0 auto;
     
     &.recording {
       .pulse-ring {
-        animation: pulse 2s ease-out infinite;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         
         &.delay-1 {
           animation-delay: 0.5s;
@@ -91,24 +133,60 @@ $danger-hover: #C0392B;
   }
   
   .record-button {
-    width: 120px;
-    height: 120px;
+    width: 150px;
+    height: 150px;
     --background: #{$primary-color};
     --background-hover: #{$primary-hover};
     --border-radius: 50%;
-    font-size: 3rem;
     margin: 0;
     position: relative;
     z-index: 10;
     transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba($primary-color, 0.3);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% + 10px);
+      height: calc(100% + 10px);
+      background: linear-gradient(135deg, $primary-color, $accent-color);
+      border-radius: 50%;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      filter: blur(8px);
+    }
+    
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba($primary-color, 0.4);
+      
+      &::before {
+        opacity: 0.3;
+      }
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
     
     &.stop-button {
       --background: #{$danger-color};
       --background-hover: #{$danger-hover};
+      box-shadow: 0 8px 32px rgba($danger-color, 0.3);
+      animation: recordingPulse 1.5s ease-in-out infinite;
+      
+      &::before {
+        background: linear-gradient(135deg, $danger-color, $accent-color);
+      }
     }
     
     ion-icon {
-      font-size: 3rem;
+      font-size: 4rem;
+      color: $text-primary;
     }
   }
   
@@ -117,54 +195,84 @@ $danger-hover: #C0392B;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 120px;
-    height: 120px;
-    border: 3px solid $primary-color;
+    width: 150px;
+    height: 150px;
+    border: 2px solid $primary-color;
     border-radius: 50%;
     opacity: 0;
   }
   
   .recording-text {
-    margin-top: 2rem;
-    font-size: 1.1rem;
+    margin-top: 2.5rem;
+    font-size: 1.2rem;
     color: $primary-color;
+    font-weight: 500;
     animation: blink 1.5s ease-in-out infinite;
+    
+    &::after {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: $danger-color;
+      border-radius: 50%;
+      margin-left: 8px;
+      animation: recordingDot 1s ease-in-out infinite;
+    }
   }
   
   .instruction-text {
-    margin-top: 2rem;
-    font-size: 1rem;
+    margin-top: 2.5rem;
+    font-size: 1.1rem;
     color: $text-secondary;
+    font-weight: 400;
   }
 }
 
 // Audio Preview Section
 .preview-section {
   margin-top: 2rem;
+  animation: slideInUp 0.6s ease-out;
   
   .audio-card {
-    background: $card-background;
-    border-radius: 16px;
-    padding: 2rem;
+    @include glass-effect;
+    border-radius: 20px;
+    padding: 2.5rem;
     @include card-shadow;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba($primary-color, 0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
   }
   
   .waveform-placeholder {
     @include flex-center;
-    height: 60px;
-    margin-bottom: 1.5rem;
-    gap: 4px;
+    height: 80px;
+    margin-bottom: 2rem;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
     
     .wave {
-      width: 4px;
-      background: $primary-color;
-      border-radius: 2px;
-      animation: wave-animation 1s ease-in-out infinite;
+      width: 6px;
+      background: linear-gradient(180deg, $primary-color 0%, $accent-color 100%);
+      border-radius: 3px;
+      animation: wave-animation 1.2s ease-in-out infinite;
+      box-shadow: 0 0 10px rgba($primary-color, 0.3);
       
       @for $i from 1 through 5 {
         &:nth-child(#{$i}) {
-          height: random(30) + 20px;
-          animation-delay: #{$i * 0.1}s;
+          height: #{20 + random(40)}px;
+          animation-delay: #{$i * 0.15}s;
         }
       }
     }
@@ -172,23 +280,55 @@ $danger-hover: #C0392B;
   
   .custom-audio {
     width: 100%;
-    margin-bottom: 1.5rem;
-    filter: hue-rotate(200deg);
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+    border-radius: 25px;
+    background: rgba($background-color, 0.5);
+    padding: 0.5rem;
   }
   
   .action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
     
     .analyze-button {
-      --background: #{$primary-color};
-      --background-hover: #{$primary-hover};
+      --background: linear-gradient(135deg, #{$primary-color} 0%, #{$primary-hover} 100%);
+      --background-hover: linear-gradient(135deg, #{$primary-hover} 0%, #{$primary-color} 100%);
       @include button-base;
+      --box-shadow: 0 4px 20px rgba(41, 171, 226, 0.3);
+      position: relative;
+      overflow: hidden;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+      
+      &:hover::after {
+        width: 300px;
+        height: 300px;
+      }
     }
     
     .reset-button {
       --color: #{$text-secondary};
+      position: relative;
+      
+      &:hover {
+        --color: #{$text-primary};
+      }
     }
   }
 }
@@ -196,18 +336,20 @@ $danger-hover: #C0392B;
 // Loading Section
 .loading-section {
   text-align: center;
-  padding: 4rem 0;
+  padding: 5rem 0;
+  animation: fadeIn 0.5s ease-out;
   
   .loader {
     @include flex-center;
-    gap: 8px;
-    margin-bottom: 1.5rem;
+    gap: 12px;
+    margin-bottom: 2rem;
     
     .loader-dot {
-      width: 12px;
-      height: 12px;
-      background: $primary-color;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
+      background: linear-gradient(135deg, $primary-color 0%, $accent-color 100%);
+      box-shadow: 0 0 20px rgba($primary-color, 0.5);
       animation: loader-bounce 1.4s ease-in-out infinite both;
       
       @for $i from 1 through 3 {
@@ -220,199 +362,150 @@ $danger-hover: #C0392B;
   
   p {
     color: $text-secondary;
-  }
-}
-
-// Feedback Section
-.feedback-section {
-  margin-top: 2rem;
-  
-  .feedback-card {
-    background: $card-background;
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    @include card-shadow;
+    font-size: 1.1rem;
+    font-weight: 500;
     
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      
-      .card-icon {
-        font-size: 1.5rem;
-        color: $primary-color;
-      }
-      
-      h3, h4 {
-        margin: 0;
-        color: $text-primary;
-      }
+    &::after {
+      content: '';
+      animation: loadingDots 1.5s steps(4, end) infinite;
     }
-    
-    &.transcript-card {
-      .transcript-content {
-        color: $text-muted;
-        line-height: 1.6;
-        font-style: italic;
-        padding: 1rem;
-        background: rgba($primary-color, 0.1);
-        border-radius: 8px;
-        border-left: 4px solid $primary-color;
-      }
-    }
-    
-    &.filler-words-card {
-      .filler-feedback {
-        color: $text-muted;
-        margin-bottom: 1rem;
-      }
-      
-      .filler-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        
-        .filler-item {
-          background: rgba($accent-color, 0.2);
-          border: 1px solid $accent-color;
-          border-radius: 20px;
-          padding: 0.25rem 0.75rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          
-          .filler-word {
-            color: $text-primary;
-            font-weight: 600;
-          }
-          
-          .filler-time {
-            color: $accent-color;
-            font-size: 0.85rem;
-          }
-        }
-      }
-    }
-  }
-  
-  .analysis-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    
-    .analysis-card {
-      background: $card-background;
-      border-radius: 16px;
-      padding: 1.5rem;
-      text-align: center;
-      @include card-shadow;
-      
-      .card-header {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-        
-        .card-icon {
-          font-size: 1.5rem;
-          color: $primary-color;
-        }
-        
-        h4 {
-          margin: 0;
-          color: $text-primary;
-        }
-      }
-      
-      .score-circle {
-        width: 50px;
-        height: 80px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, $accent-color 0%, $accent-hover 100%);
-        @include flex-center;
-        margin: 1rem auto;
-        box-shadow: 0 4px 15px rgba($accent-color, 0.4);
-        
-        .score-value {
-          color: $text-primary;
-          font-weight: 700;
-          font-size: 0.9rem;
-        }
-      }
-      
-      .feedback-text {
-        color: $text-muted;
-        font-size: 0.9rem;
-        line-height: 1.4;
-        margin-top: 0.5rem;
-      }
-    }
-  }
-  
-  .try-again-button {
-    --background: #{$accent-color};
-    --background-hover: #{$accent-hover};
-    margin-top: 2rem;
-    @include button-base;
   }
 }
 
 // Animations
 @keyframes pulse {
   0% {
-    opacity: 1;
+    opacity: 0.8;
     transform: translate(-50%, -50%) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: translate(-50%, -50%) scale(1.8);
   }
 }
 
 @keyframes blink {
-  0%, 100% { 
-    opacity: 1; 
-  }
-  50% { 
-    opacity: 0.5; 
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes recordingDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes recordingPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 @keyframes wave-animation {
   0%, 100% { 
-    transform: scaleY(0.5); 
+    transform: scaleY(0.5);
+    opacity: 0.8;
   }
   50% { 
-    transform: scaleY(1); 
+    transform: scaleY(1);
+    opacity: 1;
   }
 }
 
 @keyframes loader-bounce {
   0%, 80%, 100% {
-    transform: scale(0);
+    transform: scale(0) rotate(0deg);
   }
   40% {
-    transform: scale(1);
+    transform: scale(1) rotate(360deg);
   }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes loadingDots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
+
 // Responsive Design
-@media (max-width: 480px) {
+@media (max-width: 576px) {
   .hero-section {
+    padding: 2rem 1rem 1.5rem;
+    
     h1 {
-      font-size: 1.5rem;
+      font-size: 2rem;
+    }
+    
+    p {
+      font-size: 1rem;
     }
   }
   
-  .analysis-grid {
-    grid-template-columns: 1fr;
+  .recording-section {
+    .mic-container,
+    .record-button,
+    .pulse-ring {
+      width: 120px;
+      height: 120px;
+    }
+    
+    .record-button ion-icon {
+      font-size: 3rem;
+    }
   }
   
-  .feedback-card {
-    padding: 1rem;
+  .audio-card {
+    padding: 2rem;
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }

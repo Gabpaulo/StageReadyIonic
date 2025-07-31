@@ -1,0 +1,74 @@
+<!-- src/app/pages/speech-feedback/speech-feedback.page.html -->
+<ion-header class="custom-header">
+  <ion-toolbar>
+    <ion-title>Speech Feedback</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="custom-content">
+  <!-- Transcription -->
+  <div class="feedback-card transcript-card">
+    <div class="card-header">
+      <ion-icon name="document-text" class="card-icon"></ion-icon>
+      <h3>Transcription</h3>
+    </div>
+    <div class="transcript-content">
+      {{ feedback.transcript }}
+    </div>
+  </div>
+
+  <!-- Analysis Grid -->
+  <div class="analysis-grid">
+    <div class="analysis-card">
+      <div class="card-header">
+        <ion-icon name="speedometer" class="card-icon"></ion-icon>
+        <h4>Pace</h4>
+      </div>
+      <div class="score-circle">
+        <div class="score-value">Good</div>
+      </div>
+      <p class="feedback-text">{{ feedback.pace }}</p>
+    </div>
+    <div class="analysis-card">
+      <div class="card-header">
+        <ion-icon name="musical-notes" class="card-icon"></ion-icon>
+        <h4>Tone</h4>
+      </div>
+      <div class="score-circle">
+        <div class="score-value">Great</div>
+      </div>
+      <p class="feedback-text">{{ feedback.tone }}</p>
+    </div>
+    <div class="analysis-card">
+      <div class="card-header">
+        <ion-icon name="eye" class="card-icon"></ion-icon>
+        <h4>Clarity</h4>
+      </div>
+      <div class="score-circle">
+        <div class="score-value">Excellent</div>
+      </div>
+      <p class="feedback-text">{{ feedback.clarity }}</p>
+    </div>
+  </div>
+
+  <!-- Filler Words -->
+  <div class="feedback-card filler-words-card">
+    <div class="card-header">
+      <ion-icon name="warning" class="card-icon"></ion-icon>
+      <h3>Filler Words</h3>
+    </div>
+    <p class="filler-feedback">{{ feedback.fillerWords.feedback }}</p>
+    <div class="filler-list" *ngIf="feedback.fillerWords.words.length">
+      <div class="filler-item" *ngFor="let w of feedback.fillerWords.words">
+        <span class="filler-word">{{ w.word }}</span>
+        <span class="filler-time">{{ w.timestamp | number:'1.1-1' }}s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Try Again Button -->
+  <ion-button class="try-again-button" expand="block" (click)="tryAgain()">
+    <ion-icon name="refresh" slot="start"></ion-icon>
+    Try Another Recording
+  </ion-button>
+</ion-content>

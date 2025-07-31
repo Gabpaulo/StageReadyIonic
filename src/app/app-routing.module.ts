@@ -34,7 +34,11 @@ const routes: Routes = [
   {
     path: 'speech-analysis',
     loadChildren: () => import('./pages/speech-analysis/speech-analysis.module').then( m => m.SpeechAnalysisPageModule)
+  },  {
+    path: 'speech-feedback',
+    loadChildren: () => import('./pages/speech-feedback/speech-feedback.module').then( m => m.SpeechFeedbackPageModule)
   },
+
  
 
 
