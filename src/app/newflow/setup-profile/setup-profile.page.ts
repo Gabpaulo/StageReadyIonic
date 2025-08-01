@@ -49,7 +49,7 @@ export class SetupProfilePage {
       email: user.email || ''
     };
     await this.firebaseService.createUserProfile(user.uid, profileData);
-    this.router.navigate(['/home']);
+    this.router.navigate(['/tabs/dashboard']);
   }
 
   onInterestsChange() {

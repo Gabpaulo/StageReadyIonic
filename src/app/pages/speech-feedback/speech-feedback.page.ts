@@ -27,6 +27,6 @@ export class SpeechFeedbackPage implements OnInit {
   ngOnInit() {}
   
   tryAgain() {
-    this.router.navigateByUrl('/speech-analysis');
+    this.router.navigateByUrl('/tabs/speech-analysis');
   }
 }

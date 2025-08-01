@@ -20,6 +20,10 @@ const routes: Routes = [
         loadChildren: () => import('../speech-analysis/speech-analysis.module').then(m => m.SpeechAnalysisPageModule)
       },
       {
+        path: 'speech-feedback',
+        loadChildren: () => import('../speech-feedback/speech-feedback.module').then(m => m.SpeechFeedbackPageModule)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

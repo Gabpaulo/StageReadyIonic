@@ -102,19 +102,32 @@ export class HomePage {
     try {
       const userCred = await this.firebaseService.signInWithGoogle();
       const user = userCred.user;
+  
+      // 1. Determine if this is the very first sign-in:
+      //    Firebase Auth keeps metadata.creationTime and metadata.lastSignInTime.
+      //    If they’re identical, it means this is the first time they’ve signed in.
+      const isNewGoogleUser =
+        user.metadata.creationTime === user.metadata.lastSignInTime;
+  
+      // 2. Show the same welcome toast you already have
       const toast = await this.toastController.create({
         message: `Login successful! Welcome, ${user.displayName || user.email}`,
         duration: 2000,
         color: 'success',
       });
       await toast.present();
-      if (!(await this.firebaseService.userProfileExists(user.uid))) {
+  
+      if (isNewGoogleUser) {
         await this.firebaseService.createUserProfile(user.uid, {
           email: user.email,
           displayName: user.displayName || '',
         });
+        this.router.navigate(['/setup-profile']);
+      } else {
+      
+        this.router.navigate(['/tabs/dashboard']);
       }
-      this.router.navigate(['/tabs/dashboard']);
+  
     } catch (error: any) {
       const toast = await this.toastController.create({
         message: `Google login failed: ${error.message}`,
@@ -124,4 +137,5 @@ export class HomePage {
       await toast.present();
     }
   }
+  
 }

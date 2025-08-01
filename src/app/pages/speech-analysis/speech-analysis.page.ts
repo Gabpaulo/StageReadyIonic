@@ -36,11 +36,23 @@ export class SpeechAnalysisPage implements OnDestroy {
     );
   }
 
+  // Ionic life-cycle hook: called every time the view is about to enter
+  ionViewWillEnter() {
+    // reset recorder internals
+    this.recorder.reset();
+    // clear out any leftover blob/url/loading flags
+    this.audioBlob = null;
+    this.audioUrl  = null;
+    this.isLoading = false;
+  }
+
   startRecording()  { this.recorder.startRecording(); }
   stopRecording()   { this.recorder.stopRecording(); }
 
   resetRecording() {
     this.recorder.reset();
+    this.audioBlob = null;
+    this.audioUrl  = null;
   }
 
   analyzeRecording() {
@@ -49,9 +61,7 @@ export class SpeechAnalysisPage implements OnDestroy {
 
     this.analysis.analyzeAudioBlob(this.audioBlob).subscribe({
       next: feedback => {
-        // turn off the spinner
         this.isLoading = false;
-        // navigate to the feedback page, passing the feedback in state
         this.router.navigate(
           ['/speech-feedback'],
           { state: { feedback } }
