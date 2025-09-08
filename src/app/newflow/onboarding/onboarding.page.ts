@@ -16,17 +16,17 @@ export class OnboardingPage implements OnInit {
       description: 'Your companion for confident, polished performances.',
     },
     {
-      image: 'assets/img/onboarding2.svg',
+      image: 'assets/onboarding/trackprogress.svg',
       title: 'Track Your Progress',
       description: 'Monitor your growth and fine-tune your routine.',
     },
     {
-      image: 'assets/img/onboarding2.svg',
+      image: 'assets/onboarding/shineonstage.svg',
       title: 'Track Your Progress',
       description: 'Monitor your growth and fine-tune your routine.',
     },
     {
-      image: 'assets/img/onboarding3.svg',
+      image: 'assets/onboarding/shineonstage.svg',
       title: 'Shine On Stage',
       description: 'Be at your best when it matters most.',
     },
