@@ -12,13 +12,64 @@
   </ion-header>
 
 
-  <ion-card>
-  <ion-card-header>
-    <ion-card-subtitle>Previous Session</ion-card-subtitle>
-  </ion-card-header>
+  <!-- Badge Progress Card -->
+  <ion-card *ngIf="badgeProgress.total > 0" class="badge-progress-card">
+    <ion-card-header>
+      <ion-card-title>Badge Progress</ion-card-title>
+      <ion-card-subtitle>{{ badgeProgress.unlocked }} of {{ badgeProgress.total }} badges unlocked</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="progress-bar-container">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="badgeProgress.percentage"></div>
+        </div>
+        <span class="progress-text">{{ badgeProgress.percentage }}%</span>
+      </div>
+      <ion-button routerLink="/tabs/badges" fill="outline" size="small" class="view-badges-btn">
+        View All Badges
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
 
-  <ion-card-content>
-    Here's a small text description for the card content. Nothing more, nothing less.
-  </ion-card-content>
-</ion-card>
+  <!-- Recent Badges -->
+  <ion-card *ngIf="recentBadges.length > 0" class="recent-badges-card">
+    <ion-card-header>
+      <ion-card-title>Recent Badges</ion-card-title>
+      <ion-card-subtitle>Your latest achievements</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="recent-badges-grid">
+        <div *ngFor="let badge of recentBadges" class="badge-preview">
+          <ion-icon [name]="badge.icon" class="badge-icon"></ion-icon>
+          <div class="badge-info">
+            <h4>{{ badge.name }}</h4>
+            <p>{{ badge.description }}</p>
+          </div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Quick Actions -->
+  <ion-card class="quick-actions-card">
+    <ion-card-header>
+      <ion-card-title>Quick Actions</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="action-buttons">
+        <ion-button routerLink="/tabs/speech-analysis" expand="block" color="primary">
+          <ion-icon name="mic-outline" slot="start"></ion-icon>
+          Start Speech Practice
+        </ion-button>
+        <ion-button routerLink="/tabs/speech-history" expand="block" fill="outline">
+          <ion-icon name="time-outline" slot="start"></ion-icon>
+          View History
+        </ion-button>
+        <ion-button routerLink="/tabs/profile" expand="block" fill="outline">
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          View Profile
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

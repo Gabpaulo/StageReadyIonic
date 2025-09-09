@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
+import { BadgeService } from '../../services/badge.service';
 import { User } from 'firebase/auth';
 
 @Component({
@@ -27,10 +29,19 @@ export class ProfilePage implements OnInit {
     'Confidence Building'
   ];
 
-  constructor(private firebaseService: FirebaseService) { }
+  constructor(
+    private firebaseService: FirebaseService,
+    public badgeService: BadgeService,
+    private router: Router
+  ) { }
 
   async ngOnInit() {
     await this.loadProfile();
+  }
+
+  ionViewWillEnter() {
+    // Refresh profile each time view becomes active
+    this.loadProfile();
   }
 
   async loadProfile() {
@@ -82,7 +93,7 @@ export class ProfilePage implements OnInit {
     try {
       const user = this.firebaseService.auth.currentUser;
       if (user) {
-        await this.firebaseService.updateUserProfile(user.uid, {
+        const updatedProfile = {
           firstName: this.formData.firstName,
           lastName: this.formData.lastName,
           age: this.formData.age,
@@ -91,9 +102,14 @@ export class ProfilePage implements OnInit {
           gender: this.formData.gender,
           interests: this.formData.interests,
           bio: this.formData.bio
-        });
+        };
+        
+        await this.firebaseService.updateUserProfile(user.uid, updatedProfile);
         await this.loadProfile();
         this.editModalOpen = false;
+        
+        // Check for badge achievements related to profile completion
+        await this.badgeService.onProfileUpdated(updatedProfile);
       } else {
         this.error = 'No user is currently logged in.';
       }
@@ -101,6 +117,21 @@ export class ProfilePage implements OnInit {
       this.error = 'Failed to update profile.';
     } finally {
       this.saving = false;
+    }
+  }
+
+  async logout() {
+    try {
+      await this.firebaseService.logout();
+      // Clear local state so old user data isn't shown
+      this.userProfile = null;
+      this.formData = {};
+      this.error = null;
+      // Navigate to onboarding/login and replace history
+      this.router.navigateByUrl('/onboarding', { replaceUrl: true });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      this.error = 'Failed to logout. Please try again.';
     }
   }
 }

@@ -20,6 +20,14 @@ const routes: Routes = [
         loadChildren: () => import('../speech-analysis/speech-analysis.module').then(m => m.SpeechAnalysisPageModule)
       },
       {
+        path: 'badges',
+        loadChildren: () => import('../badges/badges.module').then(m => m.BadgesPageModule)
+      },
+      {
+        path: 'speech-history',
+        loadChildren: () => import('../speech-history/speech-history.module').then(m => m.SpeechHistoryPageModule)
+      },
+      {
         path: 'speech-feedback',
         loadChildren: () => import('../speech-feedback/speech-feedback.module').then(m => m.SpeechFeedbackPageModule)
       },

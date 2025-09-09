@@ -27,8 +27,42 @@
       </ion-card-header>
       <ion-card-content>
         <ion-button expand="block" (click)="openEditModal()">Edit Profile</ion-button>
+        <ion-button expand="block" color="danger" fill="outline" (click)="logout()" class="logout-button">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          Logout
+        </ion-button>
       </ion-card-content>
     </ion-card>
+
+    <!-- Unlocked Badges Grid -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Unlocked Badges</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ng-container *ngIf="(badgeService.userBadges$ | async) as allBadges; else noBadges">
+          <div class="badges-grid">
+            <ng-container *ngFor="let badge of allBadges">
+              <app-badge-display
+                *ngIf="badge.isUnlocked"
+                [badge]="badge"
+                [showProgress]="false"
+                size="medium">
+              </app-badge-display>
+            </ng-container>
+          </div>
+        </ng-container>
+        <ng-template #noBadges>
+          <div class="empty-state" style="text-align:center; padding:16px;">
+            <ion-icon name="ribbon-outline" style="font-size:48px; opacity:0.6; margin-bottom:8px;"></ion-icon>
+            <h3 style="margin:8px 0;">No badges yet</h3>
+            <p style="margin:0 0 16px 0;">Start practicing to unlock your first badge!</p>
+            <ion-button routerLink="/tabs/speech-analysis" color="primary">Start Practicing</ion-button>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
   </ng-container>
 
   <ion-modal [isOpen]="editModalOpen" (didDismiss)="closeEditModal()">

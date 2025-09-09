@@ -1,0 +1,196 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Speech History</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadSpeechHistory()" [disabled]="loading">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="speech-history-container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading speech history...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-state">
+      <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+      <h3>Error</h3>
+      <p>{{ error }}</p>
+      <ion-button (click)="loadSpeechHistory()" fill="outline">
+        Try Again
+      </ion-button>
+    </div>
+
+    <!-- Summary Card -->
+    <ion-card *ngIf="summary && !loading && !error" class="summary-card">
+      <ion-card-header>
+        <ion-card-title>Your Progress Summary</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="summary-stats">
+          <div class="stat-item">
+            <div class="stat-value">{{ summary.totalSessions }}</div>
+            <div class="stat-label">Total Sessions</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ formatInteger(summary.totalWords) }}</div>
+            <div class="stat-label">Words Spoken</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ formatDuration(summary.totalDuration) }}</div>
+            <div class="stat-label">Total Time</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">
+              <ion-icon 
+                [name]="getTrendIcon(summary.improvementTrend)" 
+                [color]="getTrendColor(summary.improvementTrend)">
+              </ion-icon>
+            </div>
+            <div class="stat-label">{{ summary.improvementTrend | titlecase }}</div>
+          </div>
+        </div>
+
+        <div class="average-ratings">
+          <h4>Average Ratings</h4>
+          <div class="rating-bars">
+            <div class="rating-bar">
+              <span class="rating-label">Clarity</span>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    [style.width.%]="getProgressWidth(summary.averageClarity)"
+                    [class]="'rating-' + getRatingColorSafe(summary.averageClarity)">
+                  </div>
+                </div>
+                <span class="rating-value">{{ formatNumber(summary.averageClarity) }}</span>
+              </div>
+            </div>
+            <div class="rating-bar">
+              <span class="rating-label">Pace</span>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    [style.width.%]="getProgressWidth(summary.averagePace)"
+                    [class]="'rating-' + getRatingColorSafe(summary.averagePace)">
+                  </div>
+                </div>
+                <span class="rating-value">{{ formatNumber(summary.averagePace) }}</span>
+              </div>
+            </div>
+            <div class="rating-bar">
+              <span class="rating-label">Tone</span>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    [style.width.%]="getProgressWidth(summary.averageTone)"
+                    [class]="'rating-' + getRatingColorSafe(summary.averageTone)">
+                  </div>
+                </div>
+                <span class="rating-value">{{ formatNumber(summary.averageTone) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- History List (dates only, clickable) -->
+    <div *ngIf="speechHistory.length > 0 && !loading && !error" class="history-section">
+      <h3>Recent Sessions</h3>
+      <ion-list>
+        <ion-item button detail lines="full" *ngFor="let entry of speechHistory" (click)="openSession(entry)">
+          <ion-label>{{ formatDate(entry.createdAt) }}</ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="speechHistory.length === 0 && !loading && !error" class="empty-state">
+      <ion-icon name="mic-outline" class="empty-icon"></ion-icon>
+      <h3>No Speech History Yet</h3>
+      <p>Start practicing to see your speech analysis history here!</p>
+      <ion-button routerLink="/tabs/speech-analysis" color="primary">
+        Start Practicing
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Session Details Modal -->
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Session Details</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content *ngIf="selectedEntry">
+      <div *ngIf="modalLoading" class="loading-state" style="padding: 16px;">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading session...</p>
+      </div>
+      <div *ngIf="modalError && !modalLoading" class="error-state" style="padding: 16px;">
+        <ion-text color="danger">{{ modalError }}</ion-text>
+      </div>
+      <ion-list>
+        <ion-item>
+          <ion-label>
+            <h2>{{ formatDate(selectedEntry.createdAt) }}</h2>
+            <p *ngIf="selectedEntry.duration">Duration: {{ formatDuration(selectedEntry.duration) }}</p>
+            <p *ngIf="selectedEntry.wordCount">Words: {{ selectedEntry.wordCount }}</p>
+            <p *ngIf="selectedEntry.averagePace">Pace: {{ formatInteger(selectedEntry.averagePace) }} WPM</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <ion-card *ngIf="(selectedEntry.audioUrl || selectedEntry.audioData) && !modalLoading">
+        <ion-card-header>
+          <ion-card-title>Playback</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <audio *ngIf="selectedEntry.audioUrl"
+                 [src]="selectedEntry.audioUrl"
+                 controls
+                 style="width: 100%;"></audio>
+          <audio *ngIf="!selectedEntry.audioUrl && selectedEntry.audioData"
+                 [src]="'data:' + (selectedEntry.audioMimeType || 'audio/webm') + ';base64,' + selectedEntry.audioData"
+                 controls
+                 style="width: 100%;"></audio>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Transcript</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          {{ selectedEntry.transcript }}
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Feedback</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p><strong>Clarity:</strong> {{ selectedEntry.feedback.clarity }}</p>
+          <p><strong>Pace:</strong> {{ selectedEntry.feedback.pace }}</p>
+          <p><strong>Tone:</strong> {{ selectedEntry.feedback.tone }}</p>
+        </ion-card-content>
+      </ion-card>
+    </ion-content>
+  </ng-template>
+</ion-modal>

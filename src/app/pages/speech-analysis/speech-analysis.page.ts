@@ -3,6 +3,8 @@ import { Subscription }               from 'rxjs';
 import { Router }                     from '@angular/router';
 import { AudioRecorderService }       from '../../services/audio-recorder.service';
 import { SpeechAnalysisService }      from '../../services/genai.service';
+import { BadgeService }               from '../../services/badge.service';
+import { FirebaseService }            from '../../services/firebase.service';
 import { AnalyzeSpeechForFeedbackOutput }
   from './model';
 
@@ -23,7 +25,9 @@ export class SpeechAnalysisPage implements OnDestroy {
   constructor(
     public recorder: AudioRecorderService,
     private analysis: SpeechAnalysisService,
-    private router: Router
+    private router: Router,
+    private badgeService: BadgeService,
+    private firebaseService: FirebaseService
   ) {
     this.subs.push(
       this.recorder.isRecording$
@@ -55,13 +59,45 @@ export class SpeechAnalysisPage implements OnDestroy {
     this.audioUrl  = null;
   }
 
-  analyzeRecording() {
+  async analyzeRecording() {
     if (!this.audioBlob) { return; }
     this.isLoading = true;
 
     this.analysis.analyzeAudioBlob(this.audioBlob).subscribe({
-      next: feedback => {
+      next: async feedback => {
         this.isLoading = false;
+        
+        // Save speech analysis to Firebase
+        let user = this.firebaseService.auth.currentUser;
+        if (!user) {
+          try {
+            const cred = await this.firebaseService.signInWithGoogle();
+            user = cred.user;
+          } catch (authErr) {
+            console.error('User authentication required to save analysis.', authErr);
+          }
+        }
+
+        if (user) {
+          // Save speech history (without audio blob)
+          await this.firebaseService.saveSpeechHistory(user.uid, {
+            feedback: feedback,
+            duration: this.audioBlob ? this.audioBlob.size / 1000 : 0, // rough duration estimate
+            audioBlob: this.audioBlob
+          });
+          
+          // Save detailed analysis with audio (for other purposes)
+          await this.firebaseService.saveSpeechAnalysis(user.uid, {
+            feedback: feedback,
+            audioBlob: this.audioBlob,
+            timestamp: new Date()
+          });
+        }
+        
+        // Check for badge achievements
+        await this.badgeService.onSpeechCompleted(feedback);
+        await this.badgeService.onSpeechAnalyzed(feedback);
+        
         this.router.navigate(
           ['/speech-feedback'],
           { state: { feedback } }

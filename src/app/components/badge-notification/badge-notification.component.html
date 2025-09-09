@@ -1,0 +1,41 @@
+<div *ngIf="show" class="badge-notification" [class]="getRarityGlow()">
+  <div class="notification-content" [class]="getRarityAnimation()">
+    <div class="notification-header">
+      <h3>🎉 Badge Unlocked!</h3>
+      <ion-button 
+        fill="clear" 
+        size="small" 
+        (click)="closeNotification()"
+        class="close-button">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <div class="badge-preview">
+      <div class="badge-icon-container">
+        <ion-icon 
+          [name]="badge.icon" 
+          class="badge-icon"
+          [class]="'rarity-' + badge.rarity">
+        </ion-icon>
+        <div class="rarity-sparkle" *ngIf="badge.rarity === 'legendary' || badge.rarity === 'epic'">
+          ✨
+        </div>
+      </div>
+      
+      <div class="badge-info">
+        <h4 class="badge-name">{{ badge.name }}</h4>
+        <p class="badge-description">{{ badge.description }}</p>
+        <div class="badge-rarity-badge" [class]="'rarity-' + badge.rarity">
+          {{ badge.rarity | titlecase }}
+        </div>
+      </div>
+    </div>
+    
+    <div class="notification-footer">
+      <p class="congratulations-text">
+        Congratulations! Keep up the great work! 🚀
+      </p>
+    </div>
+  </div>
+</div>

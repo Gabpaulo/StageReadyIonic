@@ -1,0 +1,157 @@
+.badges-page-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.progress-card {
+  margin-bottom: 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--ion-color-primary-tint) 0%, var(--ion-color-primary) 100%);
+  color: white;
+  
+  ion-card-content {
+    padding: 24px;
+  }
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+}
+
+.progress-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+}
+
+.progress-text {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  
+  .percentage {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  
+  .count {
+    display: block;
+    font-size: 0.7rem;
+    opacity: 0.8;
+  }
+}
+
+.progress-description {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.recent-badges {
+  margin-bottom: 32px;
+  
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+}
+
+.recent-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.all-badges {
+  margin-bottom: 32px;
+  
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--ion-color-medium);
+  
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: var(--ion-color-dark);
+  }
+  
+  p {
+    margin: 0 0 24px 0;
+    font-size: 0.9rem;
+  }
+}
+
+.view-all-section {
+  margin-top: 24px;
+  padding: 16px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .badges-page-container {
+    padding: 12px;
+  }
+  
+  .progress-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .recent-badges-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .badges-grid {
+    grid-template-columns: 1fr;
+  }
+}

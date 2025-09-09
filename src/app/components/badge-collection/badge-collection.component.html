@@ -1,0 +1,68 @@
+<ion-content>
+  <div class="badge-collection-container">
+    <!-- Header -->
+    <div class="collection-header">
+      <h1>Badge Collection</h1>
+      <div class="progress-overview">
+        <div class="progress-circle">
+          <div class="progress-text">
+            <span class="percentage">{{ badgeProgress.percentage }}%</span>
+            <span class="count">{{ badgeProgress.unlocked }}/{{ badgeProgress.total }}</span>
+          </div>
+        </div>
+        <p class="progress-description">Badges Unlocked</p>
+      </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="category-filter">
+      <ion-segment [(ngModel)]="selectedCategory" (ionChange)="selectCategory($event.detail.value)">
+        <ion-segment-button *ngFor="let category of categories" [value]="category.value">
+          <ion-icon [name]="category.icon"></ion-icon>
+          <ion-label>{{ category.label }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Category Stats (when showing all badges) -->
+    <div *ngIf="selectedCategory === 'all'" class="category-stats">
+      <ion-card *ngFor="let category of categories.slice(1)" class="category-stat-card">
+        <ion-card-content>
+          <div class="stat-content">
+            <ion-icon [name]="category.icon" class="stat-icon"></ion-icon>
+            <div class="stat-info">
+              <h3>{{ category.label }}</h3>
+              <p>{{ getCategoryStats(category.value).unlocked }}/{{ getCategoryStats(category.value).total }} badges</p>
+            </div>
+            <div class="stat-progress">
+              <div class="mini-progress-bar">
+                <div 
+                  class="mini-progress-fill" 
+                  [style.width.%]="getCategoryStats(category.value).percentage">
+                </div>
+              </div>
+              <span class="stat-percentage">{{ getCategoryStats(category.value).percentage }}%</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Badges Grid -->
+    <div class="badges-grid">
+      <app-badge-display 
+        *ngFor="let badge of filteredBadges" 
+        [badge]="badge"
+        [showProgress]="true"
+        size="medium">
+      </app-badge-display>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredBadges.length === 0" class="empty-state">
+      <ion-icon name="ribbon-outline" class="empty-icon"></ion-icon>
+      <h3>No badges found</h3>
+      <p>Try selecting a different category</p>
+    </div>
+  </div>
+</ion-content>

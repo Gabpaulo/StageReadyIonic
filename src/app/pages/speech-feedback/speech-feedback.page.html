@@ -61,7 +61,7 @@
     <div class="filler-list" *ngIf="feedback.fillerWords.words.length">
       <div class="filler-item" *ngFor="let w of feedback.fillerWords.words">
         <span class="filler-word">{{ w.word }}</span>
-        <span class="filler-time">{{ w.timestamp | number:'1.1-1' }}s</span>
+        <span class="filler-time">{{ formatTimestamp(w.timestamp) }}s</span>
       </div>
     </div>
   </div>

@@ -1,0 +1,44 @@
+<ion-card class="badge-card" [class]="getBadgeRarityClass() + ' ' + getBadgeSizeClass()">
+  <ion-card-content class="badge-content">
+    <div class="badge-icon-container">
+      <ion-icon 
+        [name]="badge.icon" 
+        class="badge-icon"
+        [style.color]="getRarityColor()">
+      </ion-icon>
+      <div class="badge-category-icon">
+        <ion-icon [name]="getCategoryIcon()"></ion-icon>
+      </div>
+    </div>
+    
+    <div class="badge-info">
+      <h3 class="badge-name">{{ badge.name }}</h3>
+      <p class="badge-description">{{ badge.description }}</p>
+      
+      <div class="badge-meta">
+        <span class="badge-category">{{ badge.category | titlecase }}</span>
+        <span class="badge-rarity">{{ badge.rarity | titlecase }}</span>
+      </div>
+      
+      <div *ngIf="showProgress && badge.maxProgress && badge.maxProgress > 1" class="badge-progress">
+        <div class="progress-bar">
+          <div 
+            class="progress-fill" 
+            [style.width.%]="getProgressPercentage()"
+            [style.background-color]="getRarityColor()">
+          </div>
+        </div>
+        <span class="progress-text">
+          {{ badge.progress || 0 }} / {{ badge.maxProgress }}
+        </span>
+      </div>
+      
+      <div *ngIf="badge.isUnlocked && badge.unlockedAt" class="badge-unlocked">
+        <ion-icon name="checkmark-circle" class="unlocked-icon"></ion-icon>
+        <span class="unlocked-date">
+          Unlocked {{ formatUnlockedDate(badge.unlockedAt) }}
+        </span>
+      </div>
+    </div>
+  </ion-card-content>
+</ion-card>

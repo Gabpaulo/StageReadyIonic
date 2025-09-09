@@ -1,0 +1,275 @@
+.badge-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 350px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  
+  &.glow-gray {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    box-shadow: 0 8px 32px rgba(108, 117, 125, 0.3);
+  }
+  
+  &.glow-blue {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+  }
+  
+  &.glow-purple {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    box-shadow: 0 8px 32px rgba(111, 66, 193, 0.3);
+  }
+  
+  &.glow-orange {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%);
+    box-shadow: 0 8px 32px rgba(253, 126, 20, 0.3);
+    animation: legendary-glow 2s ease-in-out infinite alternate;
+  }
+}
+
+.notification-content {
+  padding: 20px;
+  position: relative;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ion-color-dark);
+  }
+}
+
+.close-button {
+  --color: var(--ion-color-medium);
+  --padding-start: 8px;
+  --padding-end: 8px;
+  min-height: 32px;
+  min-width: 32px;
+}
+
+.badge-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.badge-icon-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.badge-icon {
+  font-size: 3rem;
+  display: block;
+  
+  &.rarity-common {
+    color: #6c757d;
+  }
+  
+  &.rarity-rare {
+    color: #007bff;
+  }
+  
+  &.rarity-epic {
+    color: #6f42c1;
+  }
+  
+  &.rarity-legendary {
+    color: #fd7e14;
+    animation: legendary-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+.rarity-sparkle {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1.2rem;
+  animation: sparkle 1s ease-in-out infinite;
+}
+
+.badge-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.badge-name {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.badge-description {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+  line-height: 1.4;
+}
+
+.badge-rarity-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.rarity-common {
+    background: #6c757d;
+    color: white;
+  }
+  
+  &.rarity-rare {
+    background: #007bff;
+    color: white;
+  }
+  
+  &.rarity-epic {
+    background: #6f42c1;
+    color: white;
+  }
+  
+  &.rarity-legendary {
+    background: #fd7e14;
+    color: white;
+    animation: legendary-badge-glow 2s ease-in-out infinite alternate;
+  }
+}
+
+.notification-footer {
+  text-align: center;
+  
+  .congratulations-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+    font-weight: 500;
+  }
+}
+
+// Animations
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes legendary-glow {
+  0% {
+    box-shadow: 0 8px 32px rgba(253, 126, 20, 0.3);
+  }
+  100% {
+    box-shadow: 0 8px 32px rgba(253, 126, 20, 0.6);
+  }
+}
+
+@keyframes legendary-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes legendary-badge-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(253, 126, 20, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(253, 126, 20, 0.8);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .badge-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .badge-preview {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .badge-icon {
+    font-size: 2.5rem;
+  }
+}

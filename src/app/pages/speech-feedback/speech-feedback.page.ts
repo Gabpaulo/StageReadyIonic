@@ -29,4 +29,19 @@ export class SpeechFeedbackPage implements OnInit {
   tryAgain() {
     this.router.navigateByUrl('/tabs/speech-analysis');
   }
+
+  formatTimestamp(timestamp: number | string | undefined | null): string {
+    if (timestamp === undefined || timestamp === null) {
+      return '0.0';
+    }
+    
+    // Convert to number if it's a string
+    const numValue = typeof timestamp === 'string' ? parseFloat(timestamp) : timestamp;
+    
+    if (isNaN(numValue)) {
+      return '0.0';
+    }
+    
+    return numValue.toFixed(1);
+  }
 }
