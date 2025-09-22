@@ -1,6 +1,5 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Speech History</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="loadSpeechHistory()" [disabled]="loading">
         <ion-icon name="refresh-outline"></ion-icon>
@@ -57,50 +56,6 @@
           </div>
         </div>
 
-        <div class="average-ratings">
-          <h4>Average Ratings</h4>
-          <div class="rating-bars">
-            <div class="rating-bar">
-              <span class="rating-label">Clarity</span>
-              <div class="progress-container">
-                <div class="progress-bar">
-                  <div 
-                    class="progress-fill" 
-                    [style.width.%]="getProgressWidth(summary.averageClarity)"
-                    [class]="'rating-' + getRatingColorSafe(summary.averageClarity)">
-                  </div>
-                </div>
-                <span class="rating-value">{{ formatNumber(summary.averageClarity) }}</span>
-              </div>
-            </div>
-            <div class="rating-bar">
-              <span class="rating-label">Pace</span>
-              <div class="progress-container">
-                <div class="progress-bar">
-                  <div 
-                    class="progress-fill" 
-                    [style.width.%]="getProgressWidth(summary.averagePace)"
-                    [class]="'rating-' + getRatingColorSafe(summary.averagePace)">
-                  </div>
-                </div>
-                <span class="rating-value">{{ formatNumber(summary.averagePace) }}</span>
-              </div>
-            </div>
-            <div class="rating-bar">
-              <span class="rating-label">Tone</span>
-              <div class="progress-container">
-                <div class="progress-bar">
-                  <div 
-                    class="progress-fill" 
-                    [style.width.%]="getProgressWidth(summary.averageTone)"
-                    [class]="'rating-' + getRatingColorSafe(summary.averageTone)">
-                  </div>
-                </div>
-                <span class="rating-value">{{ formatNumber(summary.averageTone) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </ion-card-content>
     </ion-card>
 

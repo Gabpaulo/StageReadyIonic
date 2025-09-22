@@ -41,14 +41,12 @@
       </ion-card-header>
       <ion-card-content>
         <ng-container *ngIf="(badgeService.userBadges$ | async) as allBadges; else noBadges">
-          <div class="badges-grid">
+          <div class="badge-names-container">
             <ng-container *ngFor="let badge of allBadges">
-              <app-badge-display
-                *ngIf="badge.isUnlocked"
-                [badge]="badge"
-                [showProgress]="false"
-                size="medium">
-              </app-badge-display>
+              <div *ngIf="badge.isUnlocked" class="badge-chip">
+                <ion-icon [name]="badge.icon" class="badge-chip-icon"></ion-icon>
+                <span class="badge-chip-name">{{ badge.name }}</span>
+              </div>
             </ng-container>
           </div>
         </ng-container>

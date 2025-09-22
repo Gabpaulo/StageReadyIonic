@@ -1,74 +1,191 @@
-.logout-button {
-  margin-top: 16px;
-  
-  ion-icon {
-    margin-right: 8px;
-  }
+:host {
+  --bg:            #17232f;
+  --surface:       #1e2c3a;
+  --surface-2:     #1a2734;
+  --primary:       #22a7f0;
+  --primary-700:   #1b8fd3;
+  --primary-glow:  rgba(34, 167, 240, 0.35);
+  --text:          #e8f1f9;
+  --muted:         #9bb2c8;
+  --border:        #2b3b4c;
 }
 
-ion-card {
-  margin: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-ion-card-header {
+ion-content {
+  --background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%),
+                 var(--bg);
+  color: var(--text);
   text-align: center;
-  padding-bottom: 8px;
 }
 
-ion-card-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--ion-color-dark);
+ion-header ion-toolbar {
+  --background: transparent;
+  --color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  backdrop-filter: blur(6px);
 }
 
-ion-card-content {
-  padding-top: 0;
+ion-title {
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: .3px;
 }
 
-ion-button {
-  margin-bottom: 8px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
+/* ===== Loading/Error States ===== */
+ion-spinner {
+  margin: 24px auto;
+  color: var(--primary);
+  filter: drop-shadow(0 0 6px var(--primary-glow));
 }
 
-ion-modal {
-  --height: 80%;
-  --border-radius: 16px;
-}
-
-ion-item {
-  --padding-start: 0;
-  --padding-end: 0;
-  margin-bottom: 16px;
-}
-
-ion-label {
-  font-weight: 500;
-  color: var(--ion-color-dark);
-}
-
-ion-input, ion-textarea, ion-select {
-  --padding-start: 12px;
-  --padding-end: 12px;
-  border: 1px solid var(--ion-color-light);
-  border-radius: 8px;
+p {
+  color: var(--muted);
   margin-top: 8px;
 }
 
-ion-spinner {
-  margin: 32px auto;
-  display: block;
+ion-text[color="danger"] {
+  font-weight: 600;
+  margin: 16px 0;
 }
 
-ion-text[color="danger"] {
-  text-align: center;
-  display: block;
-  margin: 16px;
-  padding: 12px;
-  background: var(--ion-color-danger-tint);
-  border-radius: 8px;
+/* ===== Profile Card ===== */
+ion-card {
+  --background: var(--surface);
+  --color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 24px var(--primary-glow);
+}
+
+ion-card-title {
+  color: var(--text);
+  font-weight: 700;
+}
+
+ion-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== Buttons ===== */
+ion-button {
+  --border-radius: 14px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  --box-shadow: 0 10px 24px rgba(0,0,0,.35);
+}
+
+/* Primary button */
+ion-button:not(.logout-button)[color="primary"] {
+  --background: linear-gradient(180deg, var(--primary), var(--primary-700));
+  --background-activated: linear-gradient(180deg, var(--primary-700), var(--primary));
+  --ripple-color: rgba(255,255,255,.25);
+  box-shadow: 0 6px 18px var(--primary-glow);
+  color: #fff;
+}
+
+/* Outline buttons */
+ion-button[fill="outline"] {
+  --border-color: var(--primary);
+  --color: var(--primary);
+  --background: transparent;
+  --background-activated: rgba(34, 167, 240, 0.07);
+}
+
+/* Logout button */
+.logout-button {
+  --border-color: #ff5d5d;
+  --color: #ff5d5d;
+  --background-activated: rgba(255, 93, 93, 0.08);
+}
+
+/* ===== Unlocked Badge Names ===== */
+.badge-names-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px var(--primary-glow);
+    transform: translateY(-1px);
+  }
+}
+
+.badge-chip-icon {
+  font-size: 0.9rem;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.badge-chip-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+/* Empty State */
+.empty-state {
+  color: var(--muted);
+
+  ion-icon {
+    color: var(--primary);
+    filter: drop-shadow(0 0 6px var(--primary-glow));
+  }
+
+  h3 {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--muted);
+  }
+
+  ion-button {
+    margin-top: 12px;
+  }
+}
+
+/* ===== Modal Styles ===== */
+ion-modal {
+  --background: var(--bg);
+}
+
+ion-modal ion-header ion-toolbar {
+  --background: var(--surface);
+  --color: var(--text);
+}
+
+ion-item {
+  --background: var(--surface-2);
+  --border-color: var(--border);
+  --color: var(--text);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+ion-label {
+  color: var(--muted);
+}
+
+ion-input, ion-textarea, ion-select {
+  color: var(--text);
 }

@@ -49,13 +49,14 @@
     </div>
 
     <!-- Badges Grid -->
-    <div class="badges-grid">
-      <app-badge-display 
-        *ngFor="let badge of filteredBadges" 
-        [badge]="badge"
-        [showProgress]="true"
-        size="medium">
-      </app-badge-display>
+    <div class="badges-container">
+      <div *ngFor="let badge of filteredBadges" class="badge-chip-with-desc">
+        <div class="badge-chip-header">
+          <ion-icon [name]="badge.icon" class="badge-chip-icon"></ion-icon>
+          <span class="badge-chip-name">{{ badge.name }}</span>
+        </div>
+        <p class="badge-chip-desc">{{ badge.description }}</p>
+      </div>
     </div>
 
     <!-- Empty State -->
