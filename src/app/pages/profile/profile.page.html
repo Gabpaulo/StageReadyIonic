@@ -26,12 +26,74 @@
         <ion-card-title>{{ (userProfile.firstName || '') + ' ' + (userProfile.lastName || '') }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <ion-avatar *ngIf="currentUserPhotoURL">
+            <img [src]="currentUserPhotoURL" alt="Avatar" />
+          </ion-avatar>
+          <div>
+            <div *ngIf="currentUserEmail" style="opacity:0.8; font-size: 14px;">{{ currentUserEmail }}</div>
+            <div *ngIf="userProfile.bio" style="margin-top:6px;">{{ userProfile.bio }}</div>
+          </div>
+        </div>
         <ion-button expand="block" (click)="openEditModal()">Edit Profile</ion-button>
         <ion-button expand="block" color="danger" fill="outline" (click)="logout()" class="logout-button">
           <ion-icon name="log-out-outline" slot="start"></ion-icon>
           Logout
         </ion-button>
       </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="summary">
+      <ion-card-header>
+        <ion-card-title>Your Practice Stats</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <div style="text-align:center;">
+                <div style="font-size:22px; font-weight:600;">{{ summary.totalSessions }}</div>
+                <div style="opacity:.7;">Sessions</div>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div style="text-align:center;">
+                <div style="font-size:22px; font-weight:600;">{{ summary.totalWords }}</div>
+                <div style="opacity:.7;">Words</div>
+              </div>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="6">
+              <div style="text-align:center;">
+                <div style="font-size:22px; font-weight:600;">{{ formatDuration(summary.totalDuration) }}</div>
+                <div style="opacity:.7;">Total Time</div>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div style="text-align:center;">
+                <ion-icon [name]="summary.improvementTrend === 'improving' ? 'trending-up' : (summary.improvementTrend === 'declining' ? 'trending-down' : 'remove')"></ion-icon>
+                <div style="opacity:.7;">Trend</div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="recentSpeeches.length">
+      <ion-card-header>
+        <ion-card-title>Recent Sessions</ion-card-title>
+      </ion-card-header>
+      <ion-list>
+        <ion-item *ngFor="let s of recentSpeeches">
+          <ion-label>
+            <h2>{{ formatDate(s.createdAt) }}</h2>
+            <p *ngIf="s.speechType">Type: {{ s.speechType | titlecase }}</p>
+            <p>{{ (s.transcript || '') | slice:0:80 }}{{ ((s.transcript || '').length > 80) ? '…' : '' }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
     </ion-card>
 
     <!-- Unlocked Badges Grid -->
@@ -110,6 +172,14 @@
           <ion-item>
             <ion-label position="stacked">Bio</ion-label>
             <ion-textarea [(ngModel)]="formData.bio" name="bio"></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Default Speech Type</ion-label>
+            <ion-select [(ngModel)]="formData.defaultSpeechType" name="defaultSpeechType">
+              <ion-select-option value="informative">Informative</ion-select-option>
+              <ion-select-option value="motivational">Motivational</ion-select-option>
+              <ion-select-option value="persuasive">Persuasive</ion-select-option>
+            </ion-select>
           </ion-item>
           <ion-button expand="block" type="submit" [disabled]="saving">
             <ion-spinner *ngIf="saving" name="crescent"></ion-spinner>

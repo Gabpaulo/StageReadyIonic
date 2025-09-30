@@ -19,6 +19,10 @@ export class SpeechAnalysisPage implements OnDestroy {
   audioBlob: Blob | null = null;
   audioUrl:  string | null = null;
   isLoading = false;
+  speechType: 'informative' | 'motivational' | 'persuasive' = 'informative';
+  pendingType: 'informative' | 'motivational' | 'persuasive' | null = 'informative';
+  isTypeModalOpen = true;
+  hasConfirmedSpeechType = false;
 
   private subs: Subscription[] = [];
 
@@ -48,6 +52,10 @@ export class SpeechAnalysisPage implements OnDestroy {
     this.audioBlob = null;
     this.audioUrl  = null;
     this.isLoading = false;
+    // force user to pick a speech type first
+    this.pendingType = 'informative';
+    this.isTypeModalOpen = true;
+    this.hasConfirmedSpeechType = false;
   }
 
   startRecording()  { this.recorder.startRecording(); }
@@ -59,11 +67,27 @@ export class SpeechAnalysisPage implements OnDestroy {
     this.audioUrl  = null;
   }
 
+  openTypeModal() {
+    this.isTypeModalOpen = true;
+  }
+
+  confirmSpeechType() {
+    if (!this.pendingType) { return; }
+    this.speechType = this.pendingType;
+    this.hasConfirmedSpeechType = true;
+    this.isTypeModalOpen = false;
+  }
+
+  cancelTypeModal() {
+    // Keep modal open until selection is confirmed
+    this.isTypeModalOpen = true;
+  }
+
   async analyzeRecording() {
     if (!this.audioBlob) { return; }
     this.isLoading = true;
 
-    this.analysis.analyzeAudioBlob(this.audioBlob).subscribe({
+    this.analysis.analyzeAudioBlob(this.audioBlob, this.speechType).subscribe({
       next: async feedback => {
         this.isLoading = false;
         
@@ -83,13 +107,15 @@ export class SpeechAnalysisPage implements OnDestroy {
           await this.firebaseService.saveSpeechHistory(user.uid, {
             feedback: feedback,
             duration: this.audioBlob ? this.audioBlob.size / 1000 : 0, // rough duration estimate
-            audioBlob: this.audioBlob
+            audioBlob: this.audioBlob,
+            speechType: this.speechType
           });
           
           // Save detailed analysis with audio (for other purposes)
           await this.firebaseService.saveSpeechAnalysis(user.uid, {
             feedback: feedback,
             audioBlob: this.audioBlob,
+            speechType: this.speechType,
             timestamp: new Date()
           });
         }

@@ -1,4 +1,7 @@
-/* ===== Color Tokens (pulled from the screenshot’s palette) ===== */
+// Import shared styles
+@import '../../../theme/shared-styles';
+
+/* ===== Color Tokens (pulled from the screenshot's palette) ===== */
 :host {
   --bg:            #17232f;  /* page background (deep navy) */
   --surface:       #1e2c3a;  /* card background */

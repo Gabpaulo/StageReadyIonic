@@ -10,7 +10,7 @@ import { AnalyzeSpeechForFeedbackOutput }
 export class SpeechAnalysisService {
   private ai = new GoogleGenAI({ apiKey: environment.geminiApiKey });
 
-  analyzeAudioBlob(blob: Blob): Observable<AnalyzeSpeechForFeedbackOutput> {
+  analyzeAudioBlob(blob: Blob, speechType: 'informative' | 'motivational' | 'persuasive' = 'informative'): Observable<AnalyzeSpeechForFeedbackOutput> {
     // 1) Blob → base64 Data URI
     const toDataUri = new Promise<string>((resolve, reject) => {
       const rdr = new FileReader();
@@ -26,7 +26,7 @@ export class SpeechAnalysisService {
           model: 'gemini-1.5-flash-latest',
           contents: [
             {
-              text: `You are an AI speech coach.  Given this audio, return STRICT JSON with ONLY these keys:
+              text: `You are an AI speech coach. The user is practicing a ${speechType} public speech. Tailor your feedback to that style. Given this audio, return STRICT JSON with ONLY these keys:
   "transcript" (the spoken text),
   "pace" (a sentence describing the speaker’s pace),
   "tone" (a sentence describing the speaker’s tone),

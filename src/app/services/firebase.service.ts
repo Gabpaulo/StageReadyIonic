@@ -233,6 +233,7 @@ export class FirebaseService {
       id: historyRef.id,
       userId: uid,
       transcript: speechData.feedback.transcript,
+      speechType: speechData.speechType,
       feedback: {
         pace: speechData.feedback.pace,
         tone: speechData.feedback.tone,

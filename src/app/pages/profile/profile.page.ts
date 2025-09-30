@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 import { BadgeService } from '../../services/badge.service';
 import { User } from 'firebase/auth';
+import { SpeechHistoryEntry, SpeechHistorySummary } from '../../models/speech-history.model';
 
 @Component({
   selector: 'app-profile',
@@ -17,6 +18,10 @@ export class ProfilePage implements OnInit {
   public editModalOpen: boolean = false;
   public formData: any = {};
   public saving: boolean = false;
+  public summary: SpeechHistorySummary | null = null;
+  public recentSpeeches: SpeechHistoryEntry[] = [];
+  public currentUserEmail: string | null = null;
+  public currentUserPhotoURL: string | null = null;
   public interestOptions: string[] = [
     'Public Speaking',
     'Debate',
@@ -51,6 +56,8 @@ export class ProfilePage implements OnInit {
       const user = this.firebaseService.auth.currentUser;
       if (user) {
         this.userProfile = await this.firebaseService.getUserProfile(user.uid);
+        this.currentUserEmail = user.email || null;
+        this.currentUserPhotoURL = (user.photoURL as string) || null;
         this.formData = {
           firstName: this.userProfile.firstName || '',
           lastName: this.userProfile.lastName || '',
@@ -58,8 +65,17 @@ export class ProfilePage implements OnInit {
           phone: this.userProfile.phone || this.userProfile.phoneNumber || '',
           gender: this.userProfile.gender || '',
           interests: Array.isArray(this.userProfile.interests) ? [...this.userProfile.interests] : [],
-          bio: this.userProfile.bio || ''
+          bio: this.userProfile.bio || '',
+          defaultSpeechType: this.userProfile.defaultSpeechType || 'informative'
         };
+
+        // Load user speech stats and recent sessions
+        const [summary, history] = await Promise.all([
+          this.firebaseService.getSpeechHistorySummary(user.uid),
+          this.firebaseService.getSpeechHistory(user.uid, 3)
+        ]);
+        this.summary = summary;
+        this.recentSpeeches = history;
       } else {
         this.error = 'No user is currently logged in.';
       }
@@ -78,7 +94,8 @@ export class ProfilePage implements OnInit {
       phone: this.userProfile.phone || this.userProfile.phoneNumber || '',
       gender: this.userProfile.gender || '',
       interests: Array.isArray(this.userProfile.interests) ? [...this.userProfile.interests] : [],
-      bio: this.userProfile.bio || ''
+      bio: this.userProfile.bio || '',
+      defaultSpeechType: this.userProfile.defaultSpeechType || 'informative'
     };
     this.editModalOpen = true;
   }
@@ -101,7 +118,8 @@ export class ProfilePage implements OnInit {
           phoneNumber: this.formData.phone,
           gender: this.formData.gender,
           interests: this.formData.interests,
-          bio: this.formData.bio
+          bio: this.formData.bio,
+          defaultSpeechType: this.formData.defaultSpeechType || 'informative'
         };
         
         await this.firebaseService.updateUserProfile(user.uid, updatedProfile);
@@ -133,5 +151,22 @@ export class ProfilePage implements OnInit {
       console.error('Error during logout:', error);
       this.error = 'Failed to logout. Please try again.';
     }
+  }
+
+  formatDuration(seconds: number | undefined | null): string {
+    const totalSeconds = Math.floor(seconds || 0);
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  formatDate(date: Date): string {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
   }
 }

@@ -2,6 +2,7 @@ export interface SpeechHistoryEntry {
   id: string;
   userId: string;
   transcript: string;
+  speechType?: 'informative' | 'motivational' | 'persuasive';
   feedback: {
     pace: string;
     tone: string;

@@ -82,7 +82,7 @@
 </ion-content>
 
 <!-- Session Details Modal -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" cssClass="opaque-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -92,14 +92,17 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
+
     <ion-content *ngIf="selectedEntry">
       <div *ngIf="modalLoading" class="loading-state" style="padding: 16px;">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Loading session...</p>
       </div>
+
       <div *ngIf="modalError && !modalLoading" class="error-state" style="padding: 16px;">
         <ion-text color="danger">{{ modalError }}</ion-text>
       </div>
+
       <ion-list>
         <ion-item>
           <ion-label>

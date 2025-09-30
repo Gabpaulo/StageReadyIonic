@@ -1,4 +1,5 @@
-/* my-badges.page.scss */
+// Import shared styles
+@import '../../../theme/shared-styles';
 
 :host {
   --bg:            #17232f;

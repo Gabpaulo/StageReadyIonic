@@ -1,35 +1,7 @@
 // src/app/pages/speech-feedback/speech-feedback.page.scss
 
-// Variables
-$primary-color: #29ABE2;
-$primary-hover: #1E8EC4;
-$background-color: #1A2633;
-$card-background: #243447;
-$accent-color: #9C27B0;
-$accent-hover: #7B1FA2;
-$text-primary: #ffffff;
-$text-secondary: #8E9AAF;
-$text-muted: #B8C5D6;
-
-// Mixins
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin card-shadow {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-@mixin card-base {
-  background: $card-background;
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  @include card-shadow;
-  animation: fadeInUp 0.5s ease-out;
-}
+// Import shared styles
+@import '../../../theme/shared-styles';
 
 // Page Styles
 .custom-header {

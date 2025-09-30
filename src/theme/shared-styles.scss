@@ -1,0 +1,302 @@
+// Shared styles for all pages in the StageReady app
+// This file provides a unified design system across all pages
+
+// ===== COLOR PALETTE =====
+$primary-color: #29ABE2;
+$primary-hover: #1E8EC4;
+$background-color: #1A2633;
+$background-alt: #16222d;
+$card-background: #243447;
+$accent-color: #9C27B0;
+$accent-hover: #7B1FA2;
+$text-primary: #ffffff;
+$text-secondary: #8E9AAF;
+$text-muted: #B8C5D6;
+$danger-color: #E74C3C;
+$danger-hover: #C0392B;
+$success-color: #27AE60;
+$warning-color: #F39C12;
+
+// ===== TYPOGRAPHY =====
+$font-family-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// ===== SPACING =====
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-xxl: 3rem;
+
+// ===== BORDERS & RADIUS =====
+$border-radius-sm: 8px;
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 20px;
+
+// ===== SHADOWS =====
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+$shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+$shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+// ===== MIXINS =====
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin card-shadow {
+  box-shadow: $shadow-md;
+}
+
+@mixin card-base {
+  background: $card-background;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  @include card-shadow;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@mixin button-base {
+  font-weight: $font-weight-semibold;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@mixin glass-effect {
+  background: rgba($card-background, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba($primary-color, 0.1);
+}
+
+@mixin gradient-background {
+  background: radial-gradient(60% 60% at 50% 10%, lighten($background-color, 5%) 0%, $background-color 60%, darken($background-color, 5%) 100%);
+}
+
+// ===== ANIMATIONS =====
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// ===== BASE STYLES =====
+.custom-header {
+  --background: #{$background-color};
+  --color: #{$text-primary};
+
+  ion-toolbar {
+    --background: transparent;
+
+    ion-title {
+      font-weight: $font-weight-semibold;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+.custom-content {
+  --background: #{$background-color};
+  color: $text-primary;
+
+  .hero-section {
+    text-align: center;
+    padding: $spacing-xl 0 $spacing-xxl;
+    @include gradient-background;
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: $font-weight-bold;
+      color: $primary-color;
+      margin-bottom: $spacing-md;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: $text-secondary;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  }
+
+  .main-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 $spacing-lg;
+  }
+}
+
+// ===== CARDS =====
+.feedback-card, .analysis-card, ion-card {
+  @include card-base;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+
+  ion-icon {
+    color: $primary-color;
+    font-size: 1.5rem;
+  }
+
+  h3, h4 {
+    margin: 0;
+    color: $text-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+// ===== BUTTONS =====
+ion-button {
+  @include button-base;
+
+  &.analyze-button {
+    --background: #{$primary-color};
+    --background-hover: #{$primary-hover};
+    --border-radius: #{$border-radius-md};
+  }
+
+  &.reset-button {
+    --color: #{$text-secondary};
+    --border-color: #{$text-secondary};
+  }
+
+  &.try-again-button {
+    --background: #{$accent-color};
+    --background-hover: #{$accent-hover};
+  }
+}
+
+// ===== LOADING STATES =====
+.loading-section {
+  @include flex-center;
+  flex-direction: column;
+  padding: $spacing-xxl 0;
+
+  .loader {
+    display: flex;
+    gap: $spacing-sm;
+
+    .loader-dot {
+      width: 12px;
+      height: 12px;
+      background: $primary-color;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 1s;
+      }
+    }
+  }
+
+  p {
+    margin-top: $spacing-md;
+    color: $text-secondary;
+  }
+}
+
+// ===== EMPTY STATES =====
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: $spacing-xxl;
+  text-align: center;
+
+  ion-icon {
+    font-size: 4rem;
+    color: $text-muted;
+    margin-bottom: $spacing-md;
+  }
+
+  h3 {
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    color: $text-secondary;
+    margin-bottom: $spacing-lg;
+  }
+}
+
+// ===== UTILITIES =====
+.text-center {
+  text-align: center;
+}
+
+.text-primary {
+  color: $text-primary;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: $spacing-xs; }
+.mb-2 { margin-bottom: $spacing-sm; }
+.mb-3 { margin-bottom: $spacing-md; }
+.mb-4 { margin-bottom: $spacing-lg; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: $spacing-xs; }
+.mt-2 { margin-top: $spacing-sm; }
+.mt-3 { margin-top: $spacing-md; }
+.mt-4 { margin-top: $spacing-lg; }
+
+.p-0 { padding: 0; }
+.p-1 { padding: $spacing-xs; }
+.p-2 { padding: $spacing-sm; }
+.p-3 { padding: $spacing-md; }
+.p-4 { padding: $spacing-lg; }

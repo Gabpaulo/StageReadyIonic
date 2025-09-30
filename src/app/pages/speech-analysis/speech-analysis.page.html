@@ -20,13 +20,15 @@
         <ion-button
           class="record-button"
           [class.stop-button]="isRecording"
+          [disabled]="!hasConfirmedSpeechType"
           (click)="isRecording ? stopRecording() : startRecording()"
         >
           <ion-icon [name]="isRecording ? 'stop' : 'mic'"></ion-icon>
         </ion-button>
       </div>
       <p class="recording-text" *ngIf="isRecording">Recording in progress...</p>
-      <p class="instruction-text" *ngIf="!isRecording">Tap to start recording</p>
+      <p class="instruction-text" *ngIf="!isRecording && hasConfirmedSpeechType">Tap to start recording</p>
+      <p class="instruction-text" *ngIf="!isRecording && !hasConfirmedSpeechType">Choose a speech type to begin.</p>
     </div>
 
     <!-- Audio Preview Section -->
@@ -44,6 +46,7 @@
           <ion-button
             class="analyze-button"
             expand="block"
+            [disabled]="!hasConfirmedSpeechType"
             (click)="analyzeRecording()"
           >
             <ion-icon name="analytics" slot="start"></ion-icon>
@@ -72,4 +75,37 @@
       <p>Analyzing your speech...</p>
     </div>
   </div>
+
+  <!-- Speech Type Modal -->
+  <ion-modal [isOpen]="isTypeModalOpen" cssClass="opaque-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Select Speech Type</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <p>Please choose the type of public speech you are practicing:</p>
+        <ion-list>
+          <ion-radio-group [(ngModel)]="pendingType">
+            <ion-item>
+              <ion-label>Informative</ion-label>
+              <ion-radio slot="start" value="informative"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>Motivational</ion-label>
+              <ion-radio slot="start" value="motivational"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>Persuasive</ion-label>
+              <ion-radio slot="start" value="persuasive"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+
+        <ion-button expand="block" (click)="confirmSpeechType()">Continue</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
