@@ -40,6 +40,9 @@ export class SpeechAnalysisPage implements OnDestroy {
         .subscribe(blob => {
           this.audioBlob = blob;
           this.audioUrl  = blob ? URL.createObjectURL(blob) : null;
+          if (blob) {
+            console.log('Recorded audio blob size:', blob.size, 'bytes');
+          }
         })
     );
   }

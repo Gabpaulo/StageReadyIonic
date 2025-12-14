@@ -113,20 +113,10 @@ export class SpeechHistoryPage implements OnInit {
   }
 
   getAverageRating(entry: SpeechHistoryEntry): number {
-    const clarity = this.ratingToNumber(entry.feedback.clarity);
-    const pace = this.ratingToNumber(entry.feedback.pace);
-    const tone = this.ratingToNumber(entry.feedback.tone);
+    const clarity = entry.feedback.articulation_clarity || 0;
+    const pace = entry.feedback.speech_pace || 0;
+    const tone = entry.feedback.pitch_variation || 0;
     return (clarity + pace + tone) / 3;
-  }
-
-  private ratingToNumber(rating: string): number {
-    switch (rating.toLowerCase()) {
-      case 'excellent': return 4;
-      case 'good': return 3;
-      case 'fair': return 2;
-      case 'poor': return 1;
-      default: return 0;
-    }
   }
 
   formatNumber(value: number | undefined | null): string {
@@ -194,17 +184,11 @@ export class SpeechHistoryPage implements OnInit {
     return 'danger';
   }
 
-  getFeedbackRatingNumber(rating: string): number {
-    return this.ratingToNumber(rating);
-  }
-
-  getFeedbackProgressWidth(rating: string): number {
-    const value = this.getFeedbackRatingNumber(rating);
+  getFeedbackProgressWidth(value: number): number {
     return this.getProgressWidth(value);
   }
 
-  getFeedbackRatingColor(rating: string): string {
-    const value = this.getFeedbackRatingNumber(rating);
+  getFeedbackRatingColor(value: number): string {
     return this.getRatingColorSafe(value);
   }
 }

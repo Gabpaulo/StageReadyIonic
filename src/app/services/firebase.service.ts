@@ -315,13 +315,13 @@ export class FirebaseService {
     const lastSession = entries[0]?.createdAt;
 
     // Calculate average ratings (convert text to numbers)
-    const clarityScores = entries.map(entry => this.ratingToNumber(entry.feedback.clarity));
-    const paceScores = entries.map(entry => this.ratingToNumber(entry.feedback.pace));
-    const toneScores = entries.map(entry => this.ratingToNumber(entry.feedback.tone));
+    const clarityScores = entries.map(entry => entry.feedback.articulation_clarity || 0);
+    const paceScores = entries.map(entry => entry.feedback.speech_pace || 0);
+    const toneScores = entries.map(entry => entry.feedback.pitch_variation || 0); // Assuming pitch_variation is the tone score
 
-    const averageClarity = clarityScores.reduce((sum, score) => sum + score, 0) / clarityScores.length;
-    const averagePace = paceScores.reduce((sum, score) => sum + score, 0) / paceScores.length;
-    const averageTone = toneScores.reduce((sum, score) => sum + score, 0) / toneScores.length;
+    const averageClarity = clarityScores.length > 0 ? clarityScores.reduce((sum, score) => sum + score, 0) / clarityScores.length : 0;
+    const averagePace = paceScores.length > 0 ? paceScores.reduce((sum, score) => sum + score, 0) / paceScores.length : 0;
+    const averageTone = toneScores.length > 0 ? toneScores.reduce((sum, score) => sum + score, 0) / toneScores.length : 0;
 
     // Calculate improvement trend (compare recent vs older sessions)
     const improvementTrend = this.calculateImprovementTrend(entries);
@@ -355,15 +355,15 @@ export class FirebaseService {
     const older = entries.slice(-Math.ceil(entries.length / 3));
 
     const recentAvg = recent.reduce((sum, entry) => {
-      return sum + this.ratingToNumber(entry.feedback.clarity) + 
-             this.ratingToNumber(entry.feedback.pace) + 
-             this.ratingToNumber(entry.feedback.tone);
+      return sum + (entry.feedback.articulation_clarity || 0) + 
+             (entry.feedback.speech_pace || 0) + 
+             (entry.feedback.pitch_variation || 0);
     }, 0) / (recent.length * 3);
 
     const olderAvg = older.reduce((sum, entry) => {
-      return sum + this.ratingToNumber(entry.feedback.clarity) + 
-             this.ratingToNumber(entry.feedback.pace) + 
-             this.ratingToNumber(entry.feedback.tone);
+      return sum + (entry.feedback.articulation_clarity || 0) + 
+             (entry.feedback.speech_pace || 0) + 
+             (entry.feedback.pitch_variation || 0);
     }, 0) / (older.length * 3);
 
     const difference = recentAvg - olderAvg;

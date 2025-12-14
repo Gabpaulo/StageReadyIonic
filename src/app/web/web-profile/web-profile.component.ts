@@ -53,26 +53,38 @@ export class WebProfileComponent implements OnInit {
       const user = this.firebaseService.auth.currentUser;
       if (user) {
         this.userProfile = await this.firebaseService.getUserProfile(user.uid);
-        this.currentUserEmail = user.email || null;
-        this.currentUserPhotoURL = (user.photoURL as string) || null;
-        this.formData = {
-          firstName: this.userProfile.firstName || '',
-          lastName: this.userProfile.lastName || '',
-          age: this.userProfile.age || '',
-          phone: this.userProfile.phone || this.userProfile.phoneNumber || '',
-          gender: this.userProfile.gender || '',
-          interests: Array.isArray(this.userProfile.interests) ? [...this.userProfile.interests] : [],
-          bio: this.userProfile.bio || '',
-          defaultSpeechType: this.userProfile.defaultSpeechType || 'informative'
-        };
+        if (this.userProfile) {
+          this.currentUserEmail = user.email || null;
+          this.currentUserPhotoURL = (user.photoURL as string) || null;
+          this.formData = {
+            firstName: this.userProfile.firstName || '',
+            lastName: this.userProfile.lastName || '',
+            age: this.userProfile.age || '',
+            phone: this.userProfile.phone || this.userProfile.phoneNumber || '',
+            gender: this.userProfile.gender || '',
+            interests: Array.isArray(this.userProfile.interests) ? [...this.userProfile.interests] : [],
+            bio: this.userProfile.bio || '',
+            defaultSpeechType: this.userProfile.defaultSpeechType || 'informative'
+          };
 
-        // Load user speech stats and recent sessions
-        const [summary, history] = await Promise.all([
-          this.firebaseService.getSpeechHistorySummary(user.uid),
-          this.firebaseService.getSpeechHistory(user.uid, 3)
-        ]);
-        this.summary = summary;
-        this.recentSpeeches = history;
+          // Load user speech stats and recent sessions
+          const [summary, history] = await Promise.all([
+            this.firebaseService.getSpeechHistorySummary(user.uid),
+            this.firebaseService.getSpeechHistory(user.uid, 3)
+          ]);
+          this.summary = summary;
+          this.recentSpeeches = history;
+        } else {
+          // If user profile doesn't exist, initialize with default values
+          this.userProfile = {};
+          this.currentUserEmail = user.email || null;
+          this.currentUserPhotoURL = (user.photoURL as string) || null;
+          this.formData = {
+            firstName: '', lastName: '', age: '', phone: '', gender: '',
+            interests: [], bio: '', defaultSpeechType: 'informative'
+          };
+          this.error = 'User profile not found. Please create one.';
+        }
       } else {
         this.error = 'No user is currently logged in.';
       }
