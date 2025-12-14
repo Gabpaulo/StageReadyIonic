@@ -193,4 +193,18 @@ export class SpeechHistoryPage implements OnInit {
     if (value >= 2) return 'warning';
     return 'danger';
   }
+
+  getFeedbackRatingNumber(rating: string): number {
+    return this.ratingToNumber(rating);
+  }
+
+  getFeedbackProgressWidth(rating: string): number {
+    const value = this.getFeedbackRatingNumber(rating);
+    return this.getProgressWidth(value);
+  }
+
+  getFeedbackRatingColor(rating: string): string {
+    const value = this.getFeedbackRatingNumber(rating);
+    return this.getRatingColorSafe(value);
+  }
 }

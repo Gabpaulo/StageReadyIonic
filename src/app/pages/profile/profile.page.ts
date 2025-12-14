@@ -145,8 +145,8 @@ export class ProfilePage implements OnInit {
       this.userProfile = null;
       this.formData = {};
       this.error = null;
-      // Navigate to onboarding/login and replace history
-      this.router.navigateByUrl('/onboarding', { replaceUrl: true });
+      // Navigate to ionic login and replace history
+      this.router.navigateByUrl('/ionic-login', { replaceUrl: true });
     } catch (error) {
       console.error('Error during logout:', error);
       this.error = 'Failed to logout. Please try again.';

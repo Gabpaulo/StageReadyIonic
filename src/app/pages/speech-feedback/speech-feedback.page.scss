@@ -78,6 +78,48 @@
     }
   }
   
+  // Scores Card Specific
+  &.scores-card {
+    animation-delay: 0.2s;
+    
+    .scores-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      
+      .score-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.75rem;
+        background: rgba($primary-color, 0.1);
+        border-radius: 10px;
+        border: 1px solid rgba($primary-color, 0.2);
+        
+        .score-label {
+          font-size: 0.75rem;
+          color: $text-muted;
+          margin-bottom: 0.25rem;
+          text-align: center;
+        }
+        
+        .score-number {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $primary-color;
+        }
+      }
+    }
+  }
+  
+  // Feedback Details
+  &.feedback-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
   // Filler Words Card Specific
   &.filler-words-card {
     animation-delay: 0.3s;
@@ -90,6 +132,15 @@
       color: $text-muted;
       margin-bottom: 1.25rem;
       line-height: 1.6;
+    }
+    
+    .no-fillers {
+      color: #4caf50;
+      font-weight: 500;
+      padding: 1rem;
+      text-align: center;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: 8px;
     }
     
     .filler-list {

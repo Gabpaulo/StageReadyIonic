@@ -1,16 +1,15 @@
 
 
 <ion-content class="login-bg">
-  <div class="login-container">
-    <h1 class="login-title">Stage Ready</h1>
-    <h2 class="login-subtitle">Your AI Public Speaking Coach</h2>
+      <div class="login-container">
+        <h1 class="login-title">Stage Ready</h1>
+        <h2 class="login-subtitle">Your AI Public Speaking Coach</h2>
     <ion-card class="login-card" *ngIf="!showRegister">
       <ion-card-header>
         <ion-card-title>Login</ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <ion-item>
-          <ion-icon name="mail-outline" slot="start"></ion-icon>
           <ion-input
             [(ngModel)]="email"
             type="email"
@@ -18,7 +17,6 @@
           ></ion-input>
         </ion-item>
         <ion-item>
-          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
           <ion-input
             [(ngModel)]="password"
             type="password"
@@ -27,11 +25,10 @@
         </ion-item>
         <ion-button expand="block" color="primary" (click)="signIn()">Log In</ion-button>
         <div class="google-login-link" (click)="signInWithGoogle()">
-          <ion-icon name="logo-google"></ion-icon>
           <span>Log in with Google</span>
         </div>
         <ion-button fill="clear" expand="block" (click)="toggleRegister()">
-          Don’t have an account? Register
+          Don't have an account? Register
         </ion-button>
       </ion-card-content>
     </ion-card>
@@ -41,7 +38,6 @@
       </ion-card-header>
       <ion-card-content>
         <ion-item>
-          <ion-icon name="mail-outline" slot="start"></ion-icon>
           <ion-input
             [(ngModel)]="email"
             type="email"
@@ -49,7 +45,6 @@
           ></ion-input>
         </ion-item>
         <ion-item>
-          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
           <ion-input
             [(ngModel)]="password"
             type="password"
@@ -57,7 +52,6 @@
           ></ion-input>
         </ion-item>
         <ion-item>
-          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
           <ion-input
             [(ngModel)]="confirmPassword"
             type="password"

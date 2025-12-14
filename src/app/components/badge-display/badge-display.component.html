@@ -1,11 +1,11 @@
 <ion-card class="badge-card" [class]="getBadgeRarityClass() + ' ' + getBadgeSizeClass()">
   <ion-card-content class="badge-content">
     <div class="badge-icon-container">
-      <ion-icon 
-        [name]="badge.icon" 
-        class="badge-icon"
-        [style.color]="getRarityColor()">
-      </ion-icon>
+      <img 
+        [src]="getBadgeIconPath()" 
+        class="badge-icon" 
+        [alt]="badge.name + ' icon'"
+        (error)="onImageError($event)">
       <div class="badge-category-icon">
         <ion-icon [name]="getCategoryIcon()"></ion-icon>
       </div>

@@ -34,4 +34,12 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/* Remove Angular Material prebuilt theme as we are using Ionic now */
+// @import "@angular/material/prebuilt-themes/indigo-pink.css";
+
+/* Global font styles */
+body {
+  font-family: 'Roboto', sans-serif; /* Using Roboto as a common, readable font */
+}

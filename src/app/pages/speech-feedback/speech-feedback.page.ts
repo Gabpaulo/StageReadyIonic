@@ -44,4 +44,12 @@ export class SpeechFeedbackPage implements OnInit {
     
     return numValue.toFixed(1);
   }
+
+  get fillerWordsFeedback(): string {
+    // You might want to generate a more dynamic feedback based on filler_words_score or filler_words array
+    if (this.feedback.filler_words && this.feedback.filler_words.length > 0) {
+      return `You used ${this.feedback.filler_words.length} filler words. Try to reduce them for better fluency.`;
+    }
+    return 'Great job! No filler words detected.';
+  }
 }

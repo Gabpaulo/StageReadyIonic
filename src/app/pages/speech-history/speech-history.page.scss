@@ -277,6 +277,37 @@ ion-label {
       color: var(--primary) !important;
     }
   }
+
+  ion-item {
+    --background: transparent !important;
+    --border-color: transparent !important;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    box-shadow: none !important;
+    margin-bottom: 4px !important;
+
+    ion-label {
+      font-weight: 500 !important;
+      color: var(--text) !important;
+      min-width: 60px; /* Adjust as needed */
+      margin-right: 12px;
+    }
+
+    ion-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      --background: var(--surface-2);
+      --progress-background: var(--primary);
+      flex-grow: 1;
+      margin-right: 12px;
+    }
+
+    ion-text {
+      font-weight: 600;
+      min-width: 70px; /* Adjust as needed for text like "Excellent" */
+      text-align: end;
+    }
+  }
 }
 
 /* Extra-hardening: ensure no element renders black text or transparent bg */

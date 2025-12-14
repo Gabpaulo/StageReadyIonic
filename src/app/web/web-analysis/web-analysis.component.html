@@ -1,0 +1,68 @@
+<div class="analysis-page">
+  <div class="hero-section">
+    <h1>Speech Analysis</h1>
+    <p>Get AI-powered feedback on your speaking skills</p>
+    <p style="color: #22a7f0; font-size: 0.9rem; margin-top: 10px;">✓ Component is working!</p>
+  </div>
+
+  <div class="main-container">
+    <div style="background: #1e2c3a; padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #2b3b4c;">
+      <h2 style="color: #e8f1f9; margin-bottom: 20px;">Recording Interface</h2>
+      <p style="color: #9bb2c8; margin-bottom: 30px;">Click the button below to start recording</p>
+      
+      <button
+        class="record-button"
+        [class.stop-button]="isRecording"
+        [disabled]="!hasConfirmedSpeechType"
+        (click)="isRecording ? stopRecording() : startRecording()"
+        style="width: 150px; height: 150px; border-radius: 50%; border: none; background: linear-gradient(90deg, #1b8fd3, #22a7f0); color: white; font-size: 3rem; cursor: pointer; margin: 20px;"
+      >
+        {{ isRecording ? '⏹' : '🎤' }}
+      </button>
+      
+      <p *ngIf="!hasConfirmedSpeechType" style="color: #9bb2c8; margin-top: 20px;">
+        <button 
+          (click)="openTypeDialog()" 
+          style="background: transparent; border: 2px solid #22a7f0; color: #22a7f0; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem;"
+        >
+          Choose Speech Type First
+        </button>
+      </p>
+      
+      <p *ngIf="isRecording" style="color: #ef4444; margin-top: 20px; font-weight: 600;">
+        Recording... {{ formatDuration(recordingDuration) }}
+      </p>
+    </div>
+
+    <div *ngIf="audioUrl && !isLoading" style="background: #1e2c3a; padding: 40px; border-radius: 16px; margin-top: 20px; border: 1px solid #2b3b4c;">
+      <h3 style="color: #e8f1f9; margin-bottom: 20px;">Audio Preview</h3>
+      <audio [src]="audioUrl" controls style="width: 100%; margin-bottom: 20px;"></audio>
+      <div style="display: flex; gap: 16px; justify-content: center;">
+        <button
+          class="analyze-button"
+          [disabled]="!hasConfirmedSpeechType"
+          (click)="analyzeRecording()"
+          style="background: linear-gradient(90deg, #1b8fd3, #22a7f0); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;"
+        >
+          📊 Analyze Recording
+        </button>
+        <button
+          (click)="resetRecording()"
+          style="background: transparent; border: 2px solid #2b3b4c; color: #9bb2c8; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 1rem;"
+        >
+          🔄 Record Again
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" style="background: #1e2c3a; padding: 40px; border-radius: 16px; margin-top: 20px; text-align: center; border: 1px solid #2b3b4c;">
+      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
+        <div style="width: 12px; height: 12px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite;"></div>
+        <div style="width: 12px; height: 12px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.2s;"></div>
+        <div style="width: 12px; height: 12px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.4s;"></div>
+      </div>
+      <h3 style="color: #e8f1f9;">Analyzing your speech...</h3>
+      <p style="color: #9bb2c8;">This may take a few moments</p>
+    </div>
+  </div>
+</div>

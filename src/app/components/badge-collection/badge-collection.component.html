@@ -52,7 +52,7 @@
     <div class="badges-container">
       <div *ngFor="let badge of filteredBadges" class="badge-chip-with-desc">
         <div class="badge-chip-header">
-          <ion-icon [name]="badge.icon" class="badge-chip-icon"></ion-icon>
+          <img [src]="badge.icon" class="badge-chip-icon" [alt]="badge.name + ' icon'">
           <span class="badge-chip-name">{{ badge.name }}</span>
         </div>
         <p class="badge-chip-desc">{{ badge.description }}</p>

@@ -1,0 +1,155 @@
+<div class="profile-container">
+  <div class="page-header">
+    <h1>
+      Profile
+    </h1>
+    <p>Manage your account settings and view your progress</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <mat-icon color="warn" class="error-icon">error_outline</mat-icon>
+    <h3>Error</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="profile-content" *ngIf="!loading && !error && userProfile">
+    <div class="profile-card">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Profile Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="profile-info">
+            <div class="profile-avatar-section">
+              <img [src]="currentUserPhotoURL || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'" 
+                   alt="Profile picture" class="profile-avatar">
+              <button mat-stroked-button class="change-photo-btn">
+                Change Photo
+              </button>
+            </div>
+            <div class="profile-details">
+              <div class="detail-item">
+                <label>Name</label>
+                <span>{{ (userProfile.firstName || '') + ' ' + (userProfile.lastName || '') || 'User' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Email</label>
+                <span>{{ currentUserEmail || 'No email' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Member Since</label>
+                <span>{{ formatDate(userProfile.createdAt) }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Total Speeches</label>
+                <span>{{ summary?.totalSessions || 0 }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="stats-card" *ngIf="summary">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Your Statistics</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-info">
+                <h3>{{ summary.totalSessions || 0 }}</h3>
+                <p>Speeches</p>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-info">
+                <h3>{{ formatDuration(summary.totalDuration) }}</h3>
+                <p>Total Time</p>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-info">
+                <h3>{{ badgeService.getBadgeProgress().unlocked }}</h3>
+                <p>Badges</p>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-info">
+                <h3>{{ ((summary?.averageClarity || 0) + (summary?.averagePace || 0) + (summary?.averageTone || 0)) / 3 | number:'1.1-1' }}</h3>
+                <p>Avg Score</p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="settings-card">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Settings</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="settings-list">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Notifications</h4>
+                <p>Manage your notification preferences</p>
+              </div>
+              <mat-slide-toggle></mat-slide-toggle>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Privacy</h4>
+                <p>Control your privacy settings</p>
+              </div>
+              <button mat-icon-button>
+                >
+              </button>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Help & Support</h4>
+                <p>Get help and contact support</p>
+              </div>
+              <button mat-icon-button>
+                >
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="actions-card">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Account Actions</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="action-buttons">
+            <button mat-stroked-button class="action-btn" (click)="openEditModal()">
+              Edit Profile
+            </button>
+            <button mat-stroked-button class="action-btn">
+              Change Password
+            </button>
+            <button mat-stroked-button class="action-btn danger" (click)="logout()">
+              Sign Out
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

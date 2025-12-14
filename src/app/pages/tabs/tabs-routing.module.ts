@@ -24,6 +24,10 @@ const routes: Routes = [
         loadChildren: () => import('../badges/badges.module').then(m => m.BadgesPageModule)
       },
       {
+        path: 'badge-collection',
+        loadChildren: () => import('../badge-collection/badge-collection.module').then(m => m.BadgeCollectionPageModule)
+      },
+      {
         path: 'speech-history',
         loadChildren: () => import('../speech-history/speech-history.module').then(m => m.SpeechHistoryPageModule)
       },

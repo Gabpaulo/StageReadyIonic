@@ -111,11 +111,16 @@ body {
 }
 
 .login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
   width: 100%;
   max-width: 420px;
-  padding: 20px;
-  position: relative;
-  z-index: 1;
+  margin: 0 auto;
 }
 
 // Header styles
@@ -397,18 +402,11 @@ ion-button {
   font-size: 1rem;
   margin: 12px 0 0 0;
   cursor: pointer;
-  gap: 0.5em;
   background: none;
   border: none;
   outline: none;
   text-decoration: underline;
   transition: color 0.2s;
-
-  ion-icon {
-    font-size: 1.3em;
-    color: #4285F4;
-    margin-right: 0.3em;
-  }
 
   &:active {
     color: #174ea6;

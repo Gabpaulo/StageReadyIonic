@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, GoogleAuthProvider, signInWithPopup, UserCredential } from 'firebase/auth';
 import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
 import { UserBadgeProgress } from '../models/badge.model';
 import { SpeechHistoryEntry, SpeechHistorySummary } from '../models/speech-history.model';
 import { getStorage, FirebaseStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -57,7 +57,12 @@ export class FirebaseService {
 
   async signInWithGoogle(): Promise<UserCredential> {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(this.auth, provider);
+    try {
+      return await signInWithPopup(this.auth, provider);
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      throw error;
+    }
   }
 
   async logout(): Promise<void> {
@@ -235,10 +240,20 @@ export class FirebaseService {
       transcript: speechData.feedback.transcript,
       speechType: speechData.speechType,
       feedback: {
-        pace: speechData.feedback.pace,
-        tone: speechData.feedback.tone,
-        clarity: speechData.feedback.clarity,
-        fillerWords: speechData.feedback.fillerWords
+        speech_pace: speechData.feedback.speech_pace,
+        pausing_fluency: speechData.feedback.pausing_fluency,
+        loud_control: speechData.feedback.loud_control,
+        pitch_variation: speechData.feedback.pitch_variation,
+        articulation_clarity: speechData.feedback.articulation_clarity,
+        expressive_emph: speechData.feedback.expressive_emph,
+        filler_words_score: speechData.feedback.filler_words_score,
+        overall: speechData.feedback.overall,
+        pace_feedback: speechData.feedback.pace_feedback,
+        tone_feedback: speechData.feedback.tone_feedback,
+        clarity_feedback: speechData.feedback.clarity_feedback,
+        strengths: speechData.feedback.strengths,
+        areas_improvement: speechData.feedback.areas_improvement,
+        filler_words: speechData.feedback.filler_words
       },
       createdAt: new Date(),
       duration: duration,

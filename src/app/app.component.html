@@ -1,4 +1,12 @@
 <ion-app>
+  <ion-header *ngIf="canInstall">
+    <ion-toolbar color="primary">
+      <ion-title>Install StageReady</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="installApp()">Install</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
   <ion-router-outlet></ion-router-outlet>
 </ion-app>
 <!-- The actual tab bar and router outlet will be set up in a new tabs page. -->

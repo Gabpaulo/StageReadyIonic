@@ -1,0 +1,244 @@
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1A2633 0%, #0f1419 100%);
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+  
+  .login-title {
+    color: #22a7f0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    text-shadow: 0 2px 4px rgba(34, 167, 240, 0.3);
+    animation: slideDown 0.8s ease-out;
+  }
+  
+  .login-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.4;
+    animation: slideDown 0.8s ease-out;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+ion-card.login-card {
+  --background: linear-gradient(135deg, #232946 0%, #1A2633 100%);
+  color: #fff;
+  border: 1px solid #2b3b4c;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(34, 167, 240, 0.10), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  padding: 40px 32px;
+  margin-bottom: 2rem;
+  animation: slideUp 0.8s ease-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  ion-card-header {
+    --background: transparent;
+    padding: 0;
+    margin-bottom: 32px;
+    
+    ion-card-title {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      margin: 0;
+      text-shadow: 0 2px 8px rgba(44, 62, 80, 0.12);
+    }
+  }
+  
+  ion-card-content {
+    --background: transparent;
+    color: #fff;
+    padding: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+ion-item.full-width {
+  width: 100%;
+  margin-bottom: 24px;
+  --background: transparent;
+  --border-color: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  position: relative;
+
+  &::part(native) {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+
+  &.item-has-focus::part(native) {
+    border-color: #22a7f0;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(34, 167, 240, 0.1);
+  }
+
+  ion-label {
+    color: #6c757d;
+  }
+
+  ion-input {
+    --color: #212529;
+    --padding-start: 0;
+    --padding-end: 16px;
+    font-size: 1rem;
+    
+    &::part(native) {
+      padding: 16px 0;
+    }
+  }
+}
+
+ion-button.login-btn {
+  --background: linear-gradient(135deg, #22a7f0 0%, #1e8cb8 100%);
+  --color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  --border-radius: 16px;
+  --box-shadow: none;
+  margin: 0 0 16px 0;
+  height: auto;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+    z-index: 1;
+  }
+
+  &::part(native) {
+    padding: 16px 24px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(34, 167, 240, 0.4);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.google-login-section {
+  margin: 20px 0;
+  
+  ion-button.google-btn {
+    --border-color: #4285F4;
+    --color: #4285F4;
+    --background: transparent;
+    font-weight: 500;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    &:hover {
+      --background: rgba(66, 133, 244, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .google-logo {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+ion-button.toggle-btn {
+  --color: var(--ion-color-medium-shade);
+  font-size: 0.9rem;
+  margin-top: 8px;
+  
+  &:hover {
+    --color: var(--ion-color-light-contrast);
+  }
+}
+
+.error-text {
+  color: var(--ion-color-danger);
+  font-size: 0.9rem;
+  margin: 8px 0;
+  text-align: center;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .login-container {
+    padding: 16px;
+  }
+  
+  .login-header {
+    .login-title {
+      font-size: 2.5rem;
+    }
+    
+    .login-subtitle {
+      font-size: 1rem;
+    }
+  }
+  
+  ion-card.login-card {
+    ion-card-content {
+      padding: 20px;
+    }
+  }
+}

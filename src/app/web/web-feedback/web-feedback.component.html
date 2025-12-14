@@ -1,0 +1,171 @@
+<div class="feedback-container">
+  <div class="page-header">
+    <h1>
+      <mat-icon>feedback</mat-icon>
+      Speech Feedback
+    </h1>
+    <p>Here's your detailed speech analysis and feedback</p>
+  </div>
+
+  <!-- Transcription -->
+  <mat-card class="feedback-card transcript-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>description</mat-icon>
+        Transcription
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="transcript-content">
+        {{ feedback.transcript }}
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Scores Overview -->
+  <mat-card class="feedback-card scores-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>assessment</mat-icon>
+        Scores Overview
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="scores-grid">
+        <div class="score-item">
+          <div class="score-label">Overall</div>
+          <div class="score-number">{{ feedback.overall }}/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Speech Pace</div>
+          <div class="score-number">{{ feedback.speech_pace }}/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Pausing & Fluency</div>
+          <div class="score-number">{{ feedback.pausing_fluency }}/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Volume Control</div>
+          <div class="score-number">{{ feedback.loud_control }}/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Pitch Variation</div>
+          <div class="score-number">{{ feedback.pitch_variation }}/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Clarity</div>
+          <div class="score-number">{{ feedback.articulation_clarity }}/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Expression</div>
+          <div class="score-number">{{ feedback.expressive_emph }}/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Filler Words</div>
+          <div class="score-number">{{ feedback.filler_words_score }}/5</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Analysis Grid -->
+  <div class="analysis-grid">
+    <mat-card class="analysis-card">
+      <mat-card-content>
+        <div class="card-header">
+          <mat-icon class="card-icon">speed</mat-icon>
+          <h4>Pace</h4>
+        </div>
+        <div class="score-circle">
+          <div class="score-value">{{ feedback.speech_pace }}/5</div>
+        </div>
+        <p class="feedback-text">{{ feedback.pace_feedback }}</p>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="analysis-card">
+      <mat-card-content>
+        <div class="card-header">
+          <mat-icon class="card-icon">music_note</mat-icon>
+          <h4>Tone</h4>
+        </div>
+        <div class="score-circle">
+          <div class="score-value">{{ feedback.expressive_emph }}/5</div>
+        </div>
+        <p class="feedback-text">{{ feedback.tone_feedback }}</p>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="analysis-card">
+      <mat-card-content>
+        <div class="card-header">
+          <mat-icon class="card-icon">visibility</mat-icon>
+          <h4>Clarity</h4>
+        </div>
+        <div class="score-circle">
+          <div class="score-value">{{ feedback.articulation_clarity }}/5</div>
+        </div>
+        <p class="feedback-text">{{ feedback.clarity_feedback }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Strengths and Improvements -->
+  <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
+    <mat-card class="feedback-card" *ngIf="feedback.strengths">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>check_circle</mat-icon>
+          Strengths
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ feedback.strengths }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="feedback-card" *ngIf="feedback.areas_improvement">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>trending_up</mat-icon>
+          Areas for Improvement
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ feedback.areas_improvement }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filler Words -->
+  <mat-card class="feedback-card filler-words-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>warning</mat-icon>
+        Filler Words
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="filler-feedback" *ngIf="feedback.filler_words.length > 0">
+        You used {{ feedback.filler_words.length }} filler words. Try to reduce them for better fluency.
+      </p>
+      <div class="filler-list" *ngIf="feedback.filler_words.length > 0">
+        <div class="filler-item" *ngFor="let w of feedback.filler_words; let i = index">
+          <span class="filler-word">{{ w.word }}</span>
+          <span class="filler-time">{{ formatTimestamp(w.start_time || 0) }}s</span>
+        </div>
+      </div>
+      <p *ngIf="feedback.filler_words.length === 0" class="no-fillers">
+        Great job! No filler words detected.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Try Again Button -->
+  <div class="action-buttons">
+    <button mat-raised-button color="primary" (click)="tryAgain()" class="try-again-button">
+      <mat-icon>refresh</mat-icon>
+      Try Another Recording
+    </button>
+  </div>
+</div>

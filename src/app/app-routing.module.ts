@@ -1,9 +1,24 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
-    path: 'home',
+    path: '',
+    redirectTo: '/web/login',
+    pathMatch: 'full'
+  },
+  {
+    path: 'web',
+    loadChildren: () => import('./web/web.module').then(m => m.WebModule)
+  },
+  {
+    path: 'ionic',
+    loadChildren: () => import('./pages/tabs/tabs.module').then(m => m.TabsPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'ionic-login',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   },
   {
@@ -13,10 +28,6 @@ const routes: Routes = [
   {
     path: 'setup-profile',
     loadChildren: () => import('./newflow/setup-profile/setup-profile.module').then( m => m.SetupProfilePageModule)
-  },
-  {
-    path: 'tabs',
-    loadChildren: () => import('./pages/tabs/tabs.module').then(m => m.TabsPageModule)
   },
   {
     path: 'speech-feedback',
@@ -33,11 +44,6 @@ const routes: Routes = [
   {
     path: 'speech-history',
     loadChildren: () => import('./pages/speech-history/speech-history.module').then( m => m.SpeechHistoryPageModule)
-  },
-  {
-    path: '',
-    redirectTo: 'onboarding',
-    pathMatch: 'full'
   }
 ];
 

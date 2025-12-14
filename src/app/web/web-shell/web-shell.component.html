@@ -1,0 +1,74 @@
+<ion-split-pane contentId="main-content" class="app-container">
+  <!-- Left-side navigation menu -->
+  <ion-menu contentId="main-content" type="overlay" class="sidenav" [class.mat-sidenav-closed]="!sidebarOpen">
+    <ion-header class="sidenav-toolbar">
+      <ion-toolbar>
+        <ion-title>StageReady</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list class="nav-list">
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/web/dashboard" routerLinkActive="active" detail="false">
+            <ion-icon slot="start" name="home"></ion-icon>
+            <ion-label>Dashboard</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/web/badges" routerLinkActive="active" detail="false">
+            <ion-icon slot="start" name="trophy"></ion-icon>
+            <ion-label>Badges</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/web/history" routerLinkActive="active" detail="false">
+            <ion-icon slot="start" name="stats-chart"></ion-icon>
+            <ion-label>Speech History</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/web/analysis" routerLinkActive="active" detail="false">
+            <ion-icon slot="start" name="mic"></ion-icon>
+            <ion-label>Speech Analysis</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/web/feedback" routerLinkActive="active" detail="false">
+            <ion-icon slot="start" name="chatbubbles"></ion-icon>
+            <ion-label>Speech Feedback</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/web/profile" routerLinkActive="active" detail="false">
+            <ion-icon slot="start" name="person"></ion-icon>
+            <ion-label>Profile</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+  
+  <!-- Main content area -->
+  <div id="main-content" class="main-content">
+    <ion-header class="main-toolbar">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-menu-button (click)="toggleSidebar()"></ion-menu-button>
+        </ion-buttons>
+        <ion-title class="app-title">
+          <img [src]="logoPath" alt="StageReady Logo" class="stageready-logo">
+          StageReady
+        </ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="logout()">
+            <ion-icon slot="icon-only" name="log-out"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</ion-split-pane>

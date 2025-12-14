@@ -1,0 +1,74 @@
+<ion-content class="login-container">
+  <div class="login-content">
+    <div class="login-header">
+      <h1 class="login-title">Stage Ready</h1>
+      <h2 class="login-subtitle">Your AI Public Speaking Coach</h2>
+    </div>
+
+    <ion-card class="login-card" *ngIf="!showRegister">
+      <ion-card-header>
+        <ion-card-title>Login</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item class="full-width">
+          <ion-label position="floating">Email</ion-label>
+          <ion-input [(ngModel)]="email" type="email" placeholder="Enter your email"></ion-input>
+        </ion-item>
+        
+        <ion-item class="full-width">
+          <ion-label position="floating">Password</ion-label>
+          <ion-input [(ngModel)]="password" type="password" placeholder="Enter your password"></ion-input>
+        </ion-item>
+        
+        <ion-button expand="block" (click)="signIn()" class="login-btn">
+          Log In
+        </ion-button>
+        
+        <div class="google-login-section">
+          <ion-button expand="block" fill="outline" (click)="signInWithGoogle()" class="google-btn">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="google-logo">
+            Log in with Google
+          </ion-button>
+        </div>
+        
+        <ion-button expand="block" fill="clear" (click)="toggleRegister()" class="toggle-btn">
+          Don't have an account? Register
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="login-card" *ngIf="showRegister">
+      <ion-card-header>
+        <ion-card-title>Register</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item class="full-width">
+          <ion-label position="floating">Email</ion-label>
+          <ion-input [(ngModel)]="email" type="email" placeholder="Enter your email"></ion-input>
+        </ion-item>
+        
+        <ion-item class="full-width">
+          <ion-label position="floating">Password</ion-label>
+          <ion-input [(ngModel)]="password" type="password" placeholder="Enter your password"></ion-input>
+        </ion-item>
+        
+        <ion-item class="full-width">
+          <ion-label position="floating">Confirm Password</ion-label>
+          <ion-input [(ngModel)]="confirmPassword" type="password" placeholder="Re-enter your password"></ion-input>
+        </ion-item>
+        
+        <p *ngIf="password && confirmPassword && password !== confirmPassword" class="error-text">
+          Passwords don't match.
+        </p>
+        
+        <ion-button expand="block" (click)="register()" class="login-btn">
+          Register
+        </ion-button>
+        
+        <ion-button expand="block" fill="clear" (click)="toggleRegister()" class="toggle-btn">
+          Already have an account? Log In
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

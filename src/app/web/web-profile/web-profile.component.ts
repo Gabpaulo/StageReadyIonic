@@ -1,0 +1,168 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { FirebaseService } from '../../services/firebase.service';
+import { BadgeService } from '../../services/badge.service';
+import { User } from 'firebase/auth';
+import { SpeechHistoryEntry, SpeechHistorySummary } from '../../models/speech-history.model';
+import { MatDialog } from '@angular/material/dialog';
+
+@Component({
+  selector: 'app-web-profile',
+  templateUrl: './web-profile.component.html',
+  styleUrls: ['./web-profile.component.scss'],
+  standalone: false
+})
+export class WebProfileComponent implements OnInit {
+  public userProfile: any = null;
+  public loading: boolean = true;
+  public error: string | null = null;
+  public editModalOpen: boolean = false;
+  public formData: any = {};
+  public saving: boolean = false;
+  public summary: SpeechHistorySummary | null = null;
+  public recentSpeeches: SpeechHistoryEntry[] = [];
+  public currentUserEmail: string | null = null;
+  public currentUserPhotoURL: string | null = null;
+  public interestOptions: string[] = [
+    'Public Speaking',
+    'Debate',
+    'Storytelling',
+    'Improv',
+    'Motivational Speaking',
+    'Interview Practice',
+    'Hosting',
+    'Pitching Ideas',
+    'Confidence Building'
+  ];
+
+  constructor(
+    private firebaseService: FirebaseService,
+    public badgeService: BadgeService,
+    private router: Router,
+    private dialog: MatDialog
+  ) { }
+
+  async ngOnInit() {
+    await this.loadProfile();
+  }
+
+  async loadProfile() {
+    this.loading = true;
+    this.error = null;
+    try {
+      const user = this.firebaseService.auth.currentUser;
+      if (user) {
+        this.userProfile = await this.firebaseService.getUserProfile(user.uid);
+        this.currentUserEmail = user.email || null;
+        this.currentUserPhotoURL = (user.photoURL as string) || null;
+        this.formData = {
+          firstName: this.userProfile.firstName || '',
+          lastName: this.userProfile.lastName || '',
+          age: this.userProfile.age || '',
+          phone: this.userProfile.phone || this.userProfile.phoneNumber || '',
+          gender: this.userProfile.gender || '',
+          interests: Array.isArray(this.userProfile.interests) ? [...this.userProfile.interests] : [],
+          bio: this.userProfile.bio || '',
+          defaultSpeechType: this.userProfile.defaultSpeechType || 'informative'
+        };
+
+        // Load user speech stats and recent sessions
+        const [summary, history] = await Promise.all([
+          this.firebaseService.getSpeechHistorySummary(user.uid),
+          this.firebaseService.getSpeechHistory(user.uid, 3)
+        ]);
+        this.summary = summary;
+        this.recentSpeeches = history;
+      } else {
+        this.error = 'No user is currently logged in.';
+      }
+    } catch (err) {
+      this.error = 'Failed to load user profile.';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  openEditModal() {
+    this.formData = {
+      firstName: this.userProfile.firstName || '',
+      lastName: this.userProfile.lastName || '',
+      age: this.userProfile.age || '',
+      phone: this.userProfile.phone || this.userProfile.phoneNumber || '',
+      gender: this.userProfile.gender || '',
+      interests: Array.isArray(this.userProfile.interests) ? [...this.userProfile.interests] : [],
+      bio: this.userProfile.bio || '',
+      defaultSpeechType: this.userProfile.defaultSpeechType || 'informative'
+    };
+    this.editModalOpen = true;
+  }
+
+  closeEditModal() {
+    this.editModalOpen = false;
+  }
+
+  async saveProfile() {
+    this.saving = true;
+    this.error = null;
+    try {
+      const user = this.firebaseService.auth.currentUser;
+      if (user) {
+        const updatedProfile = {
+          firstName: this.formData.firstName,
+          lastName: this.formData.lastName,
+          age: this.formData.age,
+          phone: this.formData.phone,
+          phoneNumber: this.formData.phone,
+          gender: this.formData.gender,
+          interests: this.formData.interests,
+          bio: this.formData.bio,
+          defaultSpeechType: this.formData.defaultSpeechType || 'informative'
+        };
+        
+        await this.firebaseService.updateUserProfile(user.uid, updatedProfile);
+        await this.loadProfile();
+        this.editModalOpen = false;
+        
+        // Check for badge achievements related to profile completion
+        await this.badgeService.onProfileUpdated(updatedProfile);
+      } else {
+        this.error = 'No user is currently logged in.';
+      }
+    } catch (err) {
+      this.error = 'Failed to update profile.';
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  async logout() {
+    try {
+      await this.firebaseService.logout();
+      // Clear local state so old user data isn't shown
+      this.userProfile = null;
+      this.formData = {};
+      this.error = null;
+      // Navigate to login
+      this.router.navigateByUrl('/web-login', { replaceUrl: true });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      this.error = 'Failed to logout. Please try again.';
+    }
+  }
+
+  formatDuration(seconds: number | undefined | null): string {
+    const totalSeconds = Math.floor(seconds || 0);
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  formatDate(date: Date | string | null | undefined): string {
+    if (!date) return 'Unknown';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
+    });
+  }
+}

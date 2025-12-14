@@ -4,7 +4,7 @@ import {
   signInWithEmailAndPassword
 } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
 
 @Component({
@@ -18,12 +18,21 @@ export class HomePage {
   password: string = '';
   confirmPassword: string = '';
   showRegister: boolean = false;
+  returnUrl: string = '/ionic/dashboard';
 
   constructor(
     private toastController: ToastController,
     private router: Router,
+    private route: ActivatedRoute,
     private firebaseService: FirebaseService 
-  ) {}
+  ) {
+    // Get returnUrl from query parameters
+    this.route.queryParams.subscribe(params => {
+      if (params['returnUrl'] && params['returnUrl'].startsWith('/ionic')) {
+        this.returnUrl = params['returnUrl'];
+      }
+    });
+  }
 
   toggleRegister() {
     this.showRegister = !this.showRegister;
@@ -49,7 +58,8 @@ export class HomePage {
       if (!(await this.firebaseService.userProfileExists(user.uid))) {
         this.router.navigate(['/setup-profile']);
       } else {
-        this.router.navigate(['/tabs/dashboard']);
+        // Redirect to returnUrl or default dashboard
+        this.router.navigate([this.returnUrl]);
       }
 
     } catch (error: any) {
@@ -124,8 +134,8 @@ export class HomePage {
         });
         this.router.navigate(['/setup-profile']);
       } else {
-      
-        this.router.navigate(['/tabs/dashboard']);
+        // Redirect to returnUrl or default dashboard
+        this.router.navigate([this.returnUrl]);
       }
   
     } catch (error: any) {
@@ -137,5 +147,4 @@ export class HomePage {
       await toast.present();
     }
   }
-  
 }

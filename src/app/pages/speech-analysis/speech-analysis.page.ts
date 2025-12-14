@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { Subscription }               from 'rxjs';
 import { Router }                     from '@angular/router';
 import { AudioRecorderService }       from '../../services/audio-recorder.service';
-import { SpeechAnalysisService }      from '../../services/genai.service';
+import { SpeechAnalysisApiService }   from '../../services/speech-analysis-api.service';
 import { BadgeService }               from '../../services/badge.service';
 import { FirebaseService }            from '../../services/firebase.service';
 import { AnalyzeSpeechForFeedbackOutput }
@@ -28,7 +28,7 @@ export class SpeechAnalysisPage implements OnDestroy {
 
   constructor(
     public recorder: AudioRecorderService,
-    private analysis: SpeechAnalysisService,
+    private speechAnalysisApi: SpeechAnalysisApiService,
     private router: Router,
     private badgeService: BadgeService,
     private firebaseService: FirebaseService
@@ -87,7 +87,7 @@ export class SpeechAnalysisPage implements OnDestroy {
     if (!this.audioBlob) { return; }
     this.isLoading = true;
 
-    this.analysis.analyzeAudioBlob(this.audioBlob, this.speechType).subscribe({
+    this.speechAnalysisApi.analyzeSpeech(this.audioBlob, this.speechType).subscribe({
       next: async feedback => {
         this.isLoading = false;
         

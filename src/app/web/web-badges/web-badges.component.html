@@ -1,0 +1,55 @@
+<div class="badges-container">
+  <div class="page-header">
+    <h1>
+      Your Badges
+    </h1>
+    <p>Track your achievements and unlock new badges by practicing your speaking skills</p>
+  </div>
+
+  <div class="badges-grid" *ngIf="(badges$ | async) as badges">
+    <div class="badge-card" *ngFor="let badge of badges" [class.unlocked]="badge.isUnlocked">
+      <div class="badge-image-container">
+        <img [src]="getBadgeIconPath(badge.icon)" [alt]="badge.name" class="badge-image" 
+             (error)="onImageError($event)">
+        <div class="badge-overlay" *ngIf="!badge.isUnlocked">
+          <img src="/assets/icon/lock.svg" alt="Locked" class="lock-icon">
+        </div>
+      </div>
+      <div class="badge-content">
+        <h3 class="badge-name">{{ badge.name }}</h3>
+        <p class="badge-description">{{ badge.description }}</p>
+        <div class="badge-category">
+          <span class="category-tag" [class]="badge.category.toLowerCase()">
+            {{ badge.category }}
+          </span>
+          <span class="rarity-tag" [class]="badge.rarity.toLowerCase()">
+            {{ badge.rarity }}
+          </span>
+        </div>
+        <div class="badge-progress" *ngIf="badge.progress !== undefined && badge.maxProgress">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="(badge.progress / badge.maxProgress) * 100"></div>
+          </div>
+          <span class="progress-text">{{ badge.progress }}/{{ badge.maxProgress }}</span>
+        </div>
+        <div class="badge-date" *ngIf="badge.unlockedAt">
+          <mat-icon>schedule</mat-icon>
+          <span>Unlocked {{ badge.unlockedAt | date:'short' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!(badges$ | async)?.length">
+    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" 
+         alt="No badges yet" class="empty-image">
+    <h3>No badges yet</h3>
+    <p>Start practicing your speeches to unlock your first badge!</p>
+    <button mat-raised-button color="primary" routerLink="/web/analysis">
+      <mat-icon>mic</mat-icon>
+      Start Practicing
+    </button>
+  </div>
+</div>
+
+

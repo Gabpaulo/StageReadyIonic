@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="64" fill="#17232f"/>
+  <rect x="32" y="32" width="448" height="448" rx="56" fill="#1e2c3a"/>
+  
+  <!-- Microphone Icon -->
+  <path d="M256 80C240.536 80 228 92.536 228 108V256C228 271.464 240.536 284 256 284C271.464 284 284 271.464 284 256V108C284 92.536 271.464 80 256 80Z" fill="#667eea"/>
+  
+  <!-- Microphone Stand -->
+  <rect x="244" y="284" width="24" height="64" fill="#667eea"/>
+  
+  <!-- Microphone Base -->
+  <rect x="192" y="348" width="128" height="24" rx="12" fill="#667eea"/>
+  
+  <!-- Sound Waves -->
+  <path d="M320 160C334.359 160 346 171.641 346 186C346 200.359 334.359 212 320 212" stroke="#667eea" stroke-width="8" fill="none"/>
+  <path d="M352 128C374.091 128 392 145.909 392 168C392 190.091 374.091 208 352 208" stroke="#667eea" stroke-width="8" fill="none"/>
+  <path d="M384 96C414.928 96 440 121.072 440 152C440 182.928 414.928 208 384 208" stroke="#667eea" stroke-width="8" fill="none"/>
+  
+  <!-- Stage/Platform -->
+  <rect x="112" y="400" width="288" height="24" rx="12" fill="#9bb2c8"/>
+  <rect x="80" y="424" width="352" height="12" rx="6" fill="#9bb2c8"/>
+  
+  <!-- Text "SR" -->
+  <text x="256" y="120" text-anchor="middle" fill="#e8f1f9" font-family="Arial, sans-serif" font-size="48" font-weight="bold">SR</text>
+</svg>

@@ -35,8 +35,25 @@ export class BadgeService {
 
     try {
       const userBadgeData = await this.firebaseService.getUserBadges(this.currentUserId);
-      if (userBadgeData) {
-        this.userBadgesSubject.next(userBadgeData.badges);
+      if (userBadgeData && userBadgeData.badges && userBadgeData.badges.length > 0) {
+        // Merge with BADGE_DEFINITIONS to ensure icon paths are correct
+        const mergedBadges = userBadgeData.badges.map(savedBadge => {
+          const definition = BADGE_DEFINITIONS.find(def => def.id === savedBadge.id);
+          if (definition) {
+            // Preserve user progress but use correct icon path from definition
+            return {
+              ...savedBadge,
+              icon: definition.icon, // Always use the correct icon path from definition
+              name: definition.name,
+              description: definition.description,
+              category: definition.category,
+              rarity: definition.rarity,
+              maxProgress: definition.maxProgress
+            };
+          }
+          return savedBadge;
+        });
+        this.userBadgesSubject.next(mergedBadges);
       } else {
         // Initialize with default badges if none exist
         const defaultBadges = BADGE_DEFINITIONS.map(badge => ({ ...badge }));
@@ -45,6 +62,9 @@ export class BadgeService {
       }
     } catch (error) {
       console.error('Error loading user badges:', error);
+      // Fallback to default badges on error
+      const defaultBadges = BADGE_DEFINITIONS.map(badge => ({ ...badge }));
+      this.userBadgesSubject.next(defaultBadges);
     }
   }
 
@@ -169,11 +189,11 @@ export class BadgeService {
   private getRatingFromFeedback(feedback: AnalyzeSpeechForFeedbackOutput, ratingType: string): string {
     switch (ratingType) {
       case 'clarity':
-        return feedback.clarity.toLowerCase();
+        return feedback.clarity_feedback.toLowerCase();
       case 'pace':
-        return feedback.pace.toLowerCase();
+        return feedback.pace_feedback.toLowerCase();
       case 'tone':
-        return feedback.tone.toLowerCase();
+        return feedback.tone_feedback.toLowerCase();
       default:
         return 'fair';
     }
@@ -225,11 +245,28 @@ export class BadgeService {
   private async saveUserBadges(badges: Badge[]): Promise<void> {
     if (!this.currentUserId) return;
 
+    // Ensure all badges have correct icon paths from definitions before saving
+    const badgesWithCorrectIcons = badges.map(badge => {
+      const definition = BADGE_DEFINITIONS.find(def => def.id === badge.id);
+      if (definition) {
+        return {
+          ...badge,
+          icon: definition.icon, // Always use correct icon path from definition
+          name: definition.name,
+          description: definition.description,
+          category: definition.category,
+          rarity: definition.rarity,
+          maxProgress: definition.maxProgress
+        };
+      }
+      return badge;
+    });
+
     const userBadgeProgress: UserBadgeProgress = {
       userId: this.currentUserId,
-      badges: badges,
+      badges: badgesWithCorrectIcons,
       totalBadges: BADGE_DEFINITIONS.length,
-      unlockedBadges: badges.filter(b => b.isUnlocked).length,
+      unlockedBadges: badgesWithCorrectIcons.filter(b => b.isUnlocked).length,
       lastUpdated: new Date()
     };
 

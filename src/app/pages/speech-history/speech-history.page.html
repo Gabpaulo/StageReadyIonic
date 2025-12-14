@@ -144,9 +144,36 @@
           <ion-card-title>Feedback</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <p><strong>Clarity:</strong> {{ selectedEntry.feedback.clarity }}</p>
-          <p><strong>Pace:</strong> {{ selectedEntry.feedback.pace }}</p>
-          <p><strong>Tone:</strong> {{ selectedEntry.feedback.tone }}</p>
+          <ion-item lines="none">
+            <ion-label>Clarity</ion-label>
+            <ion-progress-bar 
+              [value]="getFeedbackProgressWidth(selectedEntry.feedback.clarity) / 100" 
+              [color]="getFeedbackRatingColor(selectedEntry.feedback.clarity)">
+            </ion-progress-bar>
+            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback.clarity)" slot="end">
+              {{ selectedEntry.feedback.clarity }}
+            </ion-text>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label>Pace</ion-label>
+            <ion-progress-bar 
+              [value]="getFeedbackProgressWidth(selectedEntry.feedback.pace) / 100" 
+              [color]="getFeedbackRatingColor(selectedEntry.feedback.pace)">
+            </ion-progress-bar>
+            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback.pace)" slot="end">
+              {{ selectedEntry.feedback.pace }}
+            </ion-text>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label>Tone</ion-label>
+            <ion-progress-bar 
+              [value]="getFeedbackProgressWidth(selectedEntry.feedback.tone) / 100" 
+              [color]="getFeedbackRatingColor(selectedEntry.feedback.tone)">
+            </ion-progress-bar>
+            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback.tone)" slot="end">
+              {{ selectedEntry.feedback.tone }}
+            </ion-text>
+          </ion-item>
         </ion-card-content>
       </ion-card>
     </ion-content>

@@ -29,6 +29,39 @@ export class BadgeDisplayComponent implements OnInit {
     return Math.round(((this.badge.progress || 0) / this.badge.maxProgress) * 100);
   }
 
+  getSvgColorFilter(): string {
+    let color = '';
+    switch (this.badge.rarity) {
+      case BadgeRarity.COMMON:
+        color = '6c757d'; // Gray
+        break;
+      case BadgeRarity.RARE:
+        color = '007bff'; // Blue
+        break;
+      case BadgeRarity.EPIC:
+        color = '6f42c1'; // Purple
+        break;
+      case BadgeRarity.LEGENDARY:
+        color = 'fd7e14'; // Orange
+        break;
+      default:
+        color = '6c757d'; // Default to gray
+        break;
+    }
+
+    // Convert hex to RGB
+    const r = parseInt(color.substring(0, 2), 16);
+    const g = parseInt(color.substring(2, 4), 16);
+    const b = parseInt(color.substring(4, 6), 16);
+
+    // Apply a simple SVG color filter (this is a simplified approach and might need fine-tuning)
+    // This filter attempts to tint the SVG to the desired color.
+    return `
+      filter: brightness(0) saturate(100%) invert(${r / 255}) sepia(1) saturate(500%) hue-rotate(180deg) brightness(1.5) contrast(1.5);
+      filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='colorize'><feColorMatrix type='matrix' values='0 0 0 0 ${r / 255} 0 0 0 0 ${g / 255} 0 0 0 0 ${b / 255} 0 0 0 1 0'/></filter></svg>#colorize");
+    `;
+  }
+
   getRarityColor(): string {
     switch (this.badge.rarity) {
       case BadgeRarity.COMMON:
@@ -93,5 +126,44 @@ export class BadgeDisplayComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     }).format(date);
+  }
+
+  getBadgeIconPath(): string {
+    if (!this.badge || !this.badge.icon) {
+      return '/assets/badges/first-step.svg';
+    }
+    // Ensure path starts with / for absolute path from root
+    if (this.badge.icon.startsWith('/')) {
+      return this.badge.icon;
+    }
+    return '/' + this.badge.icon;
+  }
+
+  onImageError(event: any): void {
+    // Log the error for debugging
+    console.error('Badge icon failed to load:', event.target.src);
+    // Try alternative path formats
+    try {
+      const currentSrc = event.target.src;
+      const url = new URL(currentSrc);
+      const path = url.pathname;
+      
+      // If it has leading slash, try without
+      if (path.startsWith('/assets/')) {
+        event.target.src = path.substring(1);
+      } 
+      // If it doesn't have leading slash, try with
+      else if (path.startsWith('assets/')) {
+        event.target.src = '/' + path;
+      }
+    } catch (e) {
+      // If URL parsing fails, try simple string manipulation
+      const currentSrc = event.target.src;
+      if (currentSrc.startsWith('/assets/')) {
+        event.target.src = currentSrc.substring(1);
+      } else if (currentSrc.includes('assets/') && !currentSrc.startsWith('/')) {
+        event.target.src = '/' + currentSrc;
+      }
+    }
   }
 }
