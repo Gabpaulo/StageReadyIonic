@@ -13,7 +13,6 @@ import { MatSidenav } from '@angular/material/sidenav';
 export class WebShellComponent implements OnInit {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   sidebarOpen = true;
-  logoPath = '/assets/icon/stagereadylogo.svg';
 
   constructor(
     private router: Router,
