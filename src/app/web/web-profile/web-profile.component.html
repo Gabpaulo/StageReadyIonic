@@ -17,6 +17,12 @@
     <mat-icon color="warn" class="error-icon">error_outline</mat-icon>
     <h3>Error</h3>
     <p>{{ error }}</p>
+    <button *ngIf="error.includes('not found')" mat-raised-button color="primary" (click)="openEditModal()">
+      Create Profile
+    </button>
+    <button *ngIf="error.includes('Failed')" mat-stroked-button (click)="loadProfile()">
+      Try Again
+    </button>
   </div>
 
   <!-- Profile Content -->
@@ -152,4 +158,74 @@
       </mat-card>
     </div>
   </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div *ngIf="editModalOpen" class="modal-overlay" (click)="closeEditModal()">
+  <mat-card class="edit-modal" (click)="$event.stopPropagation()">
+    <mat-card-header>
+      <mat-card-title>Edit Profile</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="profile-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>First Name</mat-label>
+            <input matInput [(ngModel)]="formData.firstName" name="firstName">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Last Name</mat-label>
+            <input matInput [(ngModel)]="formData.lastName" name="lastName">
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Age</mat-label>
+            <input matInput type="number" [(ngModel)]="formData.age" name="age">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Phone</mat-label>
+            <input matInput [(ngModel)]="formData.phone" name="phone">
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="form-field-full">
+          <mat-label>Gender</mat-label>
+          <mat-select [(ngModel)]="formData.gender" name="gender">
+            <mat-option value="male">Male</mat-option>
+            <mat-option value="female">Female</mat-option>
+            <mat-option value="non-binary">Non-binary</mat-option>
+            <mat-option value="prefer-not-to-say">Prefer not to say</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field-full">
+          <mat-label>Interests</mat-label>
+          <mat-select [(ngModel)]="formData.interests" name="interests" multiple>
+            <mat-option *ngFor="let interest of interestOptions" [value]="interest">
+              {{ interest }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field-full">
+          <mat-label>Bio</mat-label>
+          <textarea matInput [(ngModel)]="formData.bio" name="bio" rows="4"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field-full">
+          <mat-label>Default Speech Type</mat-label>
+          <mat-select [(ngModel)]="formData.defaultSpeechType" name="defaultSpeechType">
+            <mat-option value="informative">Informative</mat-option>
+            <mat-option value="persuasive">Persuasive</mat-option>
+            <mat-option value="entertaining">Entertaining</mat-option>
+            <mat-option value="demonstration">Demonstration</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-button (click)="closeEditModal()" [disabled]="saving">Cancel</button>
+      <button mat-raised-button color="primary" (click)="saveProfile()" [disabled]="saving">
+        <span *ngIf="!saving">Save</span>
+        <span *ngIf="saving">Saving...</span>
+      </button>
+    </mat-card-actions>
+  </mat-card>
 </div>

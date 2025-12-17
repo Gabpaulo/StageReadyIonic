@@ -50,7 +50,14 @@ export class WebProfileComponent implements OnInit {
     this.loading = true;
     this.error = null;
     try {
-      const user = this.firebaseService.auth.currentUser;
+      // Wait for auth state to be ready
+      const user = await new Promise<any>((resolve) => {
+        const unsubscribe = this.firebaseService.auth.onAuthStateChanged((user) => {
+          unsubscribe();
+          resolve(user);
+        });
+      });
+
       if (user) {
         this.userProfile = await this.firebaseService.getUserProfile(user.uid);
         if (this.userProfile) {
@@ -89,6 +96,7 @@ export class WebProfileComponent implements OnInit {
         this.error = 'No user is currently logged in.';
       }
     } catch (err) {
+      console.error('Error loading profile:', err);
       this.error = 'Failed to load user profile.';
     } finally {
       this.loading = false;

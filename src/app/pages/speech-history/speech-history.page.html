@@ -139,39 +139,39 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card>
+      <ion-card *ngIf="selectedEntry.feedback">
         <ion-card-header>
           <ion-card-title>Feedback</ion-card-title>
         </ion-card-header>
         <ion-card-content>
           <ion-item lines="none">
             <ion-label>Clarity</ion-label>
-            <ion-progress-bar 
-              [value]="getFeedbackProgressWidth(selectedEntry.feedback.articulation_clarity) / 100" 
-              [color]="getFeedbackRatingColor(selectedEntry.feedback.articulation_clarity)">
+            <ion-progress-bar
+              [value]="getFeedbackProgressWidth(selectedEntry.feedback?.articulation_clarity || 0) / 100"
+              [color]="getFeedbackRatingColor(selectedEntry.feedback?.articulation_clarity || 0)">
             </ion-progress-bar>
-            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback.articulation_clarity)" slot="end">
-              {{ selectedEntry.feedback.articulation_clarity }}
+            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback?.articulation_clarity || 0)" slot="end">
+              {{ selectedEntry.feedback?.articulation_clarity || 'N/A' }}
             </ion-text>
           </ion-item>
           <ion-item lines="none">
             <ion-label>Pace</ion-label>
-            <ion-progress-bar 
-              [value]="getFeedbackProgressWidth(selectedEntry.feedback.speech_pace) / 100" 
-              [color]="getFeedbackRatingColor(selectedEntry.feedback.speech_pace)">
+            <ion-progress-bar
+              [value]="getFeedbackProgressWidth(selectedEntry.feedback?.speech_pace || 0) / 100"
+              [color]="getFeedbackRatingColor(selectedEntry.feedback?.speech_pace || 0)">
             </ion-progress-bar>
-            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback.speech_pace)" slot="end">
-              {{ selectedEntry.feedback.speech_pace }}
+            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback?.speech_pace || 0)" slot="end">
+              {{ selectedEntry.feedback?.speech_pace || 'N/A' }}
             </ion-text>
           </ion-item>
           <ion-item lines="none">
             <ion-label>Tone</ion-label>
-            <ion-progress-bar 
-              [value]="getFeedbackProgressWidth(selectedEntry.feedback.pitch_variation) / 100" 
-              [color]="getFeedbackRatingColor(selectedEntry.feedback.pitch_variation)">
+            <ion-progress-bar
+              [value]="getFeedbackProgressWidth(selectedEntry.feedback?.pitch_variation || 0) / 100"
+              [color]="getFeedbackRatingColor(selectedEntry.feedback?.pitch_variation || 0)">
             </ion-progress-bar>
-            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback.pitch_variation)" slot="end">
-              {{ selectedEntry.feedback.pitch_variation }}
+            <ion-text [color]="getFeedbackRatingColor(selectedEntry.feedback?.pitch_variation || 0)" slot="end">
+              {{ selectedEntry.feedback?.pitch_variation || 'N/A' }}
             </ion-text>
           </ion-item>
         </ion-card-content>

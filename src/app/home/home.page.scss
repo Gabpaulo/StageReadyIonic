@@ -211,10 +211,14 @@ ion-item {
   ion-input {
     --padding-start: 0;
     --padding-end: 16px;
+    --color: #000000;
+    --placeholder-color: #6c757d;
     font-size: 1rem;
-    
+    color: #000000;
+
     &::part(native) {
       padding: 16px 0;
+      color: #000000;
     }
   }
 }

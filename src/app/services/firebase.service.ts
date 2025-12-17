@@ -50,7 +50,17 @@ export class FirebaseService {
     const docRef = doc(this.firestore, `users/${uid}`);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data();
+      const data = docSnap.data() as any;
+
+      // Convert Firebase Timestamps to JavaScript Dates
+      if (data.createdAt instanceof Timestamp) {
+        data.createdAt = data.createdAt.toDate();
+      }
+      if (data.updatedAt instanceof Timestamp) {
+        data.updatedAt = data.updatedAt.toDate();
+      }
+
+      return data;
     }
     return null;
   }
@@ -75,7 +85,23 @@ export class FirebaseService {
     const docRef = doc(this.firestore, `userBadges/${uid}`);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data() as UserBadgeProgress;
+      const data = docSnap.data() as any;
+
+      // Convert Firebase Timestamps to JavaScript Dates
+      if (data.badges) {
+        data.badges = data.badges.map((badge: any) => ({
+          ...badge,
+          unlockedAt: badge.unlockedAt instanceof Timestamp
+            ? badge.unlockedAt.toDate()
+            : badge.unlockedAt
+        }));
+      }
+
+      if (data.lastUpdated instanceof Timestamp) {
+        data.lastUpdated = data.lastUpdated.toDate();
+      }
+
+      return data as UserBadgeProgress;
     }
     return null;
   }
@@ -276,13 +302,46 @@ export class FirebaseService {
     const historyRef = collection(this.firestore, `users/${uid}/speechHistory`);
     const q = query(historyRef, orderBy('createdAt', 'desc'), limit(limitCount));
     const querySnapshot = await getDocs(q);
-    
+
     return querySnapshot.docs.map(doc => {
       const data = doc.data();
-      return {
-        ...data,
+
+      // Map the stored structure to the expected SpeechHistoryEntry format
+      const entry: any = {
+        id: data['id'],
+        userId: data['userId'],
+        transcript: data['transcript'],
+        speechType: data['speechType'],
         createdAt: data['createdAt'].toDate(),
-      } as SpeechHistoryEntry;
+        duration: data['duration'],
+        wordCount: data['wordCount'],
+        averagePace: data['averagePace'],
+        audioUrl: data['audioUrl'],
+        audioData: data['audioData'],
+        audioMimeType: data['audioMimeType']
+      };
+
+      // Map scores object to flat feedback structure
+      if (data['scores']) {
+        entry.feedback = {
+          speech_pace: data['scores'].speech_pace || 0,
+          pausing_fluency: data['scores'].pausing_fluency || 0,
+          loud_control: data['scores'].loudness_control || 0,
+          pitch_variation: data['scores'].pitch_variation || 0,
+          articulation_clarity: data['scores'].articulation_clarity || 0,
+          expressive_emph: data['scores'].expressive_emphasis || 0,
+          filler_words_score: data['scores'].filler_words || 0,
+          overall: data['scores'].overall || 0,
+          pace_feedback: data['feedbackDetails']?.pace_feedback || '',
+          tone_feedback: data['feedbackDetails']?.tone_feedback || '',
+          clarity_feedback: data['feedbackDetails']?.clarity_feedback || '',
+          strengths: data['feedbackDetails']?.strengths || '',
+          areas_improvement: data['feedbackDetails']?.areas_improvement || '',
+          filler_words: data['feedbackDetails']?.filler_words || []
+        };
+      }
+
+      return entry as SpeechHistoryEntry;
     });
   }
 
@@ -305,10 +364,22 @@ export class FirebaseService {
 
     const entries = querySnapshot.docs.map(doc => {
       const data = doc.data();
-      return {
-        ...data,
+      const entry: any = {
         createdAt: data['createdAt'].toDate(),
-      } as SpeechHistoryEntry;
+        duration: data['duration'],
+        wordCount: data['wordCount'],
+      };
+
+      // Map scores to feedback structure
+      if (data['scores']) {
+        entry.feedback = {
+          speech_pace: data['scores'].speech_pace || 0,
+          pitch_variation: data['scores'].pitch_variation || 0,
+          articulation_clarity: data['scores'].articulation_clarity || 0,
+        };
+      }
+
+      return entry as SpeechHistoryEntry;
     });
 
     const totalSessions = entries.length;
@@ -316,10 +387,16 @@ export class FirebaseService {
     const totalDuration = entries.reduce((sum, entry) => sum + (entry.duration || 0), 0);
     const lastSession = entries[0]?.createdAt;
 
-    // Calculate average ratings (convert text to numbers)
-    const clarityScores = entries.map(entry => entry.feedback.articulation_clarity || 0);
-    const paceScores = entries.map(entry => entry.feedback.speech_pace || 0);
-    const toneScores = entries.map(entry => entry.feedback.pitch_variation || 0); // Assuming pitch_variation is the tone score
+    // Calculate average ratings (convert text to numbers) with null checks
+    const clarityScores = entries
+      .filter(entry => entry.feedback && typeof entry.feedback.articulation_clarity === 'number')
+      .map(entry => entry.feedback.articulation_clarity);
+    const paceScores = entries
+      .filter(entry => entry.feedback && typeof entry.feedback.speech_pace === 'number')
+      .map(entry => entry.feedback.speech_pace);
+    const toneScores = entries
+      .filter(entry => entry.feedback && typeof entry.feedback.pitch_variation === 'number')
+      .map(entry => entry.feedback.pitch_variation);
 
     const averageClarity = clarityScores.length > 0 ? clarityScores.reduce((sum, score) => sum + score, 0) / clarityScores.length : 0;
     const averagePace = paceScores.length > 0 ? paceScores.reduce((sum, score) => sum + score, 0) / paceScores.length : 0;
@@ -357,19 +434,21 @@ export class FirebaseService {
     const older = entries.slice(-Math.ceil(entries.length / 3));
 
     const recentAvg = recent.reduce((sum, entry) => {
-      return sum + (entry.feedback.articulation_clarity || 0) + 
-             (entry.feedback.speech_pace || 0) + 
-             (entry.feedback.pitch_variation || 0);
+      const clarity = entry.feedback?.articulation_clarity || 0;
+      const pace = entry.feedback?.speech_pace || 0;
+      const tone = entry.feedback?.pitch_variation || 0;
+      return sum + clarity + pace + tone;
     }, 0) / (recent.length * 3);
 
     const olderAvg = older.reduce((sum, entry) => {
-      return sum + (entry.feedback.articulation_clarity || 0) + 
-             (entry.feedback.speech_pace || 0) + 
-             (entry.feedback.pitch_variation || 0);
+      const clarity = entry.feedback?.articulation_clarity || 0;
+      const pace = entry.feedback?.speech_pace || 0;
+      const tone = entry.feedback?.pitch_variation || 0;
+      return sum + clarity + pace + tone;
     }, 0) / (older.length * 3);
 
     const difference = recentAvg - olderAvg;
-    
+
     if (difference > 0.2) return 'improving';
     if (difference < -0.2) return 'declining';
     return 'stable';

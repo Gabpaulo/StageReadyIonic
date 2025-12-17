@@ -38,4 +38,19 @@ export class DashboardPage implements OnInit {
         .slice(0, 3);
     });
   }
+
+  getBadgeIconPath(icon: string): string {
+    if (!icon) {
+      return 'assets/badges/first-step.svg';
+    }
+    if (icon.startsWith('/')) {
+      return icon;
+    }
+    return '/' + icon;
+  }
+
+  onImageError(event: any): void {
+    console.error('Badge icon failed to load:', event.target.src);
+    event.target.src = '/assets/badges/first-step.svg';
+  }
 }

@@ -109,7 +109,7 @@ export class SpeechAnalysisPage implements OnDestroy {
           // Save speech history (without audio blob)
           await this.firebaseService.saveSpeechHistory(user.uid, {
             feedback: feedback,
-            duration: this.audioBlob ? this.audioBlob.size / 1000 : 0, // rough duration estimate
+            duration: feedback.duration || 0, // Use duration from backend (in seconds)
             audioBlob: this.audioBlob,
             speechType: this.speechType
           });

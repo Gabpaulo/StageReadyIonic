@@ -17,7 +17,7 @@
         <p class="slide-description">{{ slide.description }}</p>
         
         <div class="button-container" *ngIf="i === onboardingSlides.length - 1">
-          <ion-button expand="block" routerLink="/home">Get Started</ion-button>
+          <ion-button expand="block" (click)="completeOnboarding()">Get Started</ion-button>
         </div>
       </div>
     </swiper-slide>

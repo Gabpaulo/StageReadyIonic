@@ -1,4 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Router } from '@angular/router';
+import { OnboardingService } from '../../services/onboarding.service';
+import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
   selector: 'app-onboarding',
@@ -22,8 +25,8 @@ export class OnboardingPage implements OnInit {
     },
     {
       image: 'assets/onboarding/shineonstage.svg',
-      title: 'Track Your Progress',
-      description: 'Monitor your growth and fine-tune your routine.',
+      title: 'Practice Makes Perfect',
+      description: 'Record and analyze your speeches to improve.',
     },
     {
       image: 'assets/onboarding/shineonstage.svg',
@@ -34,7 +37,12 @@ export class OnboardingPage implements OnInit {
 
   isLastSlide = false;
 
-  constructor(private ngZone: NgZone) {}
+  constructor(
+    private ngZone: NgZone,
+    private router: Router,
+    private onboardingService: OnboardingService,
+    private firebaseService: FirebaseService
+  ) {}
 
   ngOnInit() {}
 
@@ -48,5 +56,18 @@ export class OnboardingPage implements OnInit {
   nextSlide() {
     const swiperEl = this.swiperElRef.nativeElement;
     swiperEl.swiper.slideNext();
+  }
+
+  async completeOnboarding() {
+    // Mark onboarding as completed
+    this.onboardingService.setOnboardingCompleted();
+
+    // Check if user needs to set up profile
+    const user = this.firebaseService.auth.currentUser;
+    if (user && !(await this.firebaseService.userProfileExists(user.uid))) {
+      this.router.navigate(['/setup-profile']);
+    } else {
+      this.router.navigate(['/ionic/dashboard']);
+    }
   }
 }

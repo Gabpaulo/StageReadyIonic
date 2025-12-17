@@ -31,4 +31,21 @@ export class BadgesPage implements OnInit {
       .sort((a, b) => new Date(b.unlockedAt!).getTime() - new Date(a.unlockedAt!).getTime())
       .slice(0, 3);
   }
+
+  getBadgeIconPath(icon: string): string {
+    if (!icon) {
+      return 'assets/badges/first-step.svg';
+    }
+    // Ensure path starts with / for absolute path from root
+    if (icon.startsWith('/')) {
+      return icon;
+    }
+    return '/' + icon;
+  }
+
+  onImageError(event: any): void {
+    console.error('Badge icon failed to load:', event.target.src);
+    // Fallback to default badge icon
+    event.target.src = '/assets/badges/first-step.svg';
+  }
 }

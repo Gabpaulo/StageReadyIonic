@@ -32,15 +32,22 @@ export class SpeechHistoryPage implements OnInit {
   async loadSpeechHistory() {
     this.loading = true;
     this.error = null;
-    
+
     try {
-      const user = this.firebaseService.auth.currentUser;
+      // Wait for auth state to be ready
+      const user = await new Promise<any>((resolve) => {
+        const unsubscribe = this.firebaseService.auth.onAuthStateChanged((user) => {
+          unsubscribe();
+          resolve(user);
+        });
+      });
+
       if (user) {
         const [history, summary] = await Promise.all([
           this.firebaseService.getSpeechHistory(user.uid),
           this.firebaseService.getSpeechHistorySummary(user.uid)
         ]);
-        
+
         this.speechHistory = history;
         this.summary = summary;
       } else {
@@ -97,9 +104,25 @@ export class SpeechHistoryPage implements OnInit {
 
   formatDuration(seconds: number): string {
     const totalSeconds = Math.floor(seconds || 0);
-    const minutes = Math.floor(totalSeconds / 60);
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
     const remainingSeconds = totalSeconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+
+    // Build the duration string with labels
+    const parts = [];
+
+    if (hours > 0) {
+      parts.push(`${hours}h`);
+    }
+
+    if (minutes > 0 || hours > 0) {
+      parts.push(`${minutes}m`);
+    }
+
+    parts.push(`${remainingSeconds}s`);
+
+    return parts.join(' ');
   }
 
   formatDate(date: Date): string {
@@ -113,9 +136,9 @@ export class SpeechHistoryPage implements OnInit {
   }
 
   getAverageRating(entry: SpeechHistoryEntry): number {
-    const clarity = entry.feedback.articulation_clarity || 0;
-    const pace = entry.feedback.speech_pace || 0;
-    const tone = entry.feedback.pitch_variation || 0;
+    const clarity = entry.feedback?.articulation_clarity || 0;
+    const pace = entry.feedback?.speech_pace || 0;
+    const tone = entry.feedback?.pitch_variation || 0;
     return (clarity + pace + tone) / 3;
   }
 

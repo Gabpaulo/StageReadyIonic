@@ -40,7 +40,8 @@
     <ion-card-content>
       <div class="recent-badges-grid">
         <div *ngFor="let badge of recentBadges" class="badge-preview">
-          <ion-icon [name]="badge.icon" class="badge-icon"></ion-icon>
+          <img [src]="getBadgeIconPath(badge.icon)" [alt]="badge.name" class="badge-icon"
+               (error)="onImageError($event)">
           <div class="badge-info">
             <h4>{{ badge.name }}</h4>
             <p>{{ badge.description }}</p>

@@ -49,7 +49,7 @@ export class SetupProfilePage {
       email: user.email || ''
     };
     await this.firebaseService.createUserProfile(user.uid, profileData);
-    this.router.navigate(['/tabs/dashboard']);
+    this.router.navigate(['/ionic/dashboard']);
   }
 
   onInterestsChange() {
@@ -58,5 +58,5 @@ export class SetupProfilePage {
     .map(tag => tag.trim())
     .filter(tag => tag.length > 0);
   }
-  
+
 }

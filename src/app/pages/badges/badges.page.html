@@ -35,7 +35,8 @@
       <div class="recent-badges-container">
         <div *ngFor="let badge of recentBadges" class="badge-chip-with-desc">
           <div class="badge-chip-header">
-            <ion-icon [name]="badge.icon" class="badge-chip-icon"></ion-icon>
+            <img [src]="getBadgeIconPath(badge.icon)" [alt]="badge.name" class="badge-chip-image"
+                 (error)="onImageError($event)">
             <span class="badge-chip-name">{{ badge.name }}</span>
           </div>
           <p class="badge-chip-desc">{{ badge.description }}</p>
@@ -49,7 +50,8 @@
       <div class="badges-container">
         <div *ngFor="let badge of unlockedBadges" class="badge-chip-with-desc">
           <div class="badge-chip-header">
-            <ion-icon [name]="badge.icon" class="badge-chip-icon"></ion-icon>
+            <img [src]="getBadgeIconPath(badge.icon)" [alt]="badge.name" class="badge-chip-image"
+                 (error)="onImageError($event)">
             <span class="badge-chip-name">{{ badge.name }}</span>
           </div>
           <p class="badge-chip-desc">{{ badge.description }}</p>

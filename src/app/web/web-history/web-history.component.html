@@ -133,19 +133,19 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="feedback-card">
+    <mat-card class="feedback-card" *ngIf="selectedEntry.feedback">
       <mat-card-header>
         <mat-card-title>Feedback</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <div class="feedback-item">
-          <strong>Clarity:</strong> {{ selectedEntry.feedback.articulation_clarity }}
+          <strong>Clarity:</strong> {{ selectedEntry.feedback?.articulation_clarity || 'N/A' }}
         </div>
         <div class="feedback-item">
-          <strong>Pace:</strong> {{ selectedEntry.feedback.speech_pace }}
+          <strong>Pace:</strong> {{ selectedEntry.feedback?.speech_pace || 'N/A' }}
         </div>
         <div class="feedback-item">
-          <strong>Tone:</strong> {{ selectedEntry.feedback.pitch_variation }}
+          <strong>Tone:</strong> {{ selectedEntry.feedback?.pitch_variation || 'N/A' }}
         </div>
       </mat-card-content>
     </mat-card>

@@ -6,6 +6,7 @@ import {
 import { ToastController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
+import { OnboardingService } from '../services/onboarding.service';
 
 @Component({
   selector: 'app-home',
@@ -24,7 +25,8 @@ export class HomePage {
     private toastController: ToastController,
     private router: Router,
     private route: ActivatedRoute,
-    private firebaseService: FirebaseService 
+    private firebaseService: FirebaseService,
+    private onboardingService: OnboardingService
   ) {
     // Get returnUrl from query parameters
     this.route.queryParams.subscribe(params => {
@@ -55,7 +57,11 @@ export class HomePage {
         color: 'success',
       });
       await toast.present();
-      if (!(await this.firebaseService.userProfileExists(user.uid))) {
+
+      // Check if user needs onboarding
+      if (!this.onboardingService.hasCompletedOnboarding()) {
+        this.router.navigate(['/onboarding']);
+      } else if (!(await this.firebaseService.userProfileExists(user.uid))) {
         this.router.navigate(['/setup-profile']);
       } else {
         // Redirect to returnUrl or default dashboard
@@ -126,8 +132,11 @@ export class HomePage {
         color: 'success',
       });
       await toast.present();
-  
-      if (isNewGoogleUser) {
+
+      // Check if user needs onboarding
+      if (!this.onboardingService.hasCompletedOnboarding()) {
+        this.router.navigate(['/onboarding']);
+      } else if (isNewGoogleUser) {
         await this.firebaseService.createUserProfile(user.uid, {
           email: user.email,
           displayName: user.displayName || '',
