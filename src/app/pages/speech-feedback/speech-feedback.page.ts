@@ -45,11 +45,21 @@ export class SpeechFeedbackPage implements OnInit {
     return numValue.toFixed(1);
   }
 
-  get fillerWordsFeedback(): string {
-    // You might want to generate a more dynamic feedback based on filler_words_score or filler_words array
-    if (this.feedback.filler_words && this.feedback.filler_words.length > 0) {
-      return `You used ${this.feedback.filler_words.length} filler words. Try to reduce them for better fluency.`;
+  getDetailedScores(): Array<{key: string, value: any}> {
+    if (!this.feedback.feedback?.detailed_scores) {
+      return [];
     }
-    return 'Great job! No filler words detected.';
+    const detailedScores = this.feedback.feedback.detailed_scores;
+    return Object.keys(detailedScores).map(key => ({
+      key,
+      value: detailedScores[key]
+    }));
+  }
+
+  formatMetricName(key: string): string {
+    // Convert snake_case to Title Case
+    return key.split('_').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   }
 }

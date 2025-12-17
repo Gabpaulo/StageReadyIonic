@@ -187,16 +187,25 @@ export class BadgeService {
   }
 
   private getRatingFromFeedback(feedback: AnalyzeSpeechForFeedbackOutput, ratingType: string): string {
+    // Handle new backend response structure where feedback fields may not exist
     switch (ratingType) {
       case 'clarity':
-        return feedback.clarity_feedback.toLowerCase();
+        return feedback.clarity_feedback?.toLowerCase() || this.scoreToRating(feedback.articulation_clarity);
       case 'pace':
-        return feedback.pace_feedback.toLowerCase();
+        return feedback.pace_feedback?.toLowerCase() || this.scoreToRating(feedback.speech_pace);
       case 'tone':
-        return feedback.tone_feedback.toLowerCase();
+        return feedback.tone_feedback?.toLowerCase() || this.scoreToRating(feedback.pitch_variation);
       default:
         return 'fair';
     }
+  }
+
+  private scoreToRating(score: number | undefined): string {
+    if (!score) return 'fair';
+    if (score >= 4) return 'excellent';
+    if (score >= 3) return 'good';
+    if (score >= 2) return 'fair';
+    return 'poor';
   }
 
   private async updateBadgeProgress(badge: Badge, eventType: string, data?: any): Promise<void> {

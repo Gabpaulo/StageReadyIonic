@@ -8,14 +8,14 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class SpeechAnalysisApiService {
-  private apiUrl = environment.backendApiUrl + '/analyze/'; // http://localhost:8000/api/analyze/
+  private apiUrl = environment.backendApiUrl + '/speech-analysis/analyze/'; // http://localhost:8000/api/speech-analysis/analyze/
 
   constructor(private http: HttpClient) { }
 
   analyzeSpeech(audioBlob: Blob, category: string): Observable<any> {
     const formData = new FormData();
-    // Use the actual blob type or default to webm
-    const fileName = `speech.${audioBlob.type?.split('/')[1] || 'webm'}`;
+    // Use the actual blob type or default to wav
+    const fileName = `speech.${audioBlob.type?.split('/')[1] || 'wav'}`;
     formData.append('audio_file', audioBlob, fileName);
     formData.append('category', category);
 

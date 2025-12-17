@@ -26,10 +26,20 @@ export class AudioRecorderService {
         this.audioChunks.push(e.data);
       };
 
-      this.mediaRecorder.onstop = () => {
+      this.mediaRecorder.onstop = async () => {
         console.log('MediaRecorder stopped. Chunks:', this.audioChunks);
-        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-        this.audioBlob$.next(audioBlob);
+        const webmBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+
+        // Convert WebM to WAV
+        try {
+          const wavBlob = await this.convertToWav(webmBlob);
+          this.audioBlob$.next(wavBlob);
+        } catch (error) {
+          console.error('Error converting to WAV:', error);
+          // Fallback to WebM if conversion fails
+          this.audioBlob$.next(webmBlob);
+        }
+
         this.stopStream();
       };
 
@@ -78,5 +88,81 @@ export class AudioRecorderService {
       this.stream.getTracks().forEach(t => t.stop());
       this.stream = null;
     }
+  }
+
+  /** Convert audio blob to WAV format using Web Audio API */
+  private async convertToWav(blob: Blob): Promise<Blob> {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioContext = new AudioContext();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    // Convert AudioBuffer to WAV
+    const wavBuffer = this.audioBufferToWav(audioBuffer);
+    return new Blob([wavBuffer], { type: 'audio/wav' });
+  }
+
+  /** Convert AudioBuffer to WAV format */
+  private audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
+    const length = buffer.length * buffer.numberOfChannels * 2 + 44;
+    const arrayBuffer = new ArrayBuffer(length);
+    const view = new DataView(arrayBuffer);
+    const channels: Float32Array[] = [];
+    let offset = 0;
+    let pos = 0;
+
+    // Write WAV header
+    const setUint16 = (data: number) => {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    };
+
+    const setUint32 = (data: number) => {
+      view.setUint32(pos, data, true);
+      pos += 4;
+    };
+
+    // RIFF identifier
+    setUint32(0x46464952);
+    // file length minus RIFF identifier length and file description length
+    setUint32(length - 8);
+    // RIFF type
+    setUint32(0x45564157);
+    // format chunk identifier
+    setUint32(0x20746d66);
+    // format chunk length
+    setUint32(16);
+    // sample format (raw)
+    setUint16(1);
+    // channel count
+    setUint16(buffer.numberOfChannels);
+    // sample rate
+    setUint32(buffer.sampleRate);
+    // byte rate (sample rate * block align)
+    setUint32(buffer.sampleRate * buffer.numberOfChannels * 2);
+    // block align (channel count * bytes per sample)
+    setUint16(buffer.numberOfChannels * 2);
+    // bits per sample
+    setUint16(16);
+    // data chunk identifier
+    setUint32(0x61746164);
+    // data chunk length
+    setUint32(length - pos - 4);
+
+    // Get audio data from all channels
+    for (let i = 0; i < buffer.numberOfChannels; i++) {
+      channels.push(buffer.getChannelData(i));
+    }
+
+    // Interleave channels and write to buffer
+    offset = pos;
+    for (let i = 0; i < buffer.length; i++) {
+      for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+        const sample = Math.max(-1, Math.min(1, channels[channel][i]));
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+        offset += 2;
+      }
+    }
+
+    return arrayBuffer;
   }
 }

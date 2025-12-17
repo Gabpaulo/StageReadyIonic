@@ -217,11 +217,12 @@ export class FirebaseService {
   // Speech History Methods
   async saveSpeechHistory(uid: string, speechData: any): Promise<void> {
     const historyRef = doc(collection(this.firestore, `users/${uid}/speechHistory`));
-    
+
     // Calculate additional metrics
-    const wordCount = speechData.feedback.transcript.split(' ').length;
+    const transcript = speechData.feedback?.transcript || speechData.transcript || '[Transcript not available]';
+    const wordCount = transcript !== '[Transcript not available]' ? transcript.split(' ').length : 0;
     const duration = speechData.duration || 0; // in seconds
-    const averagePace = duration > 0 ? (wordCount / duration) * 60 : 0; // words per minute
+    const averagePace = duration > 0 && wordCount > 0 ? (wordCount / duration) * 60 : 0; // words per minute
     // Optional audio support via Storage
     let audioUrl: string | undefined;
     let audioData: string | undefined; // legacy fallback
@@ -234,27 +235,28 @@ export class FirebaseService {
       audioMimeType = speechData.audioBlob.type;
     }
     
+    // The backend response structure is:
+    // { speech_pace, pausing_fluency, loudness_control, pitch_variation,
+    //   articulation_clarity, expressive_emphasis, filler_words, overall,
+    //   feedback: {...}, recommendations: [...] }
+
     const baseEntry: any = {
       id: historyRef.id,
       userId: uid,
-      transcript: speechData.feedback.transcript,
-      speechType: speechData.speechType,
-      feedback: {
-        speech_pace: speechData.feedback.speech_pace,
-        pausing_fluency: speechData.feedback.pausing_fluency,
-        loud_control: speechData.feedback.loud_control,
-        pitch_variation: speechData.feedback.pitch_variation,
-        articulation_clarity: speechData.feedback.articulation_clarity,
-        expressive_emph: speechData.feedback.expressive_emph,
-        filler_words_score: speechData.feedback.filler_words_score,
-        overall: speechData.feedback.overall,
-        pace_feedback: speechData.feedback.pace_feedback,
-        tone_feedback: speechData.feedback.tone_feedback,
-        clarity_feedback: speechData.feedback.clarity_feedback,
-        strengths: speechData.feedback.strengths,
-        areas_improvement: speechData.feedback.areas_improvement,
-        filler_words: speechData.feedback.filler_words
+      transcript: transcript,
+      speechType: speechData.speechType || 'general',
+      scores: {
+        speech_pace: speechData.feedback?.speech_pace || 0,
+        pausing_fluency: speechData.feedback?.pausing_fluency || 0,
+        loudness_control: speechData.feedback?.loudness_control || 0,
+        pitch_variation: speechData.feedback?.pitch_variation || 0,
+        articulation_clarity: speechData.feedback?.articulation_clarity || 0,
+        expressive_emphasis: speechData.feedback?.expressive_emphasis || 0,
+        filler_words: speechData.feedback?.filler_words || 0,
+        overall: speechData.feedback?.overall || 0
       },
+      feedbackDetails: speechData.feedback?.feedback || {},
+      recommendations: speechData.feedback?.recommendations || [],
       createdAt: new Date(),
       duration: duration,
       wordCount: wordCount,

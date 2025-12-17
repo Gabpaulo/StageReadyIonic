@@ -7,16 +7,16 @@
 
 <ion-content class="custom-content">
   <!-- Category and Duration -->
-  <div class="feedback-card category-card">
+  <div class="feedback-card category-card" *ngIf="feedback.category || feedback.duration">
     <div class="card-header">
       <ion-icon name="pricetag" class="card-icon"></ion-icon>
       <h3>Category: {{ feedback.category | titlecase }}</h3>
     </div>
-    <p>Duration: {{ feedback.duration | number:'1.1-1' }} seconds</p>
+    <p *ngIf="feedback.duration">Duration: {{ feedback.duration | number:'1.1-1' }} seconds</p>
   </div>
 
   <!-- Transcription -->
-  <div class="feedback-card transcript-card">
+  <div class="feedback-card transcript-card" *ngIf="feedback.transcript">
     <div class="card-header">
       <ion-icon name="document-text" class="card-icon"></ion-icon>
       <h3>Transcription</h3>
@@ -47,7 +47,7 @@
       </div>
       <div class="score-item">
         <div class="score-label">Volume Control</div>
-        <div class="score-number">{{ feedback.loud_control }}/5</div>
+        <div class="score-number">{{ feedback.loudness_control || feedback.loud_control }}/5</div>
       </div>
       <div class="score-item">
         <div class="score-label">Pitch Variation</div>
@@ -59,46 +59,45 @@
       </div>
       <div class="score-item">
         <div class="score-label">Expression</div>
-        <div class="score-number">{{ feedback.expressive_emph }}/5</div>
+        <div class="score-number">{{ feedback.expressive_emphasis || feedback.expressive_emph }}/5</div>
       </div>
       <div class="score-item">
         <div class="score-label">Filler Words</div>
-        <div class="score-number">{{ feedback.filler_words_score }}/5</div>
+        <div class="score-number">{{ feedback.filler_words || feedback.filler_words_score }}/5</div>
       </div>
     </div>
   </div>
 
-  <!-- Analysis Grid -->
-  <div class="analysis-grid">
-    <div class="analysis-card">
-      <div class="card-header">
-        <ion-icon name="speedometer" class="card-icon"></ion-icon>
-        <h4>Pace</h4>
-      </div>
-      <div class="score-circle">
-        <div class="score-value">{{ feedback.speech_pace }}/5</div>
-      </div>
-      <p class="feedback-text">{{ feedback.pace_feedback }}</p>
+  <!-- Recommendations -->
+  <div class="feedback-card recommendations-card" *ngIf="feedback.recommendations && feedback.recommendations.length > 0">
+    <div class="card-header">
+      <ion-icon name="bulb" class="card-icon"></ion-icon>
+      <h3>Recommendations</h3>
     </div>
-    <div class="analysis-card">
-      <div class="card-header">
-        <ion-icon name="musical-notes" class="card-icon"></ion-icon>
-        <h4>Tone</h4>
+    <div class="recommendations-list">
+      <div class="recommendation-item" *ngFor="let rec of feedback.recommendations">
+        <div class="rec-category">{{ rec.category }}</div>
+        <div class="rec-issue">{{ rec.issue }}</div>
+        <div class="rec-suggestion">{{ rec.suggestion }}</div>
       </div>
-      <div class="score-circle">
-        <div class="score-value">{{ feedback.expressive_emph }}/5</div>
-      </div>
-      <p class="feedback-text">{{ feedback.tone_feedback }}</p>
     </div>
-    <div class="analysis-card">
-      <div class="card-header">
-        <ion-icon name="eye" class="card-icon"></ion-icon>
-        <h4>Clarity</h4>
+  </div>
+
+  <!-- Detailed Feedback -->
+  <div class="feedback-card detailed-feedback-card" *ngIf="feedback.feedback">
+    <div class="card-header">
+      <ion-icon name="analytics" class="card-icon"></ion-icon>
+      <h3>Detailed Analysis</h3>
+    </div>
+    <div class="overall-assessment" *ngIf="feedback.feedback.overall_assessment">
+      <strong>Overall:</strong> {{ feedback.feedback.overall_assessment }}
+    </div>
+    <div class="detailed-scores" *ngIf="feedback.feedback.detailed_scores">
+      <div class="detail-item" *ngFor="let item of getDetailedScores()">
+        <div class="detail-label">{{ formatMetricName(item.key) }}</div>
+        <div class="detail-score">{{ item.value.score }}/5</div>
+        <div class="detail-desc">{{ item.value.description }}</div>
       </div>
-      <div class="score-circle">
-        <div class="score-value">{{ feedback.articulation_clarity }}/5</div>
-      </div>
-      <p class="feedback-text">{{ feedback.clarity_feedback }}</p>
     </div>
   </div>
 
@@ -121,23 +120,6 @@
     </div>
   </div>
 
-  <!-- Filler Words -->
-  <div class="feedback-card filler-words-card">
-    <div class="card-header">
-      <ion-icon name="warning" class="card-icon"></ion-icon>
-      <h3>Filler Words</h3>
-    </div>
-    <p class="filler-feedback">{{ fillerWordsFeedback }}</p>
-    <div class="filler-list" *ngIf="feedback.filler_words && feedback.filler_words.length > 0">
-      <div class="filler-item" *ngFor="let w of feedback.filler_words; let i = index">
-        <span class="filler-word">{{ w.word }}</span>
-        <span class="filler-time">{{ formatTimestamp(w.start_time || 0) }}s</span>
-      </div>
-    </div>
-    <p *ngIf="!feedback.filler_words || feedback.filler_words.length === 0" class="no-fillers">
-      Great job! No filler words detected.
-    </p>
-  </div>
 
   <!-- Try Again Button -->
   <ion-button class="try-again-button" expand="block" (click)="tryAgain()">

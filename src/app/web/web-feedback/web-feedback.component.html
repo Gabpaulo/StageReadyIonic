@@ -146,17 +146,14 @@
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <p class="filler-feedback" *ngIf="feedback.filler_words.length > 0">
-        You used {{ feedback.filler_words.length }} filler words. Try to reduce them for better fluency.
+      <p class="filler-feedback">
+        Filler Words Score: {{ feedback.filler_words || feedback.filler_words_score || 0 }}/5
       </p>
-      <div class="filler-list" *ngIf="feedback.filler_words.length > 0">
-        <div class="filler-item" *ngFor="let w of feedback.filler_words; let i = index">
-          <span class="filler-word">{{ w.word }}</span>
-          <span class="filler-time">{{ formatTimestamp(w.start_time || 0) }}s</span>
-        </div>
-      </div>
-      <p *ngIf="feedback.filler_words.length === 0" class="no-fillers">
-        Great job! No filler words detected.
+      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) >= 4" class="no-fillers">
+        Great job! Minimal filler words detected.
+      </p>
+      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) < 4" class="needs-improvement">
+        Try to reduce filler words for better fluency.
       </p>
     </mat-card-content>
   </mat-card>
