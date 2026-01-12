@@ -12,12 +12,12 @@
       <ion-card-content>
         <ion-item class="full-width">
           <ion-label position="floating">Email</ion-label>
-          <ion-input [(ngModel)]="email" type="email" placeholder="Enter your email"></ion-input>
+          <ion-input [(ngModel)]="email" type="email"></ion-input>
         </ion-item>
-        
+
         <ion-item class="full-width">
           <ion-label position="floating">Password</ion-label>
-          <ion-input [(ngModel)]="password" type="password" placeholder="Enter your password"></ion-input>
+          <ion-input [(ngModel)]="password" type="password"></ion-input>
         </ion-item>
         
         <ion-button expand="block" (click)="signIn()" class="login-btn">
@@ -44,17 +44,17 @@
       <ion-card-content>
         <ion-item class="full-width">
           <ion-label position="floating">Email</ion-label>
-          <ion-input [(ngModel)]="email" type="email" placeholder="Enter your email"></ion-input>
+          <ion-input [(ngModel)]="email" type="email"></ion-input>
         </ion-item>
-        
+
         <ion-item class="full-width">
           <ion-label position="floating">Password</ion-label>
-          <ion-input [(ngModel)]="password" type="password" placeholder="Enter your password"></ion-input>
+          <ion-input [(ngModel)]="password" type="password"></ion-input>
         </ion-item>
-        
+
         <ion-item class="full-width">
           <ion-label position="floating">Confirm Password</ion-label>
-          <ion-input [(ngModel)]="confirmPassword" type="password" placeholder="Re-enter your password"></ion-input>
+          <ion-input [(ngModel)]="confirmPassword" type="password"></ion-input>
         </ion-item>
         
         <p *ngIf="password && confirmPassword && password !== confirmPassword" class="error-text">

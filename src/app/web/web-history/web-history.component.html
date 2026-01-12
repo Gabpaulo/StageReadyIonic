@@ -75,7 +75,7 @@
 
   <!-- Empty State -->
   <div *ngIf="speechHistory.length === 0 && !loading && !error" class="empty-state">
-    <img [src]="userPhotoURL || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'" 
+    <img [src]="userPhotoURL || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'"
          alt="Profile picture" class="empty-image">
     <h3>No Speech History Yet</h3>
     <p>Start practicing to see your speech analysis history here!</p>
@@ -84,70 +84,3 @@
     </button>
   </div>
 </div>
-
-<!-- Session Details Dialog -->
-<mat-dialog-content *ngIf="selectedEntry && isModalOpen">
-  <div *ngIf="modalLoading" class="loading-state" style="padding: 16px;">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading session...</p>
-  </div>
-
-  <div *ngIf="modalError && !modalLoading" class="error-state" style="padding: 16px;">
-    <div class="error-icon">⚠</div>
-    <p>{{ modalError }}</p>
-  </div>
-
-  <div *ngIf="!modalLoading && !modalError">
-    <mat-list>
-      <mat-list-item>
-        <div matListItemIcon class="schedule-icon">🕒</div>
-        <div matListItemTitle>{{ formatDate(selectedEntry.createdAt) }}</div>
-        <div matListItemLine *ngIf="selectedEntry.duration">Duration: {{ formatDuration(selectedEntry.duration) }}</div>
-        <div matListItemLine *ngIf="selectedEntry.wordCount">Words: {{ selectedEntry.wordCount }}</div>
-        <div matListItemLine *ngIf="selectedEntry.averagePace">Pace: {{ formatInteger(selectedEntry.averagePace) }} WPM</div>
-      </mat-list-item>
-    </mat-list>
-
-    <mat-card *ngIf="(selectedEntry.audioUrl || selectedEntry.audioData)" class="audio-card">
-      <mat-card-header>
-        <mat-card-title>Playback</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <audio *ngIf="selectedEntry.audioUrl"
-               [src]="selectedEntry.audioUrl"
-               controls
-               style="width: 100%;"></audio>
-        <audio *ngIf="!selectedEntry.audioUrl && selectedEntry.audioData"
-               [src]="'data:' + (selectedEntry.audioMimeType || 'audio/webm') + ';base64,' + selectedEntry.audioData"
-               controls
-               style="width: 100%;"></audio>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="transcript-card">
-      <mat-card-header>
-        <mat-card-title>Transcript</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        {{ selectedEntry.transcript }}
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="feedback-card" *ngIf="selectedEntry.feedback">
-      <mat-card-header>
-        <mat-card-title>Feedback</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="feedback-item">
-          <strong>Clarity:</strong> {{ selectedEntry.feedback?.articulation_clarity || 'N/A' }}
-        </div>
-        <div class="feedback-item">
-          <strong>Pace:</strong> {{ selectedEntry.feedback?.speech_pace || 'N/A' }}
-        </div>
-        <div class="feedback-item">
-          <strong>Tone:</strong> {{ selectedEntry.feedback?.pitch_variation || 'N/A' }}
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-</mat-dialog-content>

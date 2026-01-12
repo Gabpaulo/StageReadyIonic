@@ -1,7 +1,113 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FirebaseService } from '../../services/firebase.service';
 import { SpeechHistoryEntry, SpeechHistorySummary } from '../../models/speech-history.model';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+
+@Component({
+  selector: 'app-session-details-dialog',
+  template: `
+    <h2 mat-dialog-title>Session Details</h2>
+    <mat-dialog-content>
+      <div *ngIf="data.loading" class="loading-state" style="padding: 16px;">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading session...</p>
+      </div>
+
+      <div *ngIf="data.error && !data.loading" class="error-state" style="padding: 16px;">
+        <div class="error-icon">⚠</div>
+        <p>{{ data.error }}</p>
+      </div>
+
+      <div *ngIf="!data.loading && !data.error">
+        <mat-list>
+          <mat-list-item>
+            <div matListItemIcon class="schedule-icon">🕒</div>
+            <div matListItemTitle>{{ formatDate(data.entry.createdAt) }}</div>
+            <div matListItemLine *ngIf="data.entry.duration">Duration: {{ formatDuration(data.entry.duration) }}</div>
+            <div matListItemLine *ngIf="data.entry.wordCount">Words: {{ data.entry.wordCount }}</div>
+            <div matListItemLine *ngIf="data.entry.averagePace">Pace: {{ formatInteger(data.entry.averagePace) }} WPM</div>
+          </mat-list-item>
+        </mat-list>
+
+        <mat-card *ngIf="(data.entry.audioUrl || data.entry.audioData)" class="audio-card" style="margin: 16px 0;">
+          <mat-card-header>
+            <mat-card-title>Playback</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <audio *ngIf="data.entry.audioUrl"
+                   [src]="data.entry.audioUrl"
+                   controls
+                   style="width: 100%;"></audio>
+            <audio *ngIf="!data.entry.audioUrl && data.entry.audioData"
+                   [src]="'data:' + (data.entry.audioMimeType || 'audio/webm') + ';base64,' + data.entry.audioData"
+                   controls
+                   style="width: 100%;"></audio>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="transcript-card" style="margin: 16px 0;">
+          <mat-card-header>
+            <mat-card-title>Transcript</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            {{ data.entry.transcript }}
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="feedback-card" *ngIf="data.entry.feedback" style="margin: 16px 0;">
+          <mat-card-header>
+            <mat-card-title>Feedback</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="feedback-item">
+              <strong>Clarity:</strong> {{ data.entry.feedback?.articulation_clarity || 'N/A' }}
+            </div>
+            <div class="feedback-item">
+              <strong>Pace:</strong> {{ data.entry.feedback?.speech_pace || 'N/A' }}
+            </div>
+            <div class="feedback-item">
+              <strong>Tone:</strong> {{ data.entry.feedback?.pitch_variation || 'N/A' }}
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+  `,
+  standalone: false
+})
+export class SessionDetailsDialogComponent {
+  constructor(
+    public dialogRef: MatDialogRef<SessionDetailsDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {}
+
+  formatDuration(seconds: number): string {
+    const totalSeconds = Math.floor(seconds || 0);
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  formatDate(date: Date): string {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  }
+
+  formatInteger(value: number | undefined | null): string {
+    if (value === undefined || value === null || isNaN(value)) {
+      return '0';
+    }
+    return Math.round(value).toString();
+  }
+}
 
 @Component({
   selector: 'app-web-history',
@@ -14,10 +120,6 @@ export class WebHistoryComponent implements OnInit {
   summary: SpeechHistorySummary | null = null;
   loading = true;
   error: string | null = null;
-  selectedEntry: SpeechHistoryEntry | null = null;
-  isModalOpen = false;
-  modalLoading = false;
-  modalError: string | null = null;
   userPhotoURL: string | null = null;
 
   constructor(
@@ -150,38 +252,54 @@ export class WebHistoryComponent implements OnInit {
   }
 
   async openSession(entry: SpeechHistoryEntry) {
-    this.modalError = null;
-    this.modalLoading = true;
-    this.selectedEntry = entry;
-    this.isModalOpen = true;
+    const dialogRef = this.dialog.open(SessionDetailsDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: {
+        entry: entry,
+        loading: true,
+        error: null
+      }
+    });
 
-    // If no embedded audio, try fetch from speeches collection nearest by time
+    // Load audio if needed
     if (!entry.audioData) {
       try {
         const user = this.firebaseService.auth.currentUser;
         if (user) {
           const nearest = await this.firebaseService.getNearestSpeechAudio(user.uid, entry.createdAt);
           if (nearest) {
-            this.selectedEntry = {
-              ...entry,
-              audioData: nearest.audioData,
-              audioMimeType: nearest.audioMimeType || 'audio/webm'
+            dialogRef.componentInstance.data = {
+              entry: {
+                ...entry,
+                audioData: nearest.audioData,
+                audioMimeType: nearest.audioMimeType || 'audio/webm'
+              },
+              loading: false,
+              error: null
+            };
+          } else {
+            dialogRef.componentInstance.data = {
+              entry: entry,
+              loading: false,
+              error: null
             };
           }
         }
       } catch (e) {
-        this.modalError = 'Failed to load audio for this session';
+        dialogRef.componentInstance.data = {
+          entry: entry,
+          loading: false,
+          error: 'Failed to load audio for this session'
+        };
       }
+    } else {
+      dialogRef.componentInstance.data = {
+        entry: entry,
+        loading: false,
+        error: null
+      };
     }
-
-    this.modalLoading = false;
-  }
-
-  closeModal() {
-    this.isModalOpen = false;
-    this.selectedEntry = null;
-    this.modalLoading = false;
-    this.modalError = null;
   }
 
   getProgressWidth(value: number | undefined | null): number {

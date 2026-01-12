@@ -28,6 +28,8 @@ export class AudioRecorderService {
 
       this.mediaRecorder.onstop = async () => {
         console.log('MediaRecorder stopped. Chunks:', this.audioChunks);
+        this.isRecording$.next(false);
+
         const webmBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
 
         // Convert WebM to WAV

@@ -20,22 +20,25 @@
         {{ isRecording ? '⏹' : '🎤' }}
       </button>
       
-      <p *ngIf="!hasConfirmedSpeechType" style="color: #9bb2c8; margin-top: 20px;">
-        <button 
-          (click)="openTypeDialog()" 
+      <p *ngIf="!hasConfirmedSpeechType && !isRecording" style="color: #9bb2c8; margin-top: 20px;">
+        <button
+          (click)="openTypeDialog()"
           style="background: transparent; border: 2px solid #22a7f0; color: #22a7f0; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem;"
         >
           Choose Speech Type First
         </button>
       </p>
-      
-      <p *ngIf="isRecording" style="color: #ef4444; margin-top: 20px; font-weight: 600;">
+
+      <p *ngIf="isRecording" style="color: #ef4444; margin-top: 20px; font-weight: 600; font-size: 1.2rem;">
         Recording... {{ formatDuration(recordingDuration) }}
       </p>
     </div>
 
     <div *ngIf="audioUrl && !isLoading" style="background: #1e2c3a; padding: 40px; border-radius: 16px; margin-top: 20px; border: 1px solid #2b3b4c;">
-      <h3 style="color: #e8f1f9; margin-bottom: 20px;">Audio Preview</h3>
+      <h3 style="color: #e8f1f9; margin-bottom: 10px;">Audio Preview</h3>
+      <p style="color: #9bb2c8; margin-bottom: 20px; font-size: 0.95rem;">
+        <span style="color: #22a7f0; font-weight: 600;">Duration:</span> {{ formatDuration(recordingDuration) }}
+      </p>
       <audio [src]="audioUrl" controls style="width: 100%; margin-bottom: 20px;"></audio>
       <div style="display: flex; gap: 16px; justify-content: center;">
         <button

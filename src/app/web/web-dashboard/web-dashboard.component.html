@@ -2,21 +2,34 @@
   <div class="welcome-section">
     <div class="welcome-content">
       <div class="welcome-text">
-        <h1>Welcome back, {{ firstName }}!</h1>
+        <h1>Welcome back, {{ firstName }}! 👋</h1>
         <p>Ready to improve your public speaking skills?</p>
+        <div class="level-badge">
+          <span class="level-label">Level {{ userLevel }}</span>
+          <span class="xp-label">{{ currentXP }} / {{ nextLevelXP }} XP</span>
+        </div>
+        <div class="xp-bar-container">
+          <div class="xp-bar">
+            <div class="xp-fill" [style.width.%]="xpPercentage"></div>
+          </div>
+        </div>
       </div>
       <div class="welcome-image">
-        <img [src]="userPhotoURL || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'" 
+        <img [src]="userPhotoURL || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'"
              alt="Profile picture" class="profile-avatar">
+        <div class="level-ring">{{ userLevel }}</div>
       </div>
     </div>
   </div>
 
   <!-- Stats Overview -->
   <div class="stats-grid">
-    <mat-card class="stat-card">
+    <mat-card class="stat-card pulse-card">
       <mat-card-content>
         <div class="stat-content">
+          <div class="stat-icon">
+            🎤
+          </div>
           <div class="stat-info">
             <h3>{{ badgeProgress.total }}</h3>
             <p>Total Speeches</p>
@@ -25,9 +38,12 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="stat-card">
+    <mat-card class="stat-card pulse-card">
       <mat-card-content>
         <div class="stat-content">
+          <div class="stat-icon">
+            🏆
+          </div>
           <div class="stat-info">
             <h3>{{ badgeProgress.unlocked }}</h3>
             <p>Badges Earned</p>
@@ -36,12 +52,29 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="stat-card">
+    <mat-card class="stat-card pulse-card">
       <mat-card-content>
         <div class="stat-content">
+          <div class="stat-icon">
+            🔥
+          </div>
+          <div class="stat-info">
+            <h3>{{ currentStreak }}</h3>
+            <p>Day Streak</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card pulse-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            ⭐
+          </div>
           <div class="stat-info">
             <h3>{{ badgeProgress.percentage }}%</h3>
-            <p>Progress</p>
+            <p>Completion</p>
           </div>
         </div>
       </mat-card-content>
@@ -49,10 +82,10 @@
   </div>
 
   <!-- Badge Progress Card -->
-  <mat-card *ngIf="badgeProgress.total > 0" class="badge-progress-card">
+  <mat-card *ngIf="badgeProgress.total > 0" class="badge-progress-card achievement-card">
     <mat-card-header>
       <mat-card-title>
-        Badge Progress
+        🏅 Achievement Progress
       </mat-card-title>
       <mat-card-subtitle>{{ badgeProgress.unlocked }} of {{ badgeProgress.total }} badges unlocked</mat-card-subtitle>
     </mat-card-header>
@@ -60,35 +93,38 @@
       <div class="progress-section">
         <div class="progress-bar-container">
           <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="badgeProgress.percentage"></div>
+            <div class="progress-fill" [style.width.%]="badgeProgress.percentage">
+              <div class="progress-shine"></div>
+            </div>
           </div>
           <span class="progress-text">{{ badgeProgress.percentage }}%</span>
         </div>
-        <button mat-stroked-button routerLink="/web/badges" class="view-badges-btn">
-          View All Badges
+        <button mat-raised-button routerLink="/web/badges" class="view-badges-btn">
+          🏆 View All Badges
         </button>
       </div>
     </mat-card-content>
   </mat-card>
 
   <!-- Recent Badges -->
-  <mat-card *ngIf="recentBadges.length > 0" class="recent-badges-card">
+  <mat-card *ngIf="recentBadges.length > 0" class="recent-badges-card achievement-card">
     <mat-card-header>
       <mat-card-title>
-        Recent Achievements
+        ✨ Recent Achievements
       </mat-card-title>
-      <mat-card-subtitle>Your latest accomplishments</mat-card-subtitle>
+      <mat-card-subtitle>Your latest accomplishments - keep up the great work!</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <div class="recent-badges-grid">
-        <div *ngFor="let badge of recentBadges" class="badge-preview">
+        <div *ngFor="let badge of recentBadges; let i = index" class="badge-preview achievement-item" [style.animation-delay.ms]="i * 100">
           <div class="badge-image">
             <img [src]="getBadgeIconPath(badge.icon)" class="badge-icon" [alt]="badge.name" (error)="onImageError($event)">
+            <div class="badge-glow"></div>
           </div>
           <div class="badge-info">
             <h4>{{ badge.name }}</h4>
             <p>{{ badge.description }}</p>
-            <span class="badge-date">{{ badge.unlockedAt | date:'short' }}</span>
+            <span class="badge-date">🎉 {{ badge.unlockedAt | date:'short' }}</span>
           </div>
         </div>
       </div>
@@ -99,30 +135,47 @@
   <mat-card class="quick-actions-card">
     <mat-card-header>
       <mat-card-title>
-        Quick Actions
+        🚀 Quick Actions
       </mat-card-title>
       <mat-card-subtitle>Start practicing or explore your progress</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <div class="action-buttons">
         <button mat-raised-button color="primary" routerLink="/web/analysis" class="action-btn primary-action">
+          <div class="action-icon">🎤</div>
           <div class="action-content">
             <span class="action-title">Start Speech Practice</span>
-            <span class="action-subtitle">Record and analyze your speech</span>
+            <span class="action-subtitle">+10 XP per session</span>
           </div>
         </button>
         <button mat-stroked-button routerLink="/web/history" class="action-btn">
+          <div class="action-icon">📊</div>
           <div class="action-content">
             <span class="action-title">View History</span>
-            <span class="action-subtitle">Review past speeches</span>
+            <span class="action-subtitle">Review your progress</span>
           </div>
         </button>
-        <button mat-stroked-button routerLink="/web/profile" class="action-btn">
+        <button mat-stroked-button routerLink="/web/badges" class="action-btn">
+          <div class="action-icon">🏆</div>
           <div class="action-content">
-            <span class="action-title">View Profile</span>
-            <span class="action-subtitle">Manage your account</span>
+            <span class="action-title">View Badges</span>
+            <span class="action-subtitle">Track achievements</span>
           </div>
         </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Daily Challenge -->
+  <mat-card class="daily-challenge-card">
+    <mat-card-content>
+      <div class="challenge-content">
+        <div class="challenge-icon">💪</div>
+        <div class="challenge-text">
+          <h3>Daily Challenge</h3>
+          <p>{{ dailyChallenge }}</p>
+          <div class="challenge-reward">+{{ dailyChallengeXP }} XP</div>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>
@@ -131,11 +184,10 @@
   <mat-card class="motivation-card">
     <mat-card-content>
       <div class="motivation-content">
-        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100&h=100&fit=crop" 
-             alt="Motivation" class="motivation-image">
+        <div class="quote-icon">💬</div>
         <div class="motivation-text">
-          <blockquote>"The way to get started is to quit talking and begin doing."</blockquote>
-          <cite>- Walt Disney</cite>
+          <blockquote>"{{ motivationalQuote }}"</blockquote>
+          <cite>- {{ quoteAuthor }}</cite>
         </div>
       </div>
     </mat-card-content>

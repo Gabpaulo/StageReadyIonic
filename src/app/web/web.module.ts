@@ -6,7 +6,7 @@ import { WebRoutingModule } from './web-routing.module';
 import { WebShellComponent } from './web-shell/web-shell.component';
 import { WebDashboardComponent } from './web-dashboard/web-dashboard.component';
 import { WebBadgesComponent } from './web-badges/web-badges.component';
-import { WebHistoryComponent } from './web-history/web-history.component';
+import { WebHistoryComponent, SessionDetailsDialogComponent } from './web-history/web-history.component';
 import { WebAnalysisComponent } from './web-analysis/web-analysis.component';
 import { WebFeedbackComponent } from './web-feedback/web-feedback.component';
 import { WebProfileComponent } from './web-profile/web-profile.component';
@@ -33,6 +33,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     WebDashboardComponent,
     WebBadgesComponent,
     WebHistoryComponent,
+    SessionDetailsDialogComponent,
     WebAnalysisComponent,
     WebFeedbackComponent,
     WebProfileComponent,

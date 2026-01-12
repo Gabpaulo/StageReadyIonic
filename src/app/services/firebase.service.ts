@@ -5,6 +5,7 @@ import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp, collection, qu
 import { environment } from '../../environments/environment';
 import { UserBadgeProgress } from '../models/badge.model';
 import { SpeechHistoryEntry, SpeechHistorySummary } from '../models/speech-history.model';
+import { UserGamification, DailyChallenge, DAILY_CHALLENGES, XP_REWARDS } from '../models/gamification.model';
 import { getStorage, FirebaseStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 @Injectable({ providedIn: 'root' })
@@ -452,5 +453,163 @@ export class FirebaseService {
     if (difference > 0.2) return 'improving';
     if (difference < -0.2) return 'declining';
     return 'stable';
+  }
+
+  // Gamification Methods
+  async getUserGamification(uid: string): Promise<UserGamification | null> {
+    if (!uid) return null;
+    const docRef = doc(this.firestore, `userGamification/${uid}`);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data() as any;
+
+      // Convert Firebase Timestamps to JavaScript Dates
+      return {
+        userId: data.userId,
+        level: data.level || 1,
+        currentXP: data.currentXP || 0,
+        totalXP: data.totalXP || 0,
+        currentStreak: data.currentStreak || 0,
+        longestStreak: data.longestStreak || 0,
+        lastActivityDate: data.lastActivityDate instanceof Timestamp
+          ? data.lastActivityDate.toDate()
+          : data.lastActivityDate,
+        dailyChallenge: {
+          challenge: data.dailyChallenge?.challenge || DAILY_CHALLENGES[0],
+          xpReward: data.dailyChallenge?.xpReward || XP_REWARDS.DAILY_CHALLENGE,
+          date: data.dailyChallenge?.date instanceof Timestamp
+            ? data.dailyChallenge.date.toDate()
+            : data.dailyChallenge?.date || new Date(),
+          completed: data.dailyChallenge?.completed || false
+        },
+        lastUpdated: data.lastUpdated instanceof Timestamp
+          ? data.lastUpdated.toDate()
+          : data.lastUpdated
+      };
+    }
+
+    return null;
+  }
+
+  async saveUserGamification(uid: string, gamification: UserGamification): Promise<void> {
+    const gamificationRef = doc(this.firestore, `userGamification/${uid}`);
+    await setDoc(gamificationRef, {
+      userId: gamification.userId,
+      level: gamification.level,
+      currentXP: gamification.currentXP,
+      totalXP: gamification.totalXP,
+      currentStreak: gamification.currentStreak,
+      longestStreak: gamification.longestStreak,
+      lastActivityDate: Timestamp.fromDate(gamification.lastActivityDate),
+      dailyChallenge: {
+        challenge: gamification.dailyChallenge.challenge,
+        xpReward: gamification.dailyChallenge.xpReward,
+        date: Timestamp.fromDate(gamification.dailyChallenge.date),
+        completed: gamification.dailyChallenge.completed
+      },
+      lastUpdated: Timestamp.now()
+    });
+  }
+
+  async initializeUserGamification(uid: string): Promise<UserGamification> {
+    const today = new Date();
+    const randomChallengeIndex = Math.floor(Math.random() * DAILY_CHALLENGES.length);
+
+    const gamification: UserGamification = {
+      userId: uid,
+      level: 1,
+      currentXP: 0,
+      totalXP: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      lastActivityDate: today,
+      dailyChallenge: {
+        challenge: DAILY_CHALLENGES[randomChallengeIndex],
+        xpReward: XP_REWARDS.DAILY_CHALLENGE,
+        date: today,
+        completed: false
+      },
+      lastUpdated: today
+    };
+
+    await this.saveUserGamification(uid, gamification);
+    return gamification;
+  }
+
+  async updateStreak(uid: string): Promise<{ currentStreak: number; isNewDay: boolean }> {
+    const gamification = await this.getUserGamification(uid);
+
+    if (!gamification) {
+      const initialized = await this.initializeUserGamification(uid);
+      return { currentStreak: 0, isNewDay: true };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastActivity = new Date(gamification.lastActivityDate);
+    lastActivity.setHours(0, 0, 0, 0);
+
+    const daysDiff = Math.floor((today.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+
+    let currentStreak = gamification.currentStreak;
+    let isNewDay = false;
+
+    if (daysDiff === 0) {
+      // Same day, no streak change
+      isNewDay = false;
+    } else if (daysDiff === 1) {
+      // Consecutive day
+      currentStreak += 1;
+      isNewDay = true;
+    } else {
+      // Streak broken
+      currentStreak = 1;
+      isNewDay = true;
+    }
+
+    const longestStreak = Math.max(gamification.longestStreak, currentStreak);
+
+    gamification.currentStreak = currentStreak;
+    gamification.longestStreak = longestStreak;
+    gamification.lastActivityDate = new Date();
+
+    await this.saveUserGamification(uid, gamification);
+
+    return { currentStreak, isNewDay };
+  }
+
+  async refreshDailyChallenge(uid: string): Promise<DailyChallenge> {
+    const gamification = await this.getUserGamification(uid);
+
+    if (!gamification) {
+      const initialized = await this.initializeUserGamification(uid);
+      return initialized.dailyChallenge;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const challengeDate = new Date(gamification.dailyChallenge.date);
+    challengeDate.setHours(0, 0, 0, 0);
+
+    // Check if it's a new day
+    if (today.getTime() > challengeDate.getTime()) {
+      const randomIndex = Math.floor(Math.random() * DAILY_CHALLENGES.length);
+      const newChallenge: DailyChallenge = {
+        challenge: DAILY_CHALLENGES[randomIndex],
+        xpReward: XP_REWARDS.DAILY_CHALLENGE,
+        date: today,
+        completed: false
+      };
+
+      gamification.dailyChallenge = newChallenge;
+      await this.saveUserGamification(uid, gamification);
+
+      return newChallenge;
+    }
+
+    return gamification.dailyChallenge;
   }
 }
