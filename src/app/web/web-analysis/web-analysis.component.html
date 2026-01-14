@@ -6,10 +6,10 @@
   </div>
 
   <div class="main-container">
-    <div style="background: #1e2c3a; padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #2b3b4c;">
+    <div *ngIf="!audioUrl && !isLoading" style="background: #1e2c3a; padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #2b3b4c;">
       <h2 style="color: #e8f1f9; margin-bottom: 20px;">Recording Interface</h2>
       <p style="color: #9bb2c8; margin-bottom: 30px;">Click the button below to start recording</p>
-      
+
       <button
         class="record-button"
         [class.stop-button]="isRecording"
@@ -19,7 +19,7 @@
       >
         {{ isRecording ? '⏹' : '🎤' }}
       </button>
-      
+
       <p *ngIf="!hasConfirmedSpeechType && !isRecording" style="color: #9bb2c8; margin-top: 20px;">
         <button
           (click)="openTypeDialog()"
@@ -58,14 +58,32 @@
       </div>
     </div>
 
-    <div *ngIf="isLoading" style="background: #1e2c3a; padding: 40px; border-radius: 16px; margin-top: 20px; text-align: center; border: 1px solid #2b3b4c;">
-      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
-        <div style="width: 12px; height: 12px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite;"></div>
-        <div style="width: 12px; height: 12px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.2s;"></div>
-        <div style="width: 12px; height: 12px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.4s;"></div>
+    <div *ngIf="isLoading" style="background: #1e2c3a; padding: 60px 40px; border-radius: 16px; margin-top: 20px; text-align: center; border: 1px solid #2b3b4c; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+      <!-- Animated microphone icon -->
+      <div style="margin-bottom: 30px;">
+        <div style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #22a7f0, #1b8fd3); border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite; box-shadow: 0 0 30px rgba(34, 167, 240, 0.5);">
+          <span style="font-size: 3rem;">🎤</span>
+        </div>
       </div>
-      <h3 style="color: #e8f1f9;">Analyzing your speech...</h3>
-      <p style="color: #9bb2c8;">This may take a few moments</p>
+
+      <!-- Progress dots -->
+      <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 30px;">
+        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite;"></div>
+        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.2s;"></div>
+        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.4s;"></div>
+      </div>
+
+      <!-- Loading text -->
+      <h2 style="color: #e8f1f9; margin-bottom: 15px; font-size: 1.8rem; font-weight: 600;">Analyzing Your Speech</h2>
+      <p style="color: #9bb2c8; font-size: 1.1rem; margin-bottom: 10px;">Our AI is processing your recording...</p>
+      <p style="color: #7a92a8; font-size: 0.95rem;">
+        <span style="animation: fadeInOut 2s infinite;">Extracting audio features</span>
+      </p>
+
+      <!-- Progress bar -->
+      <div style="width: 100%; max-width: 400px; height: 4px; background: #2b3b4c; border-radius: 2px; margin: 30px auto 0; overflow: hidden;">
+        <div style="height: 100%; background: linear-gradient(90deg, #1b8fd3, #22a7f0); animation: progressBar 2s ease-in-out infinite;"></div>
+      </div>
     </div>
   </div>
 </div>

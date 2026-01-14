@@ -11,6 +11,76 @@
     </ion-toolbar>
   </ion-header>
 
+  <!-- Level & XP Card -->
+  <ion-card class="level-card">
+    <ion-card-content>
+      <div class="level-section">
+        <div class="level-badge">
+          <span class="level-number">{{ userLevel }}</span>
+        </div>
+        <div class="level-info">
+          <h3>Level {{ userLevel }}</h3>
+          <p>{{ currentXP }} / {{ nextLevelXP }} XP</p>
+          <div class="xp-bar">
+            <div class="xp-fill" [style.width.%]="xpPercentage"></div>
+          </div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Stats Overview -->
+  <div class="stats-grid">
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <div class="stat-content">
+          <ion-icon name="mic" class="stat-icon"></ion-icon>
+          <div class="stat-info">
+            <h3>{{ totalSpeeches }}</h3>
+            <p>Speeches</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <div class="stat-content">
+          <ion-icon name="trophy" class="stat-icon"></ion-icon>
+          <div class="stat-info">
+            <h3>{{ badgeProgress.unlocked }}</h3>
+            <p>Badges</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <div class="stat-content">
+          <ion-icon name="flame" class="stat-icon"></ion-icon>
+          <div class="stat-info">
+            <h3>{{ currentStreak }}</h3>
+            <p>Day Streak</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Daily Challenge Card -->
+  <ion-card class="daily-challenge-card">
+    <ion-card-content>
+      <div class="challenge-content">
+        <ion-icon name="barbell" class="challenge-icon"></ion-icon>
+        <div class="challenge-text">
+          <h3>Daily Challenge</h3>
+          <p>{{ dailyChallenge }}</p>
+          <ion-badge color="success" class="challenge-reward">+{{ dailyChallengeXP }} XP</ion-badge>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
 
   <!-- Badge Progress Card -->
   <ion-card *ngIf="badgeProgress.total > 0" class="badge-progress-card">

@@ -109,8 +109,34 @@ export class FirebaseService {
 
   async saveUserBadges(uid: string, badgeProgress: UserBadgeProgress): Promise<void> {
     const userRef = doc(this.firestore, `userBadges/${uid}`);
+
+    // Clean badges to remove undefined values
+    const cleanedBadges = badgeProgress.badges.map(badge => {
+      const cleanBadge: any = {
+        id: badge.id,
+        name: badge.name,
+        description: badge.description,
+        icon: badge.icon,
+        category: badge.category,
+        rarity: badge.rarity,
+        isUnlocked: badge.isUnlocked || false,
+        progress: badge.progress || 0,
+        maxProgress: badge.maxProgress || 1
+      };
+
+      // Only add unlockedAt if it exists
+      if (badge.unlockedAt) {
+        cleanBadge.unlockedAt = Timestamp.fromDate(badge.unlockedAt instanceof Date ? badge.unlockedAt : new Date(badge.unlockedAt));
+      }
+
+      return cleanBadge;
+    });
+
     await setDoc(userRef, {
-      ...badgeProgress,
+      userId: badgeProgress.userId,
+      badges: cleanedBadges,
+      totalBadges: badgeProgress.totalBadges,
+      unlockedBadges: badgeProgress.unlockedBadges,
       lastUpdated: Timestamp.now(),
     });
   }
@@ -245,11 +271,12 @@ export class FirebaseService {
   async saveSpeechHistory(uid: string, speechData: any): Promise<void> {
     const historyRef = doc(collection(this.firestore, `users/${uid}/speechHistory`));
 
-    // Calculate additional metrics
-    const transcript = speechData.feedback?.transcript || speechData.transcript || '[Transcript not available]';
-    const wordCount = transcript !== '[Transcript not available]' ? transcript.split(' ').length : 0;
-    const duration = speechData.duration || 0; // in seconds
+    // Extract transcript and duration from the data
+    const transcript = speechData.transcript || speechData.feedback?.transcript || '[Transcript not available]';
+    const wordCount = transcript !== '[Transcript not available]' ? transcript.split(' ').filter((w: string) => w.length > 0).length : 0;
+    const duration = speechData.duration || speechData.feedback?.duration || 0; // in seconds
     const averagePace = duration > 0 && wordCount > 0 ? (wordCount / duration) * 60 : 0; // words per minute
+
     // Optional audio support via Storage
     let audioUrl: string | undefined;
     let audioData: string | undefined; // legacy fallback
@@ -261,11 +288,14 @@ export class FirebaseService {
       audioUrl = await getDownloadURL(storageRef);
       audioMimeType = speechData.audioBlob.type;
     }
-    
+
     // The backend response structure is:
     // { speech_pace, pausing_fluency, loudness_control, pitch_variation,
     //   articulation_clarity, expressive_emphasis, filler_words, overall,
-    //   feedback: {...}, recommendations: [...] }
+    //   transcript, duration, feedback: { overall_assessment, detailed_scores },
+    //   recommendations: [...] }
+
+    const feedback = speechData.feedback;
 
     const baseEntry: any = {
       id: historyRef.id,
@@ -273,17 +303,17 @@ export class FirebaseService {
       transcript: transcript,
       speechType: speechData.speechType || 'general',
       scores: {
-        speech_pace: speechData.feedback?.speech_pace || 0,
-        pausing_fluency: speechData.feedback?.pausing_fluency || 0,
-        loudness_control: speechData.feedback?.loudness_control || 0,
-        pitch_variation: speechData.feedback?.pitch_variation || 0,
-        articulation_clarity: speechData.feedback?.articulation_clarity || 0,
-        expressive_emphasis: speechData.feedback?.expressive_emphasis || 0,
-        filler_words: speechData.feedback?.filler_words || 0,
-        overall: speechData.feedback?.overall || 0
+        speech_pace: feedback?.speech_pace || 0,
+        pausing_fluency: feedback?.pausing_fluency || 0,
+        loudness_control: feedback?.loudness_control || 0,
+        pitch_variation: feedback?.pitch_variation || 0,
+        articulation_clarity: feedback?.articulation_clarity || 0,
+        expressive_emphasis: feedback?.expressive_emphasis || 0,
+        filler_words: feedback?.filler_words || 0,
+        overall: feedback?.overall || 0
       },
-      feedbackDetails: speechData.feedback?.feedback || {},
-      recommendations: speechData.feedback?.recommendations || [],
+      feedbackDetails: feedback?.feedback || {},
+      recommendations: feedback?.recommendations || [],
       createdAt: new Date(),
       duration: duration,
       wordCount: wordCount,

@@ -60,14 +60,25 @@
   <div *ngIf="speechHistory.length > 0 && !loading && !error" class="history-section">
     <h3>Recent Sessions</h3>
     <mat-list>
-      <mat-list-item 
-        *ngFor="let entry of speechHistory" 
+      <mat-list-item
+        *ngFor="let entry of speechHistory"
         (click)="openSession(entry)"
         class="history-item">
         <div matListItemIcon class="mic-icon">🎤</div>
-        <div matListItemTitle>{{ formatDate(entry.createdAt) }}</div>
-        <div matListItemLine *ngIf="entry.duration">Duration: {{ formatDuration(entry.duration) }}</div>
-        <div matListItemLine *ngIf="entry.wordCount">Words: {{ entry.wordCount }}</div>
+        <div matListItemTitle>
+          {{ formatDate(entry.createdAt) }}
+          <span *ngIf="entry.speechType" class="speech-type-badge">{{ entry.speechType }}</span>
+        </div>
+        <div matListItemLine *ngIf="entry.duration">
+          Duration: {{ formatDuration(entry.duration) }} |
+          Words: {{ entry.wordCount || 0 }} |
+          Overall Score: {{ entry.feedback?.overall || 0 }}/5
+        </div>
+        <div matListItemLine class="preview-scores" *ngIf="entry.feedback">
+          <span class="score-chip">Pace: {{ entry.feedback.speech_pace || 0 }}/5</span>
+          <span class="score-chip">Clarity: {{ entry.feedback.articulation_clarity || 0 }}/5</span>
+          <span class="score-chip">Tone: {{ entry.feedback.pitch_variation || 0 }}/5</span>
+        </div>
         <div matListItemMeta class="chevron-icon">›</div>
       </mat-list-item>
     </mat-list>

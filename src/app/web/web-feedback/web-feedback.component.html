@@ -1,19 +1,13 @@
 <div class="feedback-container">
   <div class="page-header">
-    <h1>
-      <mat-icon>feedback</mat-icon>
-      Speech Feedback
-    </h1>
+    <h1>Speech Feedback</h1>
     <p>Here's your detailed speech analysis and feedback</p>
   </div>
 
   <!-- Transcription -->
   <mat-card class="feedback-card transcript-card">
     <mat-card-header>
-      <mat-card-title>
-        <mat-icon>description</mat-icon>
-        Transcription
-      </mat-card-title>
+      <mat-card-title>Transcription</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div class="transcript-content">
@@ -25,10 +19,7 @@
   <!-- Scores Overview -->
   <mat-card class="feedback-card scores-card">
     <mat-card-header>
-      <mat-card-title>
-        <mat-icon>assessment</mat-icon>
-        Scores Overview
-      </mat-card-title>
+      <mat-card-title>Scores Overview</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div class="scores-grid">
@@ -73,7 +64,6 @@
     <mat-card class="analysis-card">
       <mat-card-content>
         <div class="card-header">
-          <mat-icon class="card-icon">speed</mat-icon>
           <h4>Pace</h4>
         </div>
         <div class="score-circle">
@@ -82,11 +72,10 @@
         <p class="feedback-text">{{ feedback.pace_feedback }}</p>
       </mat-card-content>
     </mat-card>
-    
+
     <mat-card class="analysis-card">
       <mat-card-content>
         <div class="card-header">
-          <mat-icon class="card-icon">music_note</mat-icon>
           <h4>Tone</h4>
         </div>
         <div class="score-circle">
@@ -95,11 +84,10 @@
         <p class="feedback-text">{{ feedback.tone_feedback }}</p>
       </mat-card-content>
     </mat-card>
-    
+
     <mat-card class="analysis-card">
       <mat-card-content>
         <div class="card-header">
-          <mat-icon class="card-icon">visibility</mat-icon>
           <h4>Clarity</h4>
         </div>
         <div class="score-circle">
@@ -114,10 +102,7 @@
   <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
     <mat-card class="feedback-card" *ngIf="feedback.strengths">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon>check_circle</mat-icon>
-          Strengths
-        </mat-card-title>
+        <mat-card-title>Strengths</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <p>{{ feedback.strengths }}</p>
@@ -126,10 +111,7 @@
 
     <mat-card class="feedback-card" *ngIf="feedback.areas_improvement">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon>trending_up</mat-icon>
-          Areas for Improvement
-        </mat-card-title>
+        <mat-card-title>Areas for Improvement</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <p>{{ feedback.areas_improvement }}</p>
@@ -140,20 +122,33 @@
   <!-- Filler Words -->
   <mat-card class="feedback-card filler-words-card">
     <mat-card-header>
-      <mat-card-title>
-        <mat-icon>warning</mat-icon>
-        Filler Words
-      </mat-card-title>
+      <mat-card-title>Filler Words Analysis</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <p class="filler-feedback">
-        Filler Words Score: {{ feedback.filler_words || feedback.filler_words_score || 0 }}/5
+        <strong>Filler Words Score:</strong> {{ feedback.filler_words || feedback.filler_words_score || 0 }}/5
       </p>
-      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) >= 4" class="no-fillers">
-        Great job! Minimal filler words detected.
+
+      <div *ngIf="feedback.analysis?.filler_word_details" style="margin-top: 15px;">
+        <p><strong>Total Filler Words:</strong> {{ feedback.analysis.filler_word_details.count }}</p>
+        <p><strong>Percentage:</strong> {{ (feedback.analysis.filler_word_details.ratio * 100).toFixed(1) }}% of speech</p>
+
+        <div *ngIf="feedback.analysis.filler_word_details.words && feedback.analysis.filler_word_details.words.length > 0" style="margin-top: 10px;">
+          <p><strong>Detected Filler Words:</strong></p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+            <span *ngFor="let filler of feedback.analysis.filler_word_details.words"
+                  style="background: #fff3e0; padding: 4px 12px; border-radius: 12px; font-size: 0.9rem;">
+              "{{ filler.word }}" ({{ filler.count }})
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) >= 4" class="no-fillers" style="margin-top: 15px; color: #4caf50;">
+        Excellent! Minimal filler words detected.
       </p>
-      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) < 4" class="needs-improvement">
-        Try to reduce filler words for better fluency.
+      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) < 4" class="needs-improvement" style="margin-top: 15px; color: #ff9800;">
+        Try to reduce filler words for better fluency. Practice pausing instead.
       </p>
     </mat-card-content>
   </mat-card>
@@ -161,7 +156,6 @@
   <!-- Try Again Button -->
   <div class="action-buttons">
     <button mat-raised-button color="primary" (click)="tryAgain()" class="try-again-button">
-      <mat-icon>refresh</mat-icon>
       Try Another Recording
     </button>
   </div>

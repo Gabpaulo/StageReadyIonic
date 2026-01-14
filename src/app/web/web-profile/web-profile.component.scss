@@ -127,12 +127,13 @@
     }
     
     .change-photo-btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
       border-radius: 8px;
       padding: 8px 16px;
-      
+      width: auto;
+
       mat-icon {
         font-size: 18px;
         width: 18px;
@@ -276,17 +277,19 @@
 
 .action-buttons {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 12px;
-  
+
   .action-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
     border-radius: 8px;
     transition: all 0.3s ease;
     text-align: left;
+    width: auto;
+    flex: 0 0 auto;
     
     &:not(.danger) {
       &:hover {

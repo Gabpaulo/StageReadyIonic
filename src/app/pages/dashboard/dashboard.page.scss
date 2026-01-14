@@ -1,23 +1,32 @@
 // Import shared styles
 @import '../../../theme/shared-styles';
 
-/* ===== Color Tokens (pulled from the screenshot's palette) ===== */
+/* ===== Color Tokens - BLUE GAMING PALETTE ===== */
 :host {
-  --bg:            #17232f;  /* page background (deep navy) */
-  --surface:       #1e2c3a;  /* card background */
-  --surface-2:     #1a2734;  /* darker surface / progress track */
-  --primary:       #22a7f0;  /* cyan/blue accent (mic button color) */
-  --primary-700:   #1b8fd3;
-  --primary-glow:  rgba(34, 167, 240, 0.35);
-  --text:          #e8f1f9;  /* main text on dark */
-  --muted:         #9bb2c8;  /* subtitles, helper text */
-  --border:        #2b3b4c;  /* subtle borders */
+  --bg:            #0a0e27;  /* deep navy background */
+  --surface:       #131a35;  /* card background */
+  --surface-2:     #0f1429;  /* darker surface */
+  --primary:       #4d9fff;  /* bright blue */
+  --primary-700:   #3182f6;
+  --primary-glow:  rgba(77, 159, 255, 0.4);
+  --secondary:     #7c3aed;  /* deep purple-blue */
+  --secondary-glow: rgba(124, 58, 237, 0.4);
+  --accent:        #60a5fa;  /* light blue */
+  --accent-glow:   rgba(96, 165, 250, 0.4);
+  --success:       #22d3ee;  /* cyan */
+  --success-glow:  rgba(34, 211, 238, 0.4);
+  --warning:       #3b82f6;  /* medium blue */
+  --warning-glow:  rgba(59, 130, 246, 0.4);
+  --text:          #e0e7ff;  /* light blue-white */
+  --muted:         #94a3b8;  /* blue-gray */
+  --border:        #1e293b;  /* dark blue border */
 }
 
 /* ===== Page & Toolbar ===== */
 ion-content {
-  --background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%),
-                 var(--bg);
+  --background: radial-gradient(circle at 20% 20%, rgba(77, 159, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0e27 0%, #131a35 100%);
   color: var(--text);
 }
 
@@ -53,7 +62,277 @@ ion-card-subtitle {
   color: var(--muted);
 }
 
+/* ===== Level Card ===== */
+.level-card {
+  margin: 16px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%) !important;
+  border: 2px solid var(--primary) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 20px var(--primary-glow) !important;
+
+  .level-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 8px;
+    position: relative;
+
+    .level-badge {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--primary-glow);
+      flex-shrink: 0;
+      position: relative;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+
+      .level-number {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: #ffffff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    .level-info {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--text);
+        text-shadow: 0 0 10px var(--primary-glow);
+      }
+
+      p {
+        margin: 0 0 8px 0;
+        color: var(--primary);
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .xp-bar {
+        height: 14px;
+        background: var(--surface-2);
+        border: 2px solid var(--primary);
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5) inset;
+
+        .xp-fill {
+          height: 100%;
+          background: linear-gradient(90deg, var(--primary), var(--secondary));
+          border-radius: 999px;
+          box-shadow: 0 0 15px var(--primary-glow);
+          transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* ===== Stats Grid ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+
+  .stat-card {
+    margin: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, transparent, rgba(34, 167, 240, 0.1));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:active {
+      transform: scale(0.95);
+
+      &::before {
+        opacity: 1;
+      }
+
+      .stat-icon {
+        transform: scale(1.2) rotate(10deg);
+      }
+    }
+
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      position: relative;
+      z-index: 1;
+
+      .stat-icon {
+        font-size: 2.2rem;
+        color: var(--primary);
+        filter: drop-shadow(0 0 12px var(--primary-glow));
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .stat-info {
+        text-align: center;
+
+        h3 {
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: var(--text);
+          margin: 0;
+        }
+
+        p {
+          font-size: 0.85rem;
+          color: var(--muted);
+          margin: 4px 0 0 0;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+
+  // Speeches
+  .stat-card:nth-child(1) {
+    border: 2px solid var(--primary) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 20px var(--primary-glow) !important;
+
+    .stat-icon {
+      color: var(--primary);
+      filter: drop-shadow(0 0 12px var(--primary-glow));
+    }
+
+    .stat-info h3 {
+      color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+  }
+
+  // Badges
+  .stat-card:nth-child(2) {
+    border: 2px solid var(--secondary) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 20px var(--secondary-glow) !important;
+
+    .stat-icon {
+      color: var(--secondary);
+      filter: drop-shadow(0 0 12px var(--secondary-glow));
+    }
+
+    .stat-info h3 {
+      color: var(--secondary);
+      text-shadow: 0 0 10px var(--secondary-glow);
+    }
+  }
+
+  // Streak
+  .stat-card:nth-child(3) {
+    border: 2px solid var(--accent) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 20px var(--accent-glow) !important;
+
+    .stat-icon {
+      color: var(--accent);
+      filter: drop-shadow(0 0 12px var(--accent-glow));
+    }
+
+    .stat-info h3 {
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent-glow);
+    }
+  }
+}
+
+/* ===== Daily Challenge Card ===== */
+.daily-challenge-card {
+  margin: 0 16px 16px;
+  border: 2px solid var(--success);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.08) 0%, var(--surface-2) 100%) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 25px var(--success-glow) !important;
+
+  .challenge-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    position: relative;
+
+    .challenge-icon {
+      font-size: 3.5rem;
+      color: var(--success);
+      filter: drop-shadow(0 0 15px var(--success-glow));
+      flex-shrink: 0;
+    }
+
+    .challenge-text {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 6px 0;
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: var(--success);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        text-shadow: 0 0 10px var(--success-glow);
+      }
+
+      p {
+        margin: 0 0 10px 0;
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .challenge-reward {
+        font-weight: 900;
+        font-size: 1rem;
+        color: var(--success);
+        text-shadow: 0 0 8px var(--success-glow);
+      }
+    }
+  }
+}
+
 /* ===== Badge Progress Card ===== */
+.badge-progress-card {
+  margin: 0 16px 16px;
+}
 .badge-progress-card {
   .progress-bar-container {
     display: flex;
@@ -98,6 +377,8 @@ ion-card-subtitle {
 
 /* ===== Recent Badges ===== */
 .recent-badges-card {
+  margin: 0 16px 16px;
+
   .recent-badges-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -112,59 +393,121 @@ ion-card-subtitle {
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(34, 167, 240, 0.15), transparent);
+      transition: left 0.5s ease;
+    }
+
+    &:active {
+      transform: translateY(-2px) scale(1.02);
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px var(--primary-glow);
+
+      &::before {
+        left: 100%;
+      }
+
+      .badge-icon {
+        transform: scale(1.1) rotate(10deg);
+      }
+    }
   }
 
   .badge-icon {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
     flex-shrink: 0;
-    filter: drop-shadow(0 0 6px var(--primary-glow));
+    filter: drop-shadow(0 0 10px var(--primary-glow));
+    transition: transform 0.3s ease;
   }
 
   .badge-info h4 {
     margin: 0;
     color: var(--text);
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.2;
+    font-size: 1.05rem;
   }
 
   .badge-info p {
     margin: 2px 0 0;
     color: var(--muted);
     font-size: 13px;
+    font-weight: 500;
   }
 }
 
 /* ===== Quick Actions ===== */
 .quick-actions-card {
+  margin: 0 16px 16px;
+
+  ion-card-header {
+    padding-bottom: 12px;
+  }
+
   .action-buttons {
     display: grid;
-    gap: 10px;
+    gap: 12px;
   }
 
   ion-button {
-    --border-radius: 14px;
-    --box-shadow: 0 10px 24px rgba(0,0,0,.35);
-    font-weight: 600;
-    letter-spacing: .2px;
+    --border-radius: 12px;
+    --box-shadow: none;
+    font-weight: 700;
+    letter-spacing: .3px;
+    height: 56px;
+    margin: 0;
+
+    ion-icon {
+      font-size: 24px;
+      margin-right: 8px;
+    }
   }
 
   /* Primary (Start Speech Practice) */
   ion-button[color="primary"] {
-    --background: linear-gradient(180deg, var(--primary), var(--primary-700));
-    --background-activated: linear-gradient(180deg, var(--primary-700), var(--primary));
-    --ripple-color: rgba(255,255,255,.25);
-    box-shadow: 0 6px 18px var(--primary-glow);
+    --background: linear-gradient(135deg, var(--primary), var(--primary-700));
+    --background-activated: linear-gradient(135deg, var(--primary-700), var(--primary));
+    --ripple-color: rgba(255,255,255,.3);
+    box-shadow: 0 4px 16px var(--primary-glow), 0 0 20px var(--primary-glow);
     color: #ffffff;
+    border: none;
+
+    &:hover {
+      box-shadow: 0 6px 20px var(--primary-glow), 0 0 30px var(--primary-glow);
+    }
   }
 
   /* Outline buttons */
   ion-button[fill="outline"] {
-    --border-color: var(--primary);
-    --color: var(--primary);
-    --background: transparent;
-    --background-activated: rgba(34, 167, 240, 0.07);
+    --border-color: var(--border);
+    --border-width: 2px;
+    --color: var(--text);
+    --background: var(--surface-2);
+    --background-activated: var(--surface);
+    --ripple-color: rgba(77, 159, 255, .2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      --border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 15px var(--primary-glow);
+    }
+
+    ion-icon {
+      color: var(--primary);
+      filter: drop-shadow(0 0 8px var(--primary-glow));
+    }
   }
 }
 
@@ -186,4 +529,15 @@ ion-card-content {
 /* ===== Optional: give icons inside buttons a bit of glow ===== */
 ion-button ion-icon[slot="start"] {
   filter: drop-shadow(0 0 6px var(--primary-glow));
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }

@@ -56,18 +56,80 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 
         <mat-card class="feedback-card" *ngIf="data.entry.feedback" style="margin: 16px 0;">
           <mat-card-header>
-            <mat-card-title>Feedback</mat-card-title>
+            <mat-card-title>Scores (1-5 scale)</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div class="feedback-item">
-              <strong>Clarity:</strong> {{ data.entry.feedback?.articulation_clarity || 'N/A' }}
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+              <div class="feedback-item">
+                <strong>Overall:</strong> {{ data.entry.feedback?.overall || 'N/A' }}/5
+              </div>
+              <div class="feedback-item">
+                <strong>Speech Pace:</strong> {{ data.entry.feedback?.speech_pace || 'N/A' }}/5
+              </div>
+              <div class="feedback-item">
+                <strong>Clarity:</strong> {{ data.entry.feedback?.articulation_clarity || 'N/A' }}/5
+              </div>
+              <div class="feedback-item">
+                <strong>Tone/Pitch:</strong> {{ data.entry.feedback?.pitch_variation || 'N/A' }}/5
+              </div>
+              <div class="feedback-item">
+                <strong>Pausing & Fluency:</strong> {{ data.entry.feedback?.pausing_fluency || 'N/A' }}/5
+              </div>
+              <div class="feedback-item">
+                <strong>Volume Control:</strong> {{ data.entry.feedback?.loud_control || 'N/A' }}/5
+              </div>
+              <div class="feedback-item">
+                <strong>Expression:</strong> {{ data.entry.feedback?.expressive_emph || 'N/A' }}/5
+              </div>
+              <div class="feedback-item">
+                <strong>Filler Words:</strong> {{ data.entry.feedback?.filler_words_score || 'N/A' }}/5
+              </div>
             </div>
-            <div class="feedback-item">
-              <strong>Pace:</strong> {{ data.entry.feedback?.speech_pace || 'N/A' }}
-            </div>
-            <div class="feedback-item">
-              <strong>Tone:</strong> {{ data.entry.feedback?.pitch_variation || 'N/A' }}
-            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card *ngIf="data.entry.feedback?.pace_feedback" style="margin: 16px 0;">
+          <mat-card-header>
+            <mat-card-title>Pace Feedback</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            {{ data.entry.feedback.pace_feedback }}
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card *ngIf="data.entry.feedback?.tone_feedback" style="margin: 16px 0;">
+          <mat-card-header>
+            <mat-card-title>Tone Feedback</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            {{ data.entry.feedback.tone_feedback }}
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card *ngIf="data.entry.feedback?.clarity_feedback" style="margin: 16px 0;">
+          <mat-card-header>
+            <mat-card-title>Clarity Feedback</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            {{ data.entry.feedback.clarity_feedback }}
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card *ngIf="data.entry.feedback?.strengths" style="margin: 16px 0; background: #e8f5e9;">
+          <mat-card-header>
+            <mat-card-title>Strengths</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            {{ data.entry.feedback.strengths }}
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card *ngIf="data.entry.feedback?.areas_improvement" style="margin: 16px 0; background: #fff3e0;">
+          <mat-card-header>
+            <mat-card-title>Areas for Improvement</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            {{ data.entry.feedback.areas_improvement }}
           </mat-card-content>
         </mat-card>
       </div>

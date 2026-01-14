@@ -147,40 +147,44 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
       next: async (response: any) => {
         console.log('Speech analysis response received:', response);
         this.isLoading = false;
-        
+
         // Validate response structure
         if (!response) {
           console.error('Empty API response');
           this.snackBar.open('Empty response from server. Please try again.', 'Close', { duration: 3000 });
           return;
         }
-        
-        // Transcript might be empty or "Audio transcription unavailable", which is still valid
-        if (response.transcript === undefined) {
-          console.error('Invalid API response - missing transcript:', response);
-          this.snackBar.open('Invalid response from server. Please try again.', 'Close', { duration: 3000 });
-          return;
-        }
+
+        // Backend returns: { speech_pace, pausing_fluency, loudness_control, pitch_variation,
+        //                   articulation_clarity, expressive_emphasis, filler_words, overall,
+        //                   transcript, duration, feedback: {...}, recommendations: [...] }
+
+        // Extract detailed feedback from nested structure
+        const detailedFeedback = response.feedback?.detailed_scores || {};
 
         // Map response to expected format
         const feedback: AnalyzeSpeechForFeedbackOutput = {
           transcript: response.transcript || '',
-          category: response.category || this.speechType,
+          category: this.speechType,
           duration: response.duration || 0,
           speech_pace: response.speech_pace || 3,
           pausing_fluency: response.pausing_fluency || 3,
-          loud_control: response.loud_control || 3,
+          loud_control: response.loudness_control || 3, // Backend uses 'loudness_control'
+          loudness_control: response.loudness_control || 3,
           pitch_variation: response.pitch_variation || 3,
           articulation_clarity: response.articulation_clarity || 3,
-          expressive_emph: response.expressive_emph || 3,
-          filler_words_score: response.filler_words_score || 3,
+          expressive_emph: response.expressive_emphasis || 3, // Backend uses 'expressive_emphasis'
+          expressive_emphasis: response.expressive_emphasis || 3,
+          filler_words_score: response.filler_words || 3,
+          filler_words: response.filler_words || 3,
           overall: response.overall || 3,
-          pace_feedback: response.pace_feedback || 'No feedback available',
-          tone_feedback: response.tone_feedback || 'No feedback available',
-          clarity_feedback: response.clarity_feedback || 'No feedback available',
-          strengths: response.strengths || 'No strengths identified',
-          areas_improvement: response.areas_improvement || 'No areas for improvement identified',
-          filler_words: response.filler_words || [],
+          pace_feedback: detailedFeedback.speech_pace?.description || response.feedback?.overall_assessment || 'No feedback available',
+          tone_feedback: detailedFeedback.pitch_variation?.description || 'No feedback available',
+          clarity_feedback: detailedFeedback.articulation_clarity?.description || 'No feedback available',
+          strengths: this.extractStrengths(response),
+          areas_improvement: this.extractAreasForImprovement(response),
+          feedback: response.feedback,
+          recommendations: response.recommendations,
           analysis: response
         };
         
@@ -198,14 +202,15 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
         }
 
         if (user) {
-          // Save speech history (without audio blob)
+          // Save speech history with properly structured backend feedback
           await this.firebaseService.saveSpeechHistory(user.uid, {
-            feedback: feedback,
-            duration: feedback.duration || (this.audioBlob ? this.audioBlob.size / 1000 : 0),
+            feedback: response, // Pass the raw backend response
+            transcript: response.transcript || '',
+            duration: response.duration || 0,
             audioBlob: this.audioBlob,
             speechType: this.speechType
           });
-          
+
           // Save detailed analysis with audio (for other purposes)
           await this.firebaseService.saveSpeechAnalysis(user.uid, {
             feedback: feedback,
@@ -214,13 +219,18 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
             timestamp: new Date()
           });
         }
-        
-        // Check for badge achievements
-        await this.badgeService.onSpeechCompleted(feedback);
-        await this.badgeService.onSpeechAnalyzed(feedback);
-        
+
+        // Check for badge achievements (non-blocking)
+        try {
+          await this.badgeService.onSpeechCompleted(feedback);
+          await this.badgeService.onSpeechAnalyzed(feedback);
+        } catch (badgeError) {
+          console.error('Badge service error (non-critical):', badgeError);
+          // Don't prevent navigation if badges fail
+        }
+
         this.snackBar.open('Analysis complete!', 'Close', { duration: 2000 });
-        
+
         // Navigate to feedback page
         this.router.navigate(['/web/feedback'], {
           state: { feedback }
@@ -270,5 +280,65 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  private extractStrengths(response: any): string {
+    const strengths: string[] = [];
+    const scores = {
+      'Speech Pace': response.speech_pace,
+      'Pausing & Fluency': response.pausing_fluency,
+      'Volume Control': response.loudness_control,
+      'Pitch Variation': response.pitch_variation,
+      'Articulation': response.articulation_clarity,
+      'Expression': response.expressive_emphasis,
+      'Filler Words': response.filler_words
+    };
+
+    // Find scores >= 4 (good or excellent)
+    for (const [category, score] of Object.entries(scores)) {
+      if (score && score >= 4) {
+        strengths.push(category);
+      }
+    }
+
+    if (strengths.length === 0) {
+      return response.feedback?.overall_assessment || 'Continue practicing to improve your skills';
+    }
+
+    return `Strong performance in: ${strengths.join(', ')}`;
+  }
+
+  private extractAreasForImprovement(response: any): string {
+    const improvements: string[] = [];
+
+    // Use recommendations from backend if available
+    if (response.recommendations && response.recommendations.length > 0) {
+      return response.recommendations
+        .map((rec: any) => `${rec.category}: ${rec.suggestion}`)
+        .join('\n\n');
+    }
+
+    // Fallback: extract from scores
+    const scores = {
+      'Speech Pace': response.speech_pace,
+      'Pausing & Fluency': response.pausing_fluency,
+      'Volume Control': response.loudness_control,
+      'Pitch Variation': response.pitch_variation,
+      'Articulation': response.articulation_clarity,
+      'Expression': response.expressive_emphasis,
+      'Filler Words': response.filler_words
+    };
+
+    for (const [category, score] of Object.entries(scores)) {
+      if (score && score <= 3) {
+        improvements.push(category);
+      }
+    }
+
+    if (improvements.length === 0) {
+      return 'Great job! Keep up the excellent work';
+    }
+
+    return `Focus on improving: ${improvements.join(', ')}`;
   }
 }
