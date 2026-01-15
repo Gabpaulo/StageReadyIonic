@@ -1,10 +1,40 @@
-// src/app/pages/speech-analysis/speech-analysis.page.scss
-
 // Import shared styles
 @import '../../../theme/shared-styles';
 
-// Page-specific styles
+/* ===== Color Tokens - CYAN/TURQUOISE PALETTE ===== */
+:host {
+  --bg:            #17232f;
+  --surface:       #1e2c3a;
+  --surface-2:     #1a2734;
+  --primary:       #22a7f0;
+  --primary-700:   #1b8fd3;
+  --primary-glow:  rgba(34, 167, 240, 0.35);
+  --secondary:     #9c27b0;
+  --secondary-glow: rgba(156, 39, 176, 0.35);
+  --accent:        #00bcd4;
+  --accent-glow:   rgba(0, 188, 212, 0.35);
+  --success:       #4caf50;
+  --success-glow:  rgba(76, 175, 80, 0.35);
+  --text:          #e8f1f9;
+  --muted:         #9bb2c8;
+  --border:        #2b3b4c;
+  --danger:        #f44336;
+  --danger-glow:   rgba(244, 67, 54, 0.35);
+}
+
+/* ===== Header & Content ===== */
+.custom-header ion-toolbar {
+  --background: transparent;
+  --color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+}
+
 .custom-content {
+  --background: radial-gradient(circle at 20% 20%, rgba(34, 167, 240, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 188, 212, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #17232f 0%, #1e2c3a 100%);
+  --color: var(--text);
   position: relative;
 
   &::before {
@@ -14,39 +44,40 @@
     left: 0;
     right: 0;
     height: 300px;
-    background: radial-gradient(ellipse at top, rgba($primary-color, 0.1) 0%, transparent 70%);
+    background: radial-gradient(ellipse at top, rgba(34, 167, 240, 0.15) 0%, transparent 70%);
     pointer-events: none;
   }
 }
 
-// Hero Section
+/* ===== Hero Section ===== */
 .hero-section {
   text-align: center;
   padding: 3rem 1rem 2rem;
-  background: linear-gradient(180deg, rgba($card-background, 0.5) 0%, transparent 100%);
   position: relative;
   z-index: 1;
 
   h1 {
     font-size: 2.5rem;
-    font-weight: 700;
+    font-weight: 900;
     margin-bottom: 0.5rem;
-    color: $text-primary;
-    background: linear-gradient(135deg, $text-primary 0%, $primary-color 100%);
+    color: var(--text);
+    background: linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 15px var(--primary-glow);
     animation: fadeInDown 0.8s ease-out;
   }
 
   p {
-    color: $text-secondary;
+    color: var(--muted);
     font-size: 1.1rem;
+    font-weight: 500;
     animation: fadeInUp 0.8s ease-out 0.2s both;
   }
 }
 
-// Main Container
+/* ===== Main Container ===== */
 .main-container {
   padding: 1rem;
   max-width: 600px;
@@ -55,45 +86,45 @@
   z-index: 1;
 }
 
-// Recording Section
+/* ===== Recording Section ===== */
 .recording-section {
   text-align: center;
   padding: 3rem 0;
   animation: fadeIn 1s ease-out;
-  
+
   .mic-container {
     position: relative;
     width: 150px;
     height: 150px;
     margin: 0 auto;
-    
+
     &.recording {
       .pulse-ring {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        
+
         &.delay-1 {
           animation-delay: 0.5s;
         }
-        
+
         &.delay-2 {
           animation-delay: 1s;
         }
       }
     }
   }
-  
+
   .record-button {
     width: 150px;
     height: 150px;
-    --background: #{$primary-color};
-    --background-hover: #{$primary-hover};
+    --background: linear-gradient(135deg, var(--primary), var(--primary-700));
     --border-radius: 50%;
     margin: 0;
     position: relative;
     z-index: 10;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 32px rgba($primary-color, 0.3);
-    
+    box-shadow: 0 8px 32px var(--primary-glow), 0 0 40px var(--primary-glow);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+
     &::before {
       content: '';
       position: absolute;
@@ -102,44 +133,44 @@
       transform: translate(-50%, -50%);
       width: calc(100% + 10px);
       height: calc(100% + 10px);
-      background: linear-gradient(135deg, $primary-color, $accent-color);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       border-radius: 50%;
       z-index: -1;
       opacity: 0;
       transition: opacity 0.3s ease;
       filter: blur(8px);
     }
-    
+
     &:hover {
       transform: scale(1.05);
-      box-shadow: 0 12px 40px rgba($primary-color, 0.4);
-      
+      box-shadow: 0 12px 40px var(--primary-glow), 0 0 60px var(--primary-glow);
+
       &::before {
-        opacity: 0.3;
+        opacity: 0.5;
       }
     }
-    
+
     &:active {
       transform: scale(0.95);
     }
-    
+
     &.stop-button {
-      --background: #{$danger-color};
-      --background-hover: #{$danger-hover};
-      box-shadow: 0 8px 32px rgba($danger-color, 0.3);
+      --background: linear-gradient(135deg, var(--danger), #c53030);
+      box-shadow: 0 8px 32px var(--danger-glow), 0 0 40px var(--danger-glow);
       animation: recordingPulse 1.5s ease-in-out infinite;
-      
+
       &::before {
-        background: linear-gradient(135deg, $danger-color, $accent-color);
+        background: linear-gradient(135deg, var(--danger), var(--secondary));
       }
     }
-    
+
     ion-icon {
       font-size: 4rem;
-      color: $text-primary;
+      color: #ffffff;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
     }
   }
-  
+
   .pulse-ring {
     position: absolute;
     top: 50%;
@@ -147,51 +178,55 @@
     transform: translate(-50%, -50%);
     width: 150px;
     height: 150px;
-    border: 2px solid $primary-color;
+    border: 2px solid var(--primary);
     border-radius: 50%;
     opacity: 0;
+    box-shadow: 0 0 20px var(--primary-glow);
   }
-  
+
   .recording-text {
     margin-top: 2.5rem;
     font-size: 1.2rem;
-    color: $primary-color;
-    font-weight: 500;
+    color: var(--danger);
+    font-weight: 700;
+    text-shadow: 0 0 10px var(--danger-glow);
     animation: blink 1.5s ease-in-out infinite;
-    
+
     &::after {
       content: '';
       display: inline-block;
       width: 8px;
       height: 8px;
-      background: $danger-color;
+      background: var(--danger);
       border-radius: 50%;
       margin-left: 8px;
+      box-shadow: 0 0 10px var(--danger-glow);
       animation: recordingDot 1s ease-in-out infinite;
     }
   }
-  
+
   .instruction-text {
     margin-top: 2.5rem;
     font-size: 1.1rem;
-    color: #2c3e50 !important;
-    font-weight: 400;
+    color: var(--muted);
+    font-weight: 500;
   }
 }
 
-// Audio Preview Section
+/* ===== Audio Preview Section ===== */
 .preview-section {
   margin-top: 2rem;
   animation: slideInUp 0.6s ease-out;
-  
+
   .audio-card {
-    @include glass-effect;
+    background: var(--surface);
+    border: 2px solid var(--primary);
     border-radius: 20px;
     padding: 2.5rem;
-    @include card-shadow;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 40px var(--primary-glow);
     position: relative;
     overflow: hidden;
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -199,60 +234,81 @@
       right: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba($primary-color, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(77, 159, 255, 0.08) 0%, transparent 70%);
       animation: rotate 20s linear infinite;
     }
   }
-  
+
   .waveform-placeholder {
-    @include flex-center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 80px;
     margin-bottom: 2rem;
     gap: 6px;
     position: relative;
     z-index: 1;
-    
+
     .wave {
       width: 6px;
-      background: linear-gradient(180deg, $primary-color 0%, $accent-color 100%);
+      background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
       border-radius: 3px;
       animation: wave-animation 1.2s ease-in-out infinite;
-      box-shadow: 0 0 10px rgba($primary-color, 0.3);
-      
-      @for $i from 1 through 5 {
-        &:nth-child(#{$i}) {
-          height: #{20 + random(40)}px;
-          animation-delay: #{$i * 0.15}s;
-        }
+      box-shadow: 0 0 10px var(--primary-glow);
+
+      &:nth-child(1) {
+        height: 40px;
+        animation-delay: 0s;
+      }
+      &:nth-child(2) {
+        height: 60px;
+        animation-delay: 0.15s;
+      }
+      &:nth-child(3) {
+        height: 50px;
+        animation-delay: 0.3s;
+      }
+      &:nth-child(4) {
+        height: 55px;
+        animation-delay: 0.45s;
+      }
+      &:nth-child(5) {
+        height: 45px;
+        animation-delay: 0.6s;
       }
     }
   }
-  
+
   .custom-audio {
     width: 100%;
     margin-bottom: 2rem;
     position: relative;
     z-index: 1;
     border-radius: 25px;
-    background: rgba($background-color, 0.5);
+    background: var(--surface-2);
     padding: 0.5rem;
+    border: 1px solid var(--border);
   }
-  
+
   .action-buttons {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     position: relative;
     z-index: 1;
-    
+
     .analyze-button {
-      --background: linear-gradient(135deg, #{$primary-color} 0%, #{$primary-hover} 100%);
-      --background-hover: linear-gradient(135deg, #{$primary-hover} 0%, #{$primary-color} 100%);
-      @include button-base;
-      --box-shadow: 0 4px 20px rgba(41, 171, 226, 0.3);
+      --background: linear-gradient(135deg, var(--primary), var(--primary-700));
+      --background-activated: linear-gradient(135deg, var(--primary-700), var(--primary));
+      --border-radius: 12px;
+      --box-shadow: 0 4px 20px var(--primary-glow), 0 0 30px var(--primary-glow);
+      font-weight: 700;
+      letter-spacing: .3px;
+      height: 56px;
+      color: #ffffff;
       position: relative;
       overflow: hidden;
-      
+
       &::after {
         content: '';
         position: absolute;
@@ -265,56 +321,71 @@
         transform: translate(-50%, -50%);
         transition: width 0.6s, height 0.6s;
       }
-      
+
       &:hover::after {
         width: 300px;
         height: 300px;
       }
+
+      ion-icon {
+        font-size: 24px;
+      }
     }
-    
+
     .reset-button {
-      --color: #{$text-secondary};
-      position: relative;
-      
+      --color: var(--muted);
+      font-weight: 600;
+      letter-spacing: .2px;
+
       &:hover {
-        --color: #{$text-primary};
+        --color: var(--text);
+      }
+
+      ion-icon {
+        font-size: 22px;
       }
     }
   }
 }
 
-// Loading Section
+/* ===== Loading Section ===== */
 .loading-section {
   text-align: center;
   padding: 5rem 0;
   animation: fadeIn 0.5s ease-out;
-  
+
   .loader {
-    @include flex-center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 12px;
     margin-bottom: 2rem;
-    
+
     .loader-dot {
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: linear-gradient(135deg, $primary-color 0%, $accent-color 100%);
-      box-shadow: 0 0 20px rgba($primary-color, 0.5);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      box-shadow: 0 0 20px var(--primary-glow);
       animation: loader-bounce 1.4s ease-in-out infinite both;
-      
-      @for $i from 1 through 3 {
-        &:nth-child(#{$i}) {
-          animation-delay: #{-0.32 + ($i - 1) * 0.16}s;
-        }
+
+      &:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      &:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+      &:nth-child(3) {
+        animation-delay: 0s;
       }
     }
   }
-  
+
   p {
-    color: $text-secondary;
+    color: var(--text);
     font-size: 1.1rem;
-    font-weight: 500;
-    
+    font-weight: 600;
+
     &::after {
       content: '';
       animation: loadingDots 1.5s steps(4, end) infinite;
@@ -322,7 +393,68 @@
   }
 }
 
-// Animations
+/* ===== Modal Styles ===== */
+.opaque-modal {
+  --background: var(--surface);
+
+  ion-header ion-toolbar {
+    --background: var(--surface);
+    --color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+
+  ion-title {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  ion-content {
+    --background: var(--surface);
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  p {
+    color: var(--muted);
+    margin-bottom: 20px;
+    font-size: 1rem;
+  }
+
+  ion-list {
+    background: transparent;
+  }
+
+  ion-item {
+    --background: var(--surface-2);
+    --border-color: var(--border);
+    --color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 10px;
+
+    ion-label {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    ion-radio {
+      --color: var(--primary);
+      --color-checked: var(--primary);
+    }
+  }
+
+  ion-button[expand="block"] {
+    margin-top: 20px;
+    --background: linear-gradient(135deg, var(--primary), var(--primary-700));
+    --border-radius: 12px;
+    box-shadow: 0 4px 16px var(--primary-glow);
+    color: #ffffff;
+    font-weight: 700;
+    height: 48px;
+  }
+}
+
+/* ===== Animations ===== */
 @keyframes pulse {
   0% {
     opacity: 0.8;
@@ -350,11 +482,11 @@
 }
 
 @keyframes wave-animation {
-  0%, 100% { 
+  0%, 100% {
     transform: scaleY(0.5);
     opacity: 0.8;
   }
-  50% { 
+  50% {
     transform: scaleY(1);
     opacity: 1;
   }
@@ -420,20 +552,20 @@
   100% { content: ''; }
 }
 
-// Responsive Design
+/* ===== Responsive Design ===== */
 @media (max-width: 576px) {
   .hero-section {
     padding: 2rem 1rem 1.5rem;
-    
+
     h1 {
       font-size: 2rem;
     }
-    
+
     p {
       font-size: 1rem;
     }
   }
-  
+
   .recording-section {
     .mic-container,
     .record-button,
@@ -441,18 +573,18 @@
       width: 120px;
       height: 120px;
     }
-    
+
     .record-button ion-icon {
       font-size: 3rem;
     }
   }
-  
+
   .audio-card {
     padding: 2rem;
   }
 }
 
-// Accessibility
+/* ===== Accessibility ===== */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

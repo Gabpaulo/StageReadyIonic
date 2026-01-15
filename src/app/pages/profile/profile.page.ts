@@ -169,4 +169,21 @@ export class ProfilePage implements OnInit {
       minute: '2-digit'
     }).format(date);
   }
+
+  getBadgeIconPath(badge: any): string {
+    if (!badge || !badge.icon) {
+      return '/assets/badges/first-step.svg';
+    }
+    // Ensure path starts with / for absolute path from root
+    if (badge.icon.startsWith('/')) {
+      return badge.icon;
+    }
+    return '/' + badge.icon;
+  }
+
+  onBadgeImageError(event: any, badge: any): void {
+    console.error('Badge icon failed to load:', badge.icon);
+    // Fallback to a default icon
+    event.target.src = '/assets/badges/first-step.svg';
+  }
 }

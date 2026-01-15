@@ -123,6 +123,15 @@ body {
   margin: 0 auto;
 }
 
+// Logo styles
+.app-logo {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 8px rgba($primary-color, 0.3));
+  animation: fadeIn 0.8s ease-out;
+}
+
 // Header styles
 .login-title {
   color: $primary-color;
@@ -357,15 +366,20 @@ ion-button {
   .login-container {
     padding: 16px;
   }
-  
+
+  .app-logo {
+    width: 100px;
+    height: 100px;
+  }
+
   .login-card {
     padding: 32px 24px;
   }
-  
+
   .login-title {
     font-size: 2rem;
   }
-  
+
   .login-subtitle {
     font-size: 1rem;
   }

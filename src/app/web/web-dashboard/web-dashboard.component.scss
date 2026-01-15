@@ -18,6 +18,18 @@
   background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), var(--bg);
   min-height: 100vh;
   color: var(--text);
+
+  .app-header {
+    text-align: center;
+    margin-bottom: 24px;
+
+    .dashboard-logo {
+      width: 80px;
+      height: 80px;
+      filter: drop-shadow(0 4px 8px rgba(34, 167, 240, 0.3));
+      animation: fadeIn 0.8s ease-out;
+    }
+  }
   
   // Force dark theme for all cards
   ::ng-deep .mat-card {
@@ -747,6 +759,17 @@
 }
 
 // Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 0.5;

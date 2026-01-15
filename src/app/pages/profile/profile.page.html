@@ -121,7 +121,10 @@
           <div class="badges-grid">
             <ng-container *ngFor="let badge of allBadges">
               <div *ngIf="badge.isUnlocked" class="badge-item">
-                <ion-icon [name]="badge.icon" class="badge-icon"></ion-icon>
+                <img [src]="getBadgeIconPath(badge)"
+                     [alt]="badge.name"
+                     class="badge-icon"
+                     (error)="onBadgeImageError($event, badge)">
                 <span class="badge-name">{{ badge.name }}</span>
               </div>
             </ng-container>
