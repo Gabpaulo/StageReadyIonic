@@ -82,6 +82,9 @@
     </ion-card-content>
   </ion-card>
 
+  <!-- Practice Calendar -->
+  <app-practice-calendar *ngIf="userId" [userId]="userId"></app-practice-calendar>
+
   <!-- Badge Progress Card -->
   <ion-card *ngIf="badgeProgress.total > 0" class="badge-progress-card">
     <ion-card-header>

@@ -13,6 +13,7 @@ import { XP_PER_LEVEL } from 'src/app/models/gamification.model';
 })
 export class DashboardPage implements OnInit {
   firstName: string = '';
+  userId: string = '';
   recentBadges: Badge[] = [];
   badgeProgress: { total: number; unlocked: number; percentage: number } = { total: 0, unlocked: 0, percentage: 0 };
 
@@ -35,6 +36,7 @@ export class DashboardPage implements OnInit {
   ngOnInit() {
     this.firebaseService.auth.onAuthStateChanged(async user => {
       if (user) {
+        this.userId = user.uid;
         const profile = await this.firebaseService.getUserProfile(user.uid);
         this.firstName = profile.firstName || '';
 
@@ -43,6 +45,7 @@ export class DashboardPage implements OnInit {
         this.totalSpeeches = speeches.length;
       } else {
         this.firstName = '';
+        this.userId = '';
       }
     });
 

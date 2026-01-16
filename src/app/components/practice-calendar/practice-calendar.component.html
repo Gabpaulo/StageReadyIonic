@@ -1,0 +1,83 @@
+<div class="practice-calendar">
+  <!-- Calendar Header -->
+  <div class="calendar-header">
+    <h3>Practice Calendar</h3>
+    <div class="calendar-stats">
+      <div class="stat-item">
+        <span class="stat-icon">🔥</span>
+        <div class="stat-content">
+          <span class="stat-value">{{ currentStreak }}</span>
+          <span class="stat-label">Day Streak</span>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">🏆</span>
+        <div class="stat-content">
+          <span class="stat-value">{{ longestStreak }}</span>
+          <span class="stat-label">Best Streak</span>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">📅</span>
+        <div class="stat-content">
+          <span class="stat-value">{{ totalPracticeDays }}</span>
+          <span class="stat-label">Total Days</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Month Navigation -->
+  <div class="month-navigation">
+    <button class="nav-btn" (click)="previousMonth()">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </button>
+    <h4 class="month-year">{{ currentMonthYear }}</h4>
+    <button class="nav-btn" (click)="nextMonth()" [disabled]="!canGoNext()">
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </button>
+  </div>
+
+  <!-- Day Labels -->
+  <div class="calendar-grid">
+    <div class="day-label">Sun</div>
+    <div class="day-label">Mon</div>
+    <div class="day-label">Tue</div>
+    <div class="day-label">Wed</div>
+    <div class="day-label">Thu</div>
+    <div class="day-label">Fri</div>
+    <div class="day-label">Sat</div>
+
+    <!-- Calendar Days -->
+    <div
+      *ngFor="let day of calendarDays"
+      class="calendar-day"
+      [class.practiced]="day.practiced"
+      [class.not-current-month]="!day.currentMonth"
+      [class.today]="day.isToday"
+      [attr.data-count]="day.speechCount"
+    >
+      <div class="day-number">{{ day.date.getDate() }}</div>
+      <div class="practice-indicator" *ngIf="day.practiced">
+        <span class="practice-dot" [class.multiple]="day.speechCount > 1"></span>
+        <span class="speech-count" *ngIf="day.speechCount > 1">{{ day.speechCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="calendar-legend">
+    <div class="legend-item">
+      <span class="legend-dot no-practice"></span>
+      <span class="legend-label">No practice</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot one-practice"></span>
+      <span class="legend-label">1 practice</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot multiple-practice"></span>
+      <span class="legend-label">2+ practices</span>
+    </div>
+  </div>
+</div>

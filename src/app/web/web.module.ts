@@ -12,6 +12,7 @@ import { WebFeedbackComponent } from './web-feedback/web-feedback.component';
 import { WebProfileComponent } from './web-profile/web-profile.component';
 import { WebLoginComponent } from './web-login/web-login.component';
 import { SpeechTypeDialogComponent } from './web-analysis/speech-type-dialog/speech-type-dialog.component';
+import { SharedModule } from '../shared/shared.module';
 
 import { IonicModule } from '@ionic/angular';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -46,6 +47,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     HttpClientModule,
     WebRoutingModule,
     IonicModule,
+    SharedModule,
     MatDialogModule,
     MatButtonModule,
     MatRadioModule,

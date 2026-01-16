@@ -1,25 +1,93 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Platform } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
 export class AudioRecorderService {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private stream: MediaStream | null = null;
+  private hasRequestedPermission = false;
 
   /** Emits true/false as recording starts/stops */
   public isRecording$ = new BehaviorSubject<boolean>(false);
   /** Emits the final audio Blob once recording stops */
   public audioBlob$    = new BehaviorSubject<Blob | null>(null);
 
+  constructor(private platform: Platform) {}
+
+  /** Check if microphone permission is granted (web only) */
+  async checkPermissions(): Promise<boolean> {
+    try {
+      // For web browsers that support the Permissions API
+      if ('permissions' in navigator) {
+        const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        console.log('Microphone permission status:', result.state);
+        return result.state === 'granted';
+      }
+      // If Permissions API not available, assume we need to request
+      return false;
+    } catch (error) {
+      console.log('Permissions API not available, will request on first use');
+      return false;
+    }
+  }
+
+  /** Request microphone permission explicitly */
+  async requestPermission(): Promise<boolean> {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+
+      // Stop the stream immediately, we just needed permission
+      stream.getTracks().forEach(track => track.stop());
+      this.hasRequestedPermission = true;
+      console.log('Microphone permission granted');
+      return true;
+    } catch (error) {
+      console.error('Failed to get microphone permission:', error);
+      this.handlePermissionError(error);
+      return false;
+    }
+  }
+
   /** Start capturing microphone only */
   async startRecording() {
     this.audioChunks = [];
     this.audioBlob$.next(null);
 
+    // Request permission if not already done
+    if (!this.hasRequestedPermission) {
+      const hasPermission = await this.requestPermission();
+      if (!hasPermission) {
+        return;
+      }
+    }
+
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      this.mediaRecorder = new MediaRecorder(this.stream);
+      // Request audio stream with optimized settings
+      const constraints: MediaStreamConstraints = {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1, // Mono for smaller file size
+          sampleRate: 48000 // High quality sample rate
+        }
+      };
+
+      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      // Use appropriate MIME type based on platform
+      const mimeType = this.getSupportedMimeType();
+      console.log('Using MIME type:', mimeType);
+
+      this.mediaRecorder = new MediaRecorder(this.stream, { mimeType });
 
       this.mediaRecorder.ondataavailable = (e) => {
         console.log('Audio data available:', e.data);
@@ -58,14 +126,98 @@ export class AudioRecorderService {
     } catch (err) {
       console.error('Error accessing microphone:', err);
       this.isRecording$.next(false);
-      if (err instanceof DOMException && err.name === 'NotAllowedError') {
-        alert('Microphone access denied. Please allow microphone permissions in your browser settings.');
-      } else if (err instanceof DOMException && err.name === 'NotFoundError') {
-        alert('No microphone found. Please ensure a microphone is connected and working.');
-      } else {
-        alert('An unexpected error occurred while trying to access the microphone.');
+      this.handlePermissionError(err);
+    }
+  }
+
+  /** Handle permission errors with user-friendly messages */
+  private handlePermissionError(error: any) {
+    if (error instanceof DOMException) {
+      switch (error.name) {
+        case 'NotAllowedError':
+          if (this.platform.is('android') || this.platform.is('ios')) {
+            alert('Microphone access denied. Please go to your device Settings > Apps > StageReady > Permissions and enable Microphone access.');
+          } else {
+            alert('Microphone access denied. Please click the microphone icon in your browser\'s address bar and allow microphone access, then try again.');
+          }
+          break;
+        case 'NotFoundError':
+          alert('No microphone found. Please ensure a microphone is connected and working.');
+          break;
+        case 'NotReadableError':
+          alert('Microphone is already in use by another application. Please close other apps using the microphone and try again.');
+          break;
+        case 'OverconstrainedError':
+          alert('Microphone does not support the requested audio settings. Trying with default settings...');
+          // Fallback to simpler constraints
+          this.startRecordingWithFallback();
+          break;
+        case 'AbortError':
+          alert('Microphone access was aborted. Please try again.');
+          break;
+        case 'SecurityError':
+          alert('Microphone access blocked due to security settings. Please check your browser or device settings.');
+          break;
+        default:
+          alert(`Microphone error: ${error.message || 'Unknown error'}`);
+      }
+    } else {
+      alert('An unexpected error occurred while trying to access the microphone.');
+    }
+  }
+
+  /** Fallback recording with simpler constraints */
+  private async startRecordingWithFallback() {
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = this.getSupportedMimeType();
+      this.mediaRecorder = new MediaRecorder(this.stream, { mimeType });
+
+      this.mediaRecorder.ondataavailable = (e) => {
+        this.audioChunks.push(e.data);
+      };
+
+      this.mediaRecorder.onstop = async () => {
+        this.isRecording$.next(false);
+        const webmBlob = new Blob(this.audioChunks, { type: mimeType });
+
+        try {
+          const wavBlob = await this.convertToWav(webmBlob);
+          this.audioBlob$.next(wavBlob);
+        } catch (error) {
+          console.error('Error converting to WAV:', error);
+          this.audioBlob$.next(webmBlob);
+        }
+
+        this.stopStream();
+      };
+
+      this.mediaRecorder.start();
+      this.isRecording$.next(true);
+    } catch (error) {
+      console.error('Fallback recording also failed:', error);
+      this.isRecording$.next(false);
+    }
+  }
+
+  /** Get supported MIME type for the platform */
+  private getSupportedMimeType(): string {
+    const types = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      'audio/mp4',
+      'audio/wav'
+    ];
+
+    for (const type of types) {
+      if (MediaRecorder.isTypeSupported(type)) {
+        return type;
       }
     }
+
+    // Default fallback
+    return 'audio/webm';
   }
 
   /** Stop capture and emit blob */

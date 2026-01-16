@@ -14,6 +14,7 @@ import { XP_PER_LEVEL } from '../../models/gamification.model';
 export class WebDashboardComponent implements OnInit {
   firstName: string = '';
   userPhotoURL: string | null = null;
+  userId: string = '';
   recentBadges: Badge[] = [];
   badgeProgress: { total: number; unlocked: number; percentage: number } = { total: 0, unlocked: 0, percentage: 0 };
 
@@ -48,10 +49,12 @@ export class WebDashboardComponent implements OnInit {
   ngOnInit() {
     this.firebaseService.auth.onAuthStateChanged(async user => {
       if (user) {
+        this.userId = user.uid;
         const profile = await this.firebaseService.getUserProfile(user.uid);
         this.firstName = profile.firstName || '';
         this.userPhotoURL = user.photoURL || null;
       } else {
+        this.userId = '';
         this.firstName = '';
         this.userPhotoURL = null;
       }

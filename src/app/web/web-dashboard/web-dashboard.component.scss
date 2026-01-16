@@ -15,9 +15,36 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), var(--bg);
+  background:
+    radial-gradient(circle at 15% 25%, rgba(34, 167, 240, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 85% 75%, rgba(156, 39, 176, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(0, 188, 212, 0.08) 0%, transparent 50%),
+    radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%),
+    var(--bg);
   min-height: 100vh;
   color: var(--text);
+  position: relative;
+  overflow-x: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      linear-gradient(90deg, transparent 0%, rgba(34, 167, 240, 0.03) 50%, transparent 100%),
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34, 167, 240, 0.03) 2px, rgba(34, 167, 240, 0.03) 4px);
+    pointer-events: none;
+    opacity: 0.5;
+    z-index: 0;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
 
   .app-header {
     text-align: center;
