@@ -7,6 +7,24 @@ ion-split-pane {
   height: 100vh;
   width: 100vw;
   background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
+  position: relative;
+
+  // Stage background image with subtle fade
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/assets/stage.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    pointer-events: none !important;
+    z-index: -1;
+  }
 }
 
 ion-menu {

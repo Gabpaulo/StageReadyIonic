@@ -5,6 +5,7 @@ import {
 } from 'firebase/auth';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
+import { OnboardingService } from '../../services/onboarding.service';
 import { ToastController } from '@ionic/angular';
 
 @Component({
@@ -24,6 +25,7 @@ export class WebLoginComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private firebaseService: FirebaseService,
+    private onboardingService: OnboardingService,
     private toastController: ToastController
   ) {}
 
@@ -62,9 +64,14 @@ export class WebLoginComponent implements OnInit {
       );
       const user = userCred.user;
       this.presentToast(`Login successful! Welcome, ${user.email}`);
-      
-      if (!(await this.firebaseService.userProfileExists(user.uid))) {
-        this.router.navigate(['/setup-profile']);
+
+      // Check if user needs onboarding
+      if (!this.onboardingService.hasCompletedOnboarding()) {
+        this.router.navigate(['/onboarding']);
+      } else if (!(await this.firebaseService.userProfileExists(user.uid))) {
+        this.router.navigate(['/setup-profile'], {
+          queryParams: { returnUrl: this.returnUrl }
+        });
       } else {
         this.router.navigate([this.returnUrl]);
       }
@@ -99,20 +106,28 @@ export class WebLoginComponent implements OnInit {
       const userCred = await this.firebaseService.signInWithGoogle();
       const user = userCred.user;
 
-      // Check if this is a new user
-      const isNewGoogleUser =
-        user.metadata.creationTime === user.metadata.lastSignInTime;
-
       this.presentToast(`Login successful! Welcome, ${user.displayName || user.email}`);
 
-      if (isNewGoogleUser) {
-        await this.firebaseService.createUserProfile(user.uid, {
-          email: user.email,
-          displayName: user.displayName || '',
-        });
-        this.router.navigate(['/setup-profile']);
+      // Check if user needs onboarding
+      if (!this.onboardingService.hasCompletedOnboarding()) {
+        this.router.navigate(['/onboarding']);
       } else {
-        this.router.navigate([this.returnUrl]);
+        // Check if user profile exists in Firestore
+        const profileExists = await this.firebaseService.userProfileExists(user.uid);
+
+        if (!profileExists) {
+          // New user - create minimal profile and redirect to setup
+          await this.firebaseService.createUserProfile(user.uid, {
+            email: user.email,
+            displayName: user.displayName || '',
+          });
+          this.router.navigate(['/setup-profile'], {
+            queryParams: { returnUrl: this.returnUrl }
+          });
+        } else {
+          // Existing user - go to dashboard
+          this.router.navigate([this.returnUrl]);
+        }
       }
 
     } catch (error: any) {

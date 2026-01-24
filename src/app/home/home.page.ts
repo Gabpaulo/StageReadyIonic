@@ -62,7 +62,9 @@ export class HomePage {
       if (!this.onboardingService.hasCompletedOnboarding()) {
         this.router.navigate(['/onboarding']);
       } else if (!(await this.firebaseService.userProfileExists(user.uid))) {
-        this.router.navigate(['/setup-profile']);
+        this.router.navigate(['/setup-profile'], {
+          queryParams: { returnUrl: this.returnUrl }
+        });
       } else {
         // Redirect to returnUrl or default dashboard
         this.router.navigate([this.returnUrl]);
@@ -118,14 +120,7 @@ export class HomePage {
     try {
       const userCred = await this.firebaseService.signInWithGoogle();
       const user = userCred.user;
-  
-      // 1. Determine if this is the very first sign-in:
-      //    Firebase Auth keeps metadata.creationTime and metadata.lastSignInTime.
-      //    If they’re identical, it means this is the first time they’ve signed in.
-      const isNewGoogleUser =
-        user.metadata.creationTime === user.metadata.lastSignInTime;
-  
-      // 2. Show the same welcome toast you already have
+
       const toast = await this.toastController.create({
         message: `Login successful! Welcome, ${user.displayName || user.email}`,
         duration: 2000,
@@ -136,17 +131,25 @@ export class HomePage {
       // Check if user needs onboarding
       if (!this.onboardingService.hasCompletedOnboarding()) {
         this.router.navigate(['/onboarding']);
-      } else if (isNewGoogleUser) {
-        await this.firebaseService.createUserProfile(user.uid, {
-          email: user.email,
-          displayName: user.displayName || '',
-        });
-        this.router.navigate(['/setup-profile']);
       } else {
-        // Redirect to returnUrl or default dashboard
-        this.router.navigate([this.returnUrl]);
+        // Check if user profile exists in Firestore
+        const profileExists = await this.firebaseService.userProfileExists(user.uid);
+
+        if (!profileExists) {
+          // New user - create minimal profile and redirect to setup
+          await this.firebaseService.createUserProfile(user.uid, {
+            email: user.email,
+            displayName: user.displayName || '',
+          });
+          this.router.navigate(['/setup-profile'], {
+            queryParams: { returnUrl: this.returnUrl }
+          });
+        } else {
+          // Existing user - go to dashboard
+          this.router.navigate([this.returnUrl]);
+        }
       }
-  
+
     } catch (error: any) {
       const toast = await this.toastController.create({
         message: `Google login failed: ${error.message}`,

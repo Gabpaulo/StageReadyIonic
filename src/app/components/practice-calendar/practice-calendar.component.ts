@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input } from '@angular/core';
 import { FirebaseService } from '../../services/firebase.service';
 
 interface CalendarDay {
@@ -15,7 +15,7 @@ interface CalendarDay {
   styleUrls: ['./practice-calendar.component.scss'],
   standalone: false
 })
-export class PracticeCalendarComponent implements OnInit {
+export class PracticeCalendarComponent implements OnInit, OnChanges {
   @Input() userId!: string;
 
   currentDate = new Date();
@@ -30,24 +30,66 @@ export class PracticeCalendarComponent implements OnInit {
   longestStreak = 0;
   totalPracticeDays = 0;
 
+  private hasLoaded = false;
+
   constructor(private firebaseService: FirebaseService) {}
 
-  async ngOnInit() {
-    await this.loadPracticeHistory();
+  ngOnInit() {
+    // Generate empty calendar immediately
     this.generateCalendar();
   }
 
+  async ngOnChanges(changes: SimpleChanges) {
+    // When userId changes and has a value, load the practice history
+    if (changes['userId'] && this.userId) {
+      // Reset if user changed
+      if (changes['userId'].previousValue !== changes['userId'].currentValue) {
+        this.hasLoaded = false;
+        this.practiceDates.clear();
+        this.practiceStats = {};
+      }
+
+      if (!this.hasLoaded) {
+        this.hasLoaded = true;
+        console.log('PracticeCalendar: Loading history for user:', this.userId);
+        await this.loadPracticeHistory();
+        console.log('PracticeCalendar: Loaded', this.practiceDates.size, 'practice dates:', Array.from(this.practiceDates));
+        this.generateCalendar();
+      }
+    }
+  }
+
   async loadPracticeHistory() {
-    if (!this.userId) return;
+    if (!this.userId) {
+      console.log('PracticeCalendar: No userId, skipping load');
+      return;
+    }
 
     try {
       const history = await this.firebaseService.getSpeechHistory(this.userId);
+      console.log('PracticeCalendar: Retrieved', history.length, 'speech history entries');
 
       // Process history to extract practice dates
-      history.forEach((speech: any) => {
-        const timestamp = speech.timestamp?.toDate?.() || new Date(speech.timestamp);
-        const dateKey = this.getDateKey(timestamp);
+      history.forEach((speech: any, index: number) => {
+        // getSpeechHistory returns entries with createdAt as a Date object
+        let timestamp: Date;
+        if (speech.createdAt instanceof Date) {
+          timestamp = speech.createdAt;
+        } else if (speech.createdAt?.toDate) {
+          timestamp = speech.createdAt.toDate();
+        } else if (speech.timestamp?.toDate) {
+          timestamp = speech.timestamp.toDate();
+        } else if (speech.timestamp) {
+          timestamp = new Date(speech.timestamp);
+        } else if (speech.createdAt) {
+          timestamp = new Date(speech.createdAt);
+        } else {
+          console.warn('PracticeCalendar: Speech entry', index, 'missing timestamp:', speech);
+          return;
+        }
 
+        const dateKey = this.getDateKey(timestamp);
+        console.log('PracticeCalendar: Entry', index, '- Date:', timestamp.toISOString(), '-> Key:', dateKey);
         this.practiceDates.add(dateKey);
         this.practiceStats[dateKey] = (this.practiceStats[dateKey] || 0) + 1;
       });
@@ -60,40 +102,59 @@ export class PracticeCalendarComponent implements OnInit {
   }
 
   calculateStreaks() {
+    if (this.practiceDates.size === 0) {
+      this.currentStreak = 0;
+      this.longestStreak = 0;
+      return;
+    }
+
+    // Get sorted unique practice dates (most recent first)
     const sortedDates = Array.from(this.practiceDates)
       .map(dateKey => new Date(dateKey))
       .sort((a, b) => b.getTime() - a.getTime());
 
-    if (sortedDates.length === 0) return;
-
-    // Calculate current streak
-    let streak = 0;
+    // Calculate current streak starting from today/yesterday
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    for (let i = 0; i < sortedDates.length; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(checkDate.getDate() - i);
-      checkDate.setHours(0, 0, 0, 0);
+    const mostRecentPractice = sortedDates[0];
+    mostRecentPractice.setHours(0, 0, 0, 0);
 
-      const dateKey = this.getDateKey(checkDate);
-      if (this.practiceDates.has(dateKey)) {
-        streak++;
-      } else if (i > 0) {
-        // Allow one day gap for current streak
-        break;
+    const daysSinceLast = Math.floor((today.getTime() - mostRecentPractice.getTime()) / (1000 * 60 * 60 * 24));
+
+    // If last practice was more than 1 day ago, streak is broken
+    if (daysSinceLast > 1) {
+      this.currentStreak = 0;
+    } else {
+      // Count consecutive days backwards from most recent practice
+      let streak = 1;
+      let expectedDate = new Date(mostRecentPractice);
+      expectedDate.setDate(expectedDate.getDate() - 1);
+
+      for (let i = 1; i < sortedDates.length; i++) {
+        const currentDay = new Date(sortedDates[i]);
+        currentDay.setHours(0, 0, 0, 0);
+
+        if (currentDay.getTime() === expectedDate.getTime()) {
+          streak++;
+          expectedDate.setDate(expectedDate.getDate() - 1);
+        } else {
+          break;
+        }
       }
+
+      this.currentStreak = streak;
     }
 
-    this.currentStreak = streak;
-
-    // Calculate longest streak
-    let maxStreak = 0;
+    // Calculate longest streak by checking all consecutive sequences
+    let maxStreak = 1;
     let tempStreak = 1;
 
     for (let i = 0; i < sortedDates.length - 1; i++) {
-      const current = sortedDates[i];
-      const next = sortedDates[i + 1];
+      const current = new Date(sortedDates[i]);
+      const next = new Date(sortedDates[i + 1]);
+      current.setHours(0, 0, 0, 0);
+      next.setHours(0, 0, 0, 0);
 
       const dayDiff = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -105,7 +166,7 @@ export class PracticeCalendarComponent implements OnInit {
       }
     }
 
-    this.longestStreak = Math.max(maxStreak, 1);
+    this.longestStreak = maxStreak;
   }
 
   generateCalendar() {

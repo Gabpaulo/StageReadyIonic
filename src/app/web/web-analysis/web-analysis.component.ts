@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AudioRecorderService } from '../../services/audio-recorder.service';
 import { SpeechAnalysisApiService } from '../../services/speech-analysis-api.service';
 import { BadgeService } from '../../services/badge.service';
+import { GamificationService } from '../../services/gamification.service';
 import { FirebaseService } from '../../services/firebase.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,6 +22,8 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
   audioBlob: Blob | null = null;
   audioUrl: string | null = null;
   isLoading = false;
+  isConverting = false;
+  isProcessingRecording = false; // Shows immediately when stop is pressed
   speechType: 'informative' | 'motivational' | 'persuasive' = 'informative';
   hasConfirmedSpeechType = false;
   recordingDuration = 0;
@@ -33,6 +36,7 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
     private speechAnalysisApi: SpeechAnalysisApiService,
     private router: Router,
     private badgeService: BadgeService,
+    private gamificationService: GamificationService,
     private firebaseService: FirebaseService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
@@ -42,16 +46,33 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
     try {
       this.subs.push(
         this.recorder.isRecording$.subscribe(r => {
+          const wasRecording = this.isRecording;
           this.isRecording = r;
-          if (r) {
+          if (r && !wasRecording) {
+            // Just started recording
+            this.stopTimer(); // Clear any existing timer first
+            this.recordingDuration = 0;
             this.startTimer();
-          } else {
+            this.isConverting = false;
+          } else if (!r && wasRecording) {
+            // Just stopped recording
             this.stopTimer();
+            this.isConverting = true;
           }
         }),
         this.recorder.audioBlob$.subscribe(blob => {
           this.audioBlob = blob;
           this.audioUrl = blob ? URL.createObjectURL(blob) : null;
+          // Audio blob received - stop the processing indicator, start converting indicator
+          if (blob) {
+            this.isProcessingRecording = false;
+            this.isConverting = true;
+          }
+        }),
+        this.recorder.wavReady$.subscribe(ready => {
+          if (ready) {
+            this.isConverting = false;
+          }
         })
       );
     } catch (error) {
@@ -111,7 +132,7 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
 
     try {
       await this.recorder.startRecording();
-      this.recordingDuration = 0;
+      // Duration reset is now handled in isRecording$ subscription
     } catch (error) {
       this.snackBar.open('Failed to access microphone. Please check permissions.', 'Close', { duration: 3000 });
       console.error('Recording error:', error);
@@ -119,6 +140,7 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
   }
 
   stopRecording() {
+    this.isProcessingRecording = true; // Show loading immediately when stop is pressed
     this.recorder.stopRecording();
   }
 
@@ -128,6 +150,7 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
     this.audioUrl = null;
     this.recordingDuration = 0;
     this.hasConfirmedSpeechType = false; // Reset speech type confirmation
+    this.isProcessingRecording = false;
   }
 
   async analyzeRecording() {
@@ -137,13 +160,18 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+
+    // Get WAV blob for submission (waits for conversion if still in progress)
+    const wavBlob = await this.recorder.getWavBlob();
+    const submissionBlob = wavBlob || this.audioBlob;
+
     console.log('Starting speech analysis...', {
-      audioBlobSize: this.audioBlob.size,
+      audioBlobSize: submissionBlob.size,
       speechType: this.speechType,
-      audioBlobType: this.audioBlob.type
+      audioBlobType: submissionBlob.type
     });
 
-    this.speechAnalysisApi.analyzeSpeech(this.audioBlob, this.speechType).subscribe({
+    this.speechAnalysisApi.analyzeSpeech(submissionBlob, this.speechType).subscribe({
       next: async (response: any) => {
         console.log('Speech analysis response received:', response);
         this.isLoading = false;
@@ -220,13 +248,14 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
           });
         }
 
-        // Check for badge achievements (non-blocking)
+        // Check for badge achievements and award XP (non-blocking)
         try {
           await this.badgeService.onSpeechCompleted(feedback);
           await this.badgeService.onSpeechAnalyzed(feedback);
+          await this.gamificationService.onSpeechCompleted();
         } catch (badgeError) {
-          console.error('Badge service error (non-critical):', badgeError);
-          // Don't prevent navigation if badges fail
+          console.error('Badge/Gamification service error (non-critical):', badgeError);
+          // Don't prevent navigation if badges/gamification fail
         }
 
         this.snackBar.open('Analysis complete!', 'Close', { duration: 2000 });

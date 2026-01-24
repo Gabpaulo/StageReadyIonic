@@ -1,0 +1,428 @@
+/* ===== Color Tokens ===== */
+$bg-dark: #17232f;
+$surface: #1e2c3a;
+$primary: #22a7f0;
+$text: #e8f1f9;
+$muted: #9bb2c8;
+
+$rarity-common: #9bb2c8;
+$rarity-rare: #22a7f0;
+$rarity-epic: #9c27b0;
+$rarity-legendary: #ffc107;
+
+/* ===== Overlay ===== */
+.badge-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &.animate-in {
+    opacity: 1;
+    visibility: visible;
+
+    .badge-popup-container {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  &.animate-out {
+    opacity: 0;
+
+    .badge-popup-container {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+  }
+}
+
+/* ===== Popup Container ===== */
+.badge-popup-container {
+  position: relative;
+  background: linear-gradient(145deg, $surface 0%, darken($surface, 5%) 100%);
+  border-radius: 24px;
+  padding: 40px 32px;
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+  transform: scale(0.5);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+
+  /* Rarity-based border glow */
+  &.rarity-common {
+    border: 2px solid $rarity-common;
+    box-shadow: 0 0 30px rgba($rarity-common, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5);
+
+    .glow-ring {
+      border-color: $rarity-common;
+      box-shadow: 0 0 20px rgba($rarity-common, 0.5);
+    }
+
+    .badge-icon-container {
+      border-color: $rarity-common;
+      box-shadow: 0 0 30px rgba($rarity-common, 0.4);
+    }
+
+    .particle {
+      background: $rarity-common;
+    }
+  }
+
+  &.rarity-rare {
+    border: 2px solid $rarity-rare;
+    box-shadow: 0 0 40px rgba($rarity-rare, 0.4), 0 20px 60px rgba(0, 0, 0, 0.5);
+
+    .glow-ring {
+      border-color: $rarity-rare;
+      box-shadow: 0 0 25px rgba($rarity-rare, 0.6);
+    }
+
+    .badge-icon-container {
+      border-color: $rarity-rare;
+      box-shadow: 0 0 40px rgba($rarity-rare, 0.5);
+    }
+
+    .particle {
+      background: $rarity-rare;
+    }
+  }
+
+  &.rarity-epic {
+    border: 2px solid $rarity-epic;
+    box-shadow: 0 0 50px rgba($rarity-epic, 0.5), 0 20px 60px rgba(0, 0, 0, 0.5);
+
+    .glow-ring {
+      border-color: $rarity-epic;
+      box-shadow: 0 0 30px rgba($rarity-epic, 0.7);
+    }
+
+    .badge-icon-container {
+      border-color: $rarity-epic;
+      box-shadow: 0 0 50px rgba($rarity-epic, 0.6);
+    }
+
+    .particle {
+      background: $rarity-epic;
+    }
+  }
+
+  &.rarity-legendary {
+    border: 2px solid $rarity-legendary;
+    box-shadow: 0 0 60px rgba($rarity-legendary, 0.6), 0 20px 60px rgba(0, 0, 0, 0.5);
+
+    .glow-ring {
+      border-color: $rarity-legendary;
+      box-shadow: 0 0 40px rgba($rarity-legendary, 0.8);
+    }
+
+    .badge-icon-container {
+      border-color: $rarity-legendary;
+      box-shadow: 0 0 60px rgba($rarity-legendary, 0.7);
+      animation: legendaryPulse 2s ease-in-out infinite;
+    }
+
+    .particle {
+      background: $rarity-legendary;
+    }
+
+    .unlock-label {
+      color: $rarity-legendary;
+    }
+  }
+}
+
+/* ===== Particles ===== */
+.particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: particleBurst 1.5s ease-out forwards;
+
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+      --angle: #{$i * 30}deg;
+    }
+  }
+}
+
+@keyframes particleBurst {
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-120px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* ===== Glow Rings ===== */
+.glow-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  border: 2px solid $primary;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: glowPulse 2s ease-out infinite;
+  pointer-events: none;
+
+  &.delay-1 {
+    animation-delay: 0.4s;
+  }
+
+  &.delay-2 {
+    animation-delay: 0.8s;
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* ===== Badge Content ===== */
+.badge-content {
+  position: relative;
+  z-index: 10;
+}
+
+.unlock-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: $primary;
+  margin-bottom: 20px;
+  animation: bounceIn 0.6s ease-out 0.2s both;
+
+  .star {
+    display: inline-block;
+    margin: 0 8px;
+    animation: starSpin 1s ease-out;
+  }
+}
+
+@keyframes starSpin {
+  from {
+    transform: rotate(0deg) scale(0);
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* ===== Badge Icon ===== */
+.badge-icon-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  border: 3px solid $primary;
+  background: linear-gradient(145deg, rgba($primary, 0.1) 0%, transparent 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: badgePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+  overflow: hidden;
+}
+
+.badge-shine {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 60%
+  );
+  animation: shine 2s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+.badge-icon {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes badgePop {
+  from {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes legendaryPulse {
+  0%, 100% {
+    box-shadow: 0 0 60px rgba($rarity-legendary, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 80px rgba($rarity-legendary, 0.9), 0 0 100px rgba($rarity-legendary, 0.5);
+  }
+}
+
+/* ===== Text Content ===== */
+.badge-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: $text;
+  margin: 0 0 8px;
+  animation: fadeInUp 0.5s ease-out 0.4s both;
+}
+
+.badge-rarity {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  animation: fadeInUp 0.5s ease-out 0.5s both;
+}
+
+.badge-description {
+  font-size: 0.95rem;
+  color: $muted;
+  line-height: 1.5;
+  margin: 0 0 24px;
+  animation: fadeInUp 0.5s ease-out 0.6s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===== Dismiss Button ===== */
+.dismiss-btn {
+  background: linear-gradient(135deg, $primary 0%, darken($primary, 10%) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 40px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba($primary, 0.4);
+  animation: fadeInUp 0.5s ease-out 0.7s both;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba($primary, 0.5);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 400px) {
+  .badge-popup-container {
+    padding: 32px 24px;
+    max-width: 300px;
+  }
+
+  .badge-icon-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .badge-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .badge-name {
+    font-size: 1.3rem;
+  }
+
+  .unlock-label {
+    font-size: 0.8rem;
+  }
+}
+
+/* ===== Accessibility ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -11,6 +11,22 @@
     </ion-toolbar>
   </ion-header>
 
+  <!-- Tip of the Day -->
+  <ion-card class="tip-of-day-card">
+    <ion-card-content>
+      <div class="tip-content">
+        <ion-icon name="bulb" class="tip-icon"></ion-icon>
+        <div class="tip-text">
+          <div class="tip-header">
+            <h3>Tip of the Day</h3>
+            <ion-badge color="warning" class="tip-category">{{ tipCategory }}</ion-badge>
+          </div>
+          <p>{{ tipOfTheDay }}</p>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Level & XP Card -->
   <ion-card class="level-card">
     <ion-card-content>
@@ -77,6 +93,30 @@
           <h3>Daily Challenge</h3>
           <p>{{ dailyChallenge }}</p>
           <ion-badge color="success" class="challenge-reward">+{{ dailyChallengeXP }} XP</ion-badge>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Upcoming Badge Preview -->
+  <ion-card *ngIf="upcomingBadge" class="upcoming-badge-card">
+    <ion-card-content>
+      <div class="upcoming-badge-content">
+        <div class="badge-preview-icon">
+          <img [src]="getBadgeIconPath(upcomingBadge.icon)" [alt]="upcomingBadge.name"
+               class="locked-badge-icon" (error)="onImageError($event)">
+          <div class="lock-overlay">
+            <ion-icon name="lock-closed"></ion-icon>
+          </div>
+        </div>
+        <div class="badge-preview-info">
+          <h3>Next Badge</h3>
+          <h4>{{ upcomingBadge.name }}</h4>
+          <p>{{ upcomingBadge.description }}</p>
+          <div class="badge-progress-bar">
+            <div class="badge-progress-fill" [style.width.%]="upcomingBadgeProgress"></div>
+          </div>
+          <span class="progress-label">{{ upcomingBadge.progress || 0 }} / {{ upcomingBadge.maxProgress }}</span>
         </div>
       </div>
     </ion-card-content>

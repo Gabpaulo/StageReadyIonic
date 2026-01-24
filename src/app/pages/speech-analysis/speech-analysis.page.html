@@ -11,8 +11,22 @@
   </div>
 
   <div class="main-container">
+    <!-- Processing Recording State (shows immediately when stop is pressed) -->
+    <div class="processing-section" *ngIf="isProcessingRecording && !audioUrl">
+      <div class="processing-icon">
+        <ion-icon name="mic"></ion-icon>
+      </div>
+      <div class="loader">
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+      </div>
+      <h3>Processing Recording</h3>
+      <p>Please wait while we process your audio...</p>
+    </div>
+
     <!-- Recording Section -->
-    <div class="recording-section" *ngIf="!audioUrl && !isLoading">
+    <div class="recording-section" *ngIf="!audioUrl && !isLoading && !isProcessingRecording">
       <div class="mic-container" [class.recording]="isRecording">
         <div class="pulse-ring" *ngIf="isRecording"></div>
         <div class="pulse-ring delay-1" *ngIf="isRecording"></div>
@@ -42,20 +56,28 @@
           <div class="wave"></div>
         </div>
         <audio [src]="audioUrl" controls class="custom-audio" type="audio/webm"></audio>
+
+        <!-- Converting indicator -->
+        <div *ngIf="isConverting" class="converting-indicator">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <span>Preparing audio for analysis...</span>
+        </div>
+
         <div class="action-buttons">
           <ion-button
             class="analyze-button"
             expand="block"
-            [disabled]="!hasConfirmedSpeechType"
+            [disabled]="!hasConfirmedSpeechType || isConverting"
             (click)="analyzeRecording()"
           >
-            <ion-icon name="analytics" slot="start"></ion-icon>
-            Analyze Recording
+            <ion-icon [name]="isConverting ? 'hourglass' : 'analytics'" slot="start"></ion-icon>
+            {{ isConverting ? 'Preparing...' : 'Analyze Recording' }}
           </ion-button>
           <ion-button
             class="reset-button"
             expand="block"
             fill="clear"
+            [disabled]="isConverting"
             (click)="resetRecording()"
           >
             <ion-icon name="refresh" slot="start"></ion-icon>

@@ -13,6 +13,22 @@
   position: relative;
   overflow: hidden;
 
+  // Stage background image with subtle fade
+  .stage-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/assets/stage.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -27,6 +43,8 @@
     background-position: 0 0, 25px 25px;
     animation: backgroundScroll 60s linear infinite;
     opacity: 0.3;
+    z-index: 1;
+    pointer-events: none;
   }
 
   &::after {
@@ -40,6 +58,7 @@
       radial-gradient(ellipse at top, rgba(34, 167, 240, 0.1), transparent),
       radial-gradient(ellipse at bottom, rgba(156, 39, 176, 0.1), transparent);
     pointer-events: none;
+    z-index: 2;
   }
 }
 
@@ -56,7 +75,8 @@
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
-  z-index: 1;
+  z-index: 3;
+  position: relative;
 }
 
 .login-header {

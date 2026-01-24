@@ -329,6 +329,173 @@ ion-card-subtitle {
   }
 }
 
+/* ===== Tip of the Day Card ===== */
+.tip-of-day-card {
+  margin: 0 16px 16px;
+  border: 2px solid var(--warning);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.08) 0%, var(--surface-2) 100%) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 25px var(--warning-glow) !important;
+
+  .tip-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px;
+    position: relative;
+
+    .tip-icon {
+      font-size: 3rem;
+      color: var(--warning);
+      filter: drop-shadow(0 0 15px var(--warning-glow));
+      flex-shrink: 0;
+    }
+
+    .tip-text {
+      flex: 1;
+
+      .tip-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+
+        h3 {
+          margin: 0;
+          font-size: 1.2rem;
+          font-weight: 900;
+          color: var(--warning);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          text-shadow: 0 0 10px var(--warning-glow);
+        }
+
+        .tip-category {
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+
+      p {
+        margin: 0;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-weight: 500;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+/* ===== Upcoming Badge Card ===== */
+.upcoming-badge-card {
+  margin: 0 16px 16px;
+  border: 2px solid var(--secondary);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.08) 0%, var(--surface-2) 100%) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 25px var(--secondary-glow) !important;
+
+  .upcoming-badge-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    position: relative;
+
+    .badge-preview-icon {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      flex-shrink: 0;
+
+      .locked-badge-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: grayscale(70%) opacity(0.6);
+      }
+
+      .lock-overlay {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        width: 28px;
+        height: 28px;
+        background: var(--secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 12px var(--secondary-glow);
+
+        ion-icon {
+          font-size: 14px;
+          color: #ffffff;
+        }
+      }
+    }
+
+    .badge-preview-info {
+      flex: 1;
+
+      h3 {
+        margin: 0;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px var(--secondary-glow);
+      }
+
+      h4 {
+        margin: 4px 0 6px 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--text);
+      }
+
+      p {
+        margin: 0 0 10px 0;
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+        line-height: 1.4;
+      }
+
+      .badge-progress-bar {
+        height: 10px;
+        background: var(--surface-2);
+        border: 2px solid var(--secondary);
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+
+        .badge-progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, var(--secondary), #e040fb);
+          border-radius: 999px;
+          box-shadow: 0 0 12px var(--secondary-glow);
+          transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+      }
+
+      .progress-label {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--secondary);
+        text-align: right;
+      }
+    }
+  }
+}
+
 /* ===== Badge Progress Card ===== */
 .badge-progress-card {
   margin: 0 16px 16px;

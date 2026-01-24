@@ -4,6 +4,7 @@ import { Router }                     from '@angular/router';
 import { AudioRecorderService }       from '../../services/audio-recorder.service';
 import { SpeechAnalysisApiService }   from '../../services/speech-analysis-api.service';
 import { BadgeService }               from '../../services/badge.service';
+import { GamificationService }        from '../../services/gamification.service';
 import { FirebaseService }            from '../../services/firebase.service';
 import { AnalyzeSpeechForFeedbackOutput }
   from './model';
@@ -19,6 +20,8 @@ export class SpeechAnalysisPage implements OnDestroy {
   audioBlob: Blob | null = null;
   audioUrl:  string | null = null;
   isLoading = false;
+  isConverting = false;
+  isProcessingRecording = false; // Shows immediately when stop is pressed
   speechType: 'informative' | 'motivational' | 'persuasive' = 'informative';
   pendingType: 'informative' | 'motivational' | 'persuasive' | null = 'informative';
   isTypeModalOpen = true;
@@ -31,17 +34,31 @@ export class SpeechAnalysisPage implements OnDestroy {
     private speechAnalysisApi: SpeechAnalysisApiService,
     private router: Router,
     private badgeService: BadgeService,
+    private gamificationService: GamificationService,
     private firebaseService: FirebaseService
   ) {
     this.subs.push(
       this.recorder.isRecording$
-        .subscribe(r => this.isRecording = r),
+        .subscribe(r => {
+          this.isRecording = r;
+          if (r) {
+            this.isConverting = false;
+          }
+        }),
       this.recorder.audioBlob$
         .subscribe(blob => {
           this.audioBlob = blob;
           this.audioUrl  = blob ? URL.createObjectURL(blob) : null;
           if (blob) {
             console.log('Recorded audio blob size:', blob.size, 'bytes');
+            this.isProcessingRecording = false; // Audio received, stop processing indicator
+            this.isConverting = true;
+          }
+        }),
+      this.recorder.wavReady$
+        .subscribe(ready => {
+          if (ready) {
+            this.isConverting = false;
           }
         })
     );
@@ -62,12 +79,16 @@ export class SpeechAnalysisPage implements OnDestroy {
   }
 
   startRecording()  { this.recorder.startRecording(); }
-  stopRecording()   { this.recorder.stopRecording(); }
+  stopRecording()   {
+    this.isProcessingRecording = true; // Show loading immediately when stop is pressed
+    this.recorder.stopRecording();
+  }
 
   resetRecording() {
     this.recorder.reset();
     this.audioBlob = null;
     this.audioUrl  = null;
+    this.isProcessingRecording = false;
   }
 
   openTypeModal() {
@@ -90,7 +111,11 @@ export class SpeechAnalysisPage implements OnDestroy {
     if (!this.audioBlob) { return; }
     this.isLoading = true;
 
-    this.speechAnalysisApi.analyzeSpeech(this.audioBlob, this.speechType).subscribe({
+    // Get WAV blob for submission (waits for conversion if still in progress)
+    const wavBlob = await this.recorder.getWavBlob();
+    const submissionBlob = wavBlob || this.audioBlob;
+
+    this.speechAnalysisApi.analyzeSpeech(submissionBlob, this.speechType).subscribe({
       next: async feedback => {
         this.isLoading = false;
         
@@ -123,10 +148,11 @@ export class SpeechAnalysisPage implements OnDestroy {
           });
         }
         
-        // Check for badge achievements
+        // Check for badge achievements and award XP
         await this.badgeService.onSpeechCompleted(feedback);
         await this.badgeService.onSpeechAnalyzed(feedback);
-        
+        await this.gamificationService.onSpeechCompleted();
+
         this.router.navigate(
           ['/speech-feedback'],
           { state: { feedback } }

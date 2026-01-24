@@ -27,6 +27,31 @@ export class DashboardPage implements OnInit {
   dailyChallengeXP: number = 25;
   totalSpeeches: number = 0;
 
+  // Upcoming badge preview
+  upcomingBadge: Badge | null = null;
+  upcomingBadgeProgress: number = 0;
+
+  // Tip of the day
+  tipOfTheDay: string = '';
+  tipCategory: string = '';
+
+  private tips = [
+    { tip: 'Practice in front of a mirror to observe your body language and facial expressions.', category: 'Body Language' },
+    { tip: 'Record yourself speaking and listen back to identify filler words like "um" and "uh".', category: 'Filler Words' },
+    { tip: 'Pause for 2-3 seconds after making an important point to let it sink in.', category: 'Pacing' },
+    { tip: 'Vary your pitch and tone to keep your audience engaged and emphasize key points.', category: 'Vocal Variety' },
+    { tip: 'Make eye contact with different sections of your audience every few seconds.', category: 'Eye Contact' },
+    { tip: 'Start with a hook - a surprising fact, question, or story to grab attention.', category: 'Opening' },
+    { tip: 'Use the "rule of three" - group ideas in threes for better retention.', category: 'Structure' },
+    { tip: 'Practice deep breathing before speaking to calm nerves and project confidence.', category: 'Confidence' },
+    { tip: 'Speak slightly slower than feels natural - nervousness often speeds us up.', category: 'Pacing' },
+    { tip: 'End with a clear call to action or memorable takeaway for your audience.', category: 'Closing' },
+    { tip: 'Use gestures purposefully to reinforce your message, not randomly.', category: 'Body Language' },
+    { tip: 'Practice your speech standing up, even if you\'ll deliver it seated.', category: 'Practice' },
+    { tip: 'Know your first and last sentences by heart - they\'re the most important.', category: 'Preparation' },
+    { tip: 'Smile genuinely when appropriate - it makes you more likeable and relatable.', category: 'Connection' }
+  ];
+
   constructor(
     private firebaseService: FirebaseService,
     private badgeService: BadgeService,
@@ -56,7 +81,13 @@ export class DashboardPage implements OnInit {
         .filter(badge => badge.isUnlocked && badge.unlockedAt)
         .sort((a, b) => new Date(b.unlockedAt!).getTime() - new Date(a.unlockedAt!).getTime())
         .slice(0, 3);
+
+      // Find upcoming badge (closest to completion)
+      this.findUpcomingBadge(badges);
     });
+
+    // Set tip of the day
+    this.setTipOfTheDay();
 
     // Subscribe to gamification updates
     this.gamificationService.userGamification$.subscribe(gamification => {
@@ -85,5 +116,33 @@ export class DashboardPage implements OnInit {
   onImageError(event: any): void {
     console.error('Badge icon failed to load:', event.target.src);
     event.target.src = '/assets/badges/first-step.svg';
+  }
+
+  private setTipOfTheDay() {
+    // Use date-based index so tip changes daily but is consistent throughout the day
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    const tipIndex = dayOfYear % this.tips.length;
+    this.tipOfTheDay = this.tips[tipIndex].tip;
+    this.tipCategory = this.tips[tipIndex].category;
+  }
+
+  private findUpcomingBadge(badges: Badge[]) {
+    // Find locked badges sorted by progress percentage (highest first)
+    const lockedBadges = badges
+      .filter(badge => !badge.isUnlocked && badge.maxProgress && badge.maxProgress > 0)
+      .map(badge => ({
+        badge,
+        progressPercent: ((badge.progress || 0) / badge.maxProgress!) * 100
+      }))
+      .sort((a, b) => b.progressPercent - a.progressPercent);
+
+    if (lockedBadges.length > 0) {
+      this.upcomingBadge = lockedBadges[0].badge;
+      this.upcomingBadgeProgress = lockedBadges[0].progressPercent;
+    } else {
+      this.upcomingBadge = null;
+      this.upcomingBadgeProgress = 0;
+    }
   }
 }

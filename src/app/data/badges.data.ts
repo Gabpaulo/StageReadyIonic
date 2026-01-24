@@ -195,23 +195,23 @@ export const BADGE_DEFINITIONS: Badge[] = [
 export const BADGE_CRITERIA: Record<string, BadgeCriteria> = {
   first_steps: {
     type: 'speech_count',
-    value: 1,
-    condition: 'greater_than'
+    value: 1
+    // Default condition is >= so 1+ speeches unlocks this
   },
   daily_practice: {
     type: 'consecutive_days',
-    value: 7,
-    condition: 'greater_than'
+    value: 7
+    // Default condition is >= so 7+ consecutive days unlocks this
   },
   week_warrior: {
     type: 'total_days',
-    value: 30,
-    condition: 'greater_than'
+    value: 30
+    // Default condition is >= so 30+ total days unlocks this
   },
   consistency_champion: {
     type: 'total_days',
-    value: 100,
-    condition: 'greater_than'
+    value: 100
+    // Default condition is >= so 100+ total days unlocks this
   },
   clarity_master: {
     type: 'rating_achievement',
@@ -233,18 +233,18 @@ export const BADGE_CRITERIA: Record<string, BadgeCriteria> = {
   },
   speed_demon: {
     type: 'speech_count',
-    value: 10,
-    condition: 'greater_than'
+    value: 10
+    // Default condition is >= so 10+ speeches unlocks this
   },
   marathon_speaker: {
     type: 'speech_count',
-    value: 50,
-    condition: 'greater_than'
+    value: 50
+    // Default condition is >= so 50+ speeches unlocks this
   },
   centurion: {
     type: 'speech_count',
-    value: 100,
-    condition: 'greater_than'
+    value: 100
+    // Default condition is >= so 100+ speeches unlocks this
   },
   profile_pioneer: {
     type: 'profile_completion',
@@ -253,8 +253,8 @@ export const BADGE_CRITERIA: Record<string, BadgeCriteria> = {
   },
   early_bird: {
     type: 'speech_count',
-    value: 1,
-    condition: 'greater_than'
+    value: 1
+    // Default condition is >= so 1+ speeches unlocks this
   },
   interests_explorer: {
     type: 'profile_completion',

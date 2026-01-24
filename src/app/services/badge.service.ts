@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FirebaseService } from './firebase.service';
+import { BadgeNotificationService } from './badge-notification.service';
+import { GamificationService } from './gamification.service';
 import { Badge, UserBadgeProgress, BadgeCategory, BadgeRarity } from '../models/badge.model';
 import { BADGE_DEFINITIONS, BADGE_CRITERIA } from '../data/badges.data';
 import { AnalyzeSpeechForFeedbackOutput } from '../pages/speech-analysis/model';
@@ -14,7 +16,19 @@ export class BadgeService {
 
   private currentUserId: string | null = null;
 
-  constructor(private firebaseService: FirebaseService) {
+  // XP rewards based on badge rarity
+  private readonly BADGE_XP_REWARDS = {
+    [BadgeRarity.COMMON]: 10,
+    [BadgeRarity.RARE]: 25,
+    [BadgeRarity.EPIC]: 50,
+    [BadgeRarity.LEGENDARY]: 100
+  };
+
+  constructor(
+    private firebaseService: FirebaseService,
+    private badgeNotificationService: BadgeNotificationService,
+    private gamificationService: GamificationService
+  ) {
     this.initializeBadgeService();
   }
 
@@ -92,6 +106,15 @@ export class BadgeService {
     if (newlyUnlockedBadges.length > 0) {
       await this.saveUserBadges(currentBadges);
       this.userBadgesSubject.next(currentBadges);
+
+      // Award XP for each unlocked badge based on rarity
+      for (const badge of newlyUnlockedBadges) {
+        const xpReward = this.BADGE_XP_REWARDS[badge.rarity] || 10;
+        await this.gamificationService.awardXP(xpReward, `${badge.name} badge unlocked`);
+      }
+
+      // Show badge unlock popup for each newly unlocked badge
+      this.badgeNotificationService.showBadgeUnlock(newlyUnlockedBadges);
     }
 
     return newlyUnlockedBadges;

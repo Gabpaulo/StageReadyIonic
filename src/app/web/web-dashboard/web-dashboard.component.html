@@ -25,6 +25,22 @@
     </div>
   </div>
 
+  <!-- Tip of the Day -->
+  <mat-card class="tip-of-day-card">
+    <mat-card-content>
+      <div class="tip-content">
+        <div class="tip-icon">💡</div>
+        <div class="tip-text">
+          <div class="tip-header">
+            <h3>Tip of the Day</h3>
+            <span class="tip-category">{{ tipCategory }}</span>
+          </div>
+          <p>{{ tipOfTheDay }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
   <!-- Stats Overview -->
   <div class="stats-grid">
     <mat-card class="stat-card pulse-card">
@@ -178,6 +194,36 @@
           <h3>Daily Challenge</h3>
           <p>{{ dailyChallenge }}</p>
           <div class="challenge-reward">+{{ dailyChallengeXP }} XP</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Upcoming Badge Preview -->
+  <mat-card *ngIf="upcomingBadge" class="upcoming-badge-card">
+    <mat-card-header>
+      <mat-card-title>
+        🎯 Next Badge
+      </mat-card-title>
+      <mat-card-subtitle>You're making progress!</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="upcoming-badge-content">
+        <div class="upcoming-badge-image">
+          <img [src]="getBadgeIconPath(upcomingBadge.icon)" [alt]="upcomingBadge.name" class="upcoming-badge-icon" (error)="onImageError($event)">
+          <div class="badge-locked-overlay">
+            <span>🔒</span>
+          </div>
+        </div>
+        <div class="upcoming-badge-info">
+          <h4>{{ upcomingBadge.name }}</h4>
+          <p>{{ upcomingBadge.description }}</p>
+          <div class="upcoming-progress-container">
+            <div class="upcoming-progress-bar">
+              <div class="upcoming-progress-fill" [style.width.%]="upcomingBadgeProgress"></div>
+            </div>
+            <span class="upcoming-progress-text">{{ upcomingBadge.progress || 0 }} / {{ upcomingBadge.maxProgress }}</span>
+          </div>
         </div>
       </div>
     </mat-card-content>

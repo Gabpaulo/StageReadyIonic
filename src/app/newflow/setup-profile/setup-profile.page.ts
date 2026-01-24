@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
@@ -8,7 +8,7 @@ import { FirebaseService } from '../../services/firebase.service';
   styleUrls: ['./setup-profile.page.scss'],
   standalone: false,
 })
-export class SetupProfilePage {
+export class SetupProfilePage implements OnInit {
   firstName = '';
   lastName = '';
   age!: number;
@@ -28,12 +28,28 @@ export class SetupProfilePage {
   'Confidence Building'
 ];
 
-
+  returnUrl: string = '/ionic/dashboard'; // Default to ionic
 
   constructor(
     private firebaseService: FirebaseService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
+
+  ngOnInit() {
+    // Get returnUrl from query parameters to determine which dashboard to navigate to
+    this.route.queryParams.subscribe(params => {
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
+      } else {
+        // Detect based on current URL
+        const currentUrl = this.router.url;
+        if (currentUrl.includes('/web')) {
+          this.returnUrl = '/web/dashboard';
+        }
+      }
+    });
+  }
 
   async saveProfile() {
     const user = this.firebaseService.auth.currentUser;
@@ -49,7 +65,9 @@ export class SetupProfilePage {
       email: user.email || ''
     };
     await this.firebaseService.createUserProfile(user.uid, profileData);
-    this.router.navigate(['/ionic/dashboard']);
+
+    // Navigate to the correct dashboard based on returnUrl
+    this.router.navigate([this.returnUrl]);
   }
 
   onInterestsChange() {

@@ -152,26 +152,52 @@ export class FirebaseService {
     const speechesRef = collection(this.firestore, `users/${uid}/speeches`);
     const q = query(speechesRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
-    
+
     if (querySnapshot.empty) return 0;
 
-    let consecutiveDays = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (const doc of querySnapshot.docs) {
+    // Get unique days with speeches (sorted desc)
+    const uniqueDays = new Set<string>();
+    querySnapshot.docs.forEach(doc => {
       const speechData = doc.data();
       const speechDate = speechData['createdAt']?.toDate();
       if (speechDate) {
-        speechDate.setHours(0, 0, 0, 0);
-        const dayDiff = Math.floor((today.getTime() - speechDate.getTime()) / (1000 * 60 * 60 * 24));
-        
-        if (dayDiff === consecutiveDays) {
-          consecutiveDays++;
-          today.setDate(today.getDate() - 1);
-        } else {
-          break;
-        }
+        const dateString = speechDate.toDateString();
+        uniqueDays.add(dateString);
+      }
+    });
+
+    // Convert to sorted array (most recent first)
+    const sortedDays = Array.from(uniqueDays).sort((a, b) => {
+      return new Date(b).getTime() - new Date(a).getTime();
+    });
+
+    if (sortedDays.length === 0) return 0;
+
+    // Check if the most recent speech was today or yesterday
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const mostRecentDay = new Date(sortedDays[0]);
+    mostRecentDay.setHours(0, 0, 0, 0);
+
+    const daysSinceLast = Math.floor((today.getTime() - mostRecentDay.getTime()) / (1000 * 60 * 60 * 24));
+
+    // If last speech was more than 1 day ago, streak is broken (return 0)
+    if (daysSinceLast > 1) return 0;
+
+    // Count consecutive days starting from the most recent
+    let consecutiveDays = 1;
+    let expectedDate = new Date(mostRecentDay);
+    expectedDate.setDate(expectedDate.getDate() - 1);
+
+    for (let i = 1; i < sortedDays.length; i++) {
+      const currentDay = new Date(sortedDays[i]);
+      currentDay.setHours(0, 0, 0, 0);
+
+      if (currentDay.getTime() === expectedDate.getTime()) {
+        consecutiveDays++;
+        expectedDate.setDate(expectedDate.getDate() - 1);
+      } else {
+        break;
       }
     }
 
