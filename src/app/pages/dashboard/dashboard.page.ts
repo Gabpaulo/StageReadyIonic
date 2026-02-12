@@ -66,8 +66,8 @@ export class DashboardPage implements OnInit {
         this.firstName = profile.firstName || '';
 
         // Load speech count
-        const speeches = await this.firebaseService.getSpeechHistory(user.uid);
-        this.totalSpeeches = speeches.length;
+        const summary = await this.firebaseService.getSpeechHistorySummary(user.uid);
+        this.totalSpeeches = summary.totalSessions;
       } else {
         this.firstName = '';
         this.userId = '';

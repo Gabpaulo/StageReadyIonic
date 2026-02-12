@@ -462,6 +462,58 @@
   }
 }
 
+// Recording Container
+.recording-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Single Recording Visualizer
+.recording-visualizer-web {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: rgba(30, 44, 58, 0.4);
+  border: 1px solid rgba(34, 167, 240, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(34, 167, 240, 0.15);
+  animation: fadeInWeb 0.5s ease-out;
+
+  .visualizer-bars-web {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 100px;
+
+    .vis-bar-web {
+      width: 6px;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary) 100%);
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(34, 167, 240, 0.3);
+      min-height: 15px;
+      max-height: 100px;
+      transform-origin: center bottom;
+      transition: height 0.05s ease-out; // Quick response to audio changes
+    }
+  }
+}
+
+@keyframes fadeInWeb {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 // Test page styles
 .test-page {
   display: flex;
@@ -481,14 +533,14 @@
   box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 24px rgba(34, 167, 240, 0.1);
   max-width: 600px;
   width: 100%;
-  
+
   h1 {
     color: #e8f1f9;
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0 0 24px 0;
   }
-  
+
   p {
     color: #9bb2c8;
     font-size: 1.1rem;

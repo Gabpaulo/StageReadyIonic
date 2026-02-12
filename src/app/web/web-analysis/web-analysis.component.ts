@@ -28,8 +28,12 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
   hasConfirmedSpeechType = false;
   recordingDuration = 0;
   recordingTimer: any;
+  audioLevels: number[] = Array(15).fill(0); // Audio levels for 15 bars
 
   private subs: Subscription[] = [];
+  private audioContext: AudioContext | null = null;
+  private analyser: AnalyserNode | null = null;
+  private animationFrameId: number | null = null;
 
   constructor(
     public recorder: AudioRecorderService,
@@ -103,9 +107,72 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subs.forEach(s => s.unsubscribe());
     this.stopTimer();
+    this.stopAudioAnalysis();
     if (this.audioUrl) {
       URL.revokeObjectURL(this.audioUrl);
     }
+  }
+
+  private async startAudioAnalysis() {
+    try {
+      // Get the media stream from the recorder
+      const stream = (this.recorder as any).stream;
+      if (!stream) {
+        console.warn('No audio stream available for analysis');
+        return;
+      }
+
+      // Create audio context and analyser
+      this.audioContext = new AudioContext();
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 64; // Small FFT for 15 frequency bins
+      this.analyser.smoothingTimeConstant = 0.7; // Smooth out the visualization
+
+      const source = this.audioContext.createMediaStreamSource(stream);
+      source.connect(this.analyser);
+
+      // Start the animation loop
+      this.updateAudioLevels();
+    } catch (error) {
+      console.error('Error starting audio analysis:', error);
+    }
+  }
+
+  private updateAudioLevels() {
+    if (!this.analyser || !this.isRecording) {
+      return;
+    }
+
+    const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+    this.analyser.getByteFrequencyData(dataArray);
+
+    // Map frequency data to our 15 bars
+    const barCount = 15;
+    const step = Math.floor(dataArray.length / barCount);
+
+    for (let i = 0; i < barCount; i++) {
+      const index = i * step;
+      // Normalize to 0-1 range and apply some scaling for better visibility
+      this.audioLevels[i] = Math.min((dataArray[index] / 255) * 1.5, 1);
+    }
+
+    // Continue the animation loop
+    this.animationFrameId = requestAnimationFrame(() => this.updateAudioLevels());
+  }
+
+  private stopAudioAnalysis() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
+
+    this.analyser = null;
+    this.audioLevels = Array(15).fill(0);
   }
 
   openTypeDialog() {
@@ -132,6 +199,8 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
 
     try {
       await this.recorder.startRecording();
+      // Start audio analysis after a short delay to ensure stream is ready
+      setTimeout(() => this.startAudioAnalysis(), 100);
       // Duration reset is now handled in isRecording$ subscription
     } catch (error) {
       this.snackBar.open('Failed to access microphone. Please check permissions.', 'Close', { duration: 3000 });
@@ -142,6 +211,7 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
   stopRecording() {
     this.isProcessingRecording = true; // Show loading immediately when stop is pressed
     this.recorder.stopRecording();
+    this.stopAudioAnalysis();
   }
 
   resetRecording() {
@@ -216,7 +286,17 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
           analysis: response
         };
         
-        // Save speech analysis to Firebase
+        this.snackBar.open('Analysis complete!', 'Close', { duration: 2000 });
+
+        // Navigate to feedback page immediately
+        this.router.navigate(['/web/feedback'], {
+          state: { feedback }
+        });
+
+        // Save to Firebase and process badges/XP in the background
+        const audioBlob = this.audioBlob;
+        const speechType = this.speechType;
+
         let user = this.firebaseService.auth.currentUser;
         if (!user) {
           try {
@@ -224,46 +304,33 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
             user = cred.user;
           } catch (authErr) {
             console.error('User authentication required to save analysis.', authErr);
-            this.snackBar.open('Authentication required to save analysis', 'Close', { duration: 3000 });
-            return;
           }
         }
 
         if (user) {
-          // Save speech history with properly structured backend feedback
-          await this.firebaseService.saveSpeechHistory(user.uid, {
-            feedback: response, // Pass the raw backend response
-            transcript: response.transcript || '',
-            duration: response.duration || 0,
-            audioBlob: this.audioBlob,
-            speechType: this.speechType
-          });
-
-          // Save detailed analysis with audio (for other purposes)
-          await this.firebaseService.saveSpeechAnalysis(user.uid, {
-            feedback: feedback,
-            audioBlob: this.audioBlob,
-            speechType: this.speechType,
-            timestamp: new Date()
-          });
+          Promise.all([
+            this.firebaseService.saveSpeechHistory(user.uid, {
+              feedback: response,
+              transcript: response.transcript || '',
+              duration: response.duration || 0,
+              audioBlob: audioBlob,
+              speechType: speechType
+            }),
+            this.firebaseService.saveSpeechAnalysis(user.uid, {
+              feedback: feedback,
+              audioBlob: audioBlob,
+              speechType: speechType,
+              timestamp: new Date()
+            })
+          ]).catch(err => console.error('Error saving speech data:', err));
         }
 
         // Check for badge achievements and award XP (non-blocking)
-        try {
-          await this.badgeService.onSpeechCompleted(feedback);
-          await this.badgeService.onSpeechAnalyzed(feedback);
-          await this.gamificationService.onSpeechCompleted();
-        } catch (badgeError) {
-          console.error('Badge/Gamification service error (non-critical):', badgeError);
-          // Don't prevent navigation if badges/gamification fail
-        }
-
-        this.snackBar.open('Analysis complete!', 'Close', { duration: 2000 });
-
-        // Navigate to feedback page
-        this.router.navigate(['/web/feedback'], {
-          state: { feedback }
-        });
+        Promise.all([
+          this.badgeService.onSpeechCompleted(feedback),
+          this.badgeService.onSpeechAnalyzed(feedback),
+          this.gamificationService.onSpeechCompleted()
+        ]).catch(err => console.error('Badge/Gamification service error:', err));
       },
       error: (err: any) => {
         console.error('Analysis error', err);

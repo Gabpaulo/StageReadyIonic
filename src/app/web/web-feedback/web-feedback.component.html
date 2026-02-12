@@ -10,9 +10,7 @@
       <mat-card-title>Transcription</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <div class="transcript-content">
-        {{ feedback.transcript }}
-      </div>
+      <div class="transcript-content" [innerHTML]="highlightedTranscript"></div>
     </mat-card-content>
   </mat-card>
 
@@ -134,11 +132,19 @@
         <p><strong>Percentage:</strong> {{ (feedback.analysis.filler_word_details.ratio * 100).toFixed(1) }}% of speech</p>
 
         <div *ngIf="feedback.analysis.filler_word_details.words && feedback.analysis.filler_word_details.words.length > 0" style="margin-top: 10px;">
-          <p><strong>Detected Filler Words:</strong></p>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-            <span *ngFor="let filler of feedback.analysis.filler_word_details.words"
-                  style="background: #fff3e0; padding: 4px 12px; border-radius: 12px; font-size: 0.9rem;">
+          <p><strong>Detected in transcript:</strong></p>
+          <div class="filler-chips">
+            <span *ngFor="let filler of feedback.analysis.filler_word_details.words" class="filler-chip">
               "{{ filler.word }}" ({{ filler.count }})
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="feedback.analysis.filler_word_details.audio_fillers?.count > 0" class="audio-fillers-section">
+          <p><strong>Hesitation sounds (um/uh) detected from audio:</strong> {{ feedback.analysis.filler_word_details.audio_fillers.count }} found</p>
+          <div class="filler-chips">
+            <span *ngFor="let ts of feedback.analysis.filler_word_details.audio_fillers.timestamps" class="filler-chip audio-filler-chip">
+              um/uh at {{ formatSecondsToTime(ts.start) }}
             </span>
           </div>
         </div>

@@ -352,13 +352,15 @@ ion-modal {
   }
 
   ion-content {
-    --background: var(--surface);
-    background: var(--surface);
+    --background: linear-gradient(180deg, #1e2c3a 0%, #17232f 100%);
+    background: linear-gradient(180deg, #1e2c3a 0%, #17232f 100%);
   }
 }
 
 .modal-content {
   padding: 16px;
+  background: linear-gradient(180deg, #1e2c3a 0%, #17232f 100%);
+  min-height: 100%;
 }
 
 /* ===== Modal Cards ===== */

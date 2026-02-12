@@ -32,15 +32,26 @@
       <h2 style="color: #e8f1f9; margin-bottom: 20px;">Recording Interface</h2>
       <p style="color: #9bb2c8; margin-bottom: 30px;">Click the button below to start recording</p>
 
-      <button
-        class="record-button"
-        [class.stop-button]="isRecording"
-        [disabled]="!hasConfirmedSpeechType"
-        (click)="isRecording ? stopRecording() : startRecording()"
-        style="width: 150px; height: 150px; border-radius: 50%; border: none; background: linear-gradient(90deg, #1b8fd3, #22a7f0); color: white; font-size: 3rem; cursor: pointer; margin: 20px;"
-      >
-        {{ isRecording ? '⏹' : '🎤' }}
-      </button>
+      <div class="recording-container">
+        <button
+          class="record-button"
+          [class.stop-button]="isRecording"
+          [disabled]="!hasConfirmedSpeechType"
+          (click)="isRecording ? stopRecording() : startRecording()"
+          style="width: 150px; height: 150px; border-radius: 50%; border: none; background: linear-gradient(90deg, #1b8fd3, #22a7f0); color: white; font-size: 3rem; cursor: pointer; margin: 20px; position: relative; z-index: 10;"
+        >
+          {{ isRecording ? '⏹' : '🎤' }}
+        </button>
+      </div>
+
+      <!-- Audio-Reactive Visualizer -->
+      <div class="recording-visualizer-web" *ngIf="isRecording">
+        <div class="visualizer-bars-web">
+          <div class="vis-bar-web"
+               *ngFor="let level of audioLevels; let i = index"
+               [style.height.px]="15 + (level * 85)"></div>
+        </div>
+      </div>
 
       <p *ngIf="!hasConfirmedSpeechType && !isRecording" style="color: #9bb2c8; margin-top: 20px;">
         <button

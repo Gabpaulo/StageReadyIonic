@@ -31,6 +31,7 @@
         <div class="pulse-ring" *ngIf="isRecording"></div>
         <div class="pulse-ring delay-1" *ngIf="isRecording"></div>
         <div class="pulse-ring delay-2" *ngIf="isRecording"></div>
+
         <ion-button
           class="record-button"
           [class.stop-button]="isRecording"
@@ -40,6 +41,16 @@
           <ion-icon [name]="isRecording ? 'stop' : 'mic'"></ion-icon>
         </ion-button>
       </div>
+
+      <!-- Audio-Reactive Visualizer -->
+      <div class="recording-visualizer" *ngIf="isRecording">
+        <div class="visualizer-bars">
+          <div class="vis-bar"
+               *ngFor="let level of audioLevels; let i = index"
+               [style.height.px]="15 + (level * 85)"></div>
+        </div>
+      </div>
+
       <p class="recording-text" *ngIf="isRecording">Recording in progress...</p>
       <p class="instruction-text" *ngIf="!isRecording && hasConfirmedSpeechType">Tap to start recording</p>
       <p class="instruction-text" *ngIf="!isRecording && !hasConfirmedSpeechType">Choose a speech type to begin.</p>

@@ -29,6 +29,8 @@ export class WebDashboardComponent implements OnInit {
   motivationalQuote: string = 'The way to get started is to quit talking and begin doing.';
   quoteAuthor: string = 'Walt Disney';
 
+  totalSpeeches: number = 0;
+
   // Upcoming badge preview
   upcomingBadge: Badge | null = null;
   upcomingBadgeProgress: number = 0;
@@ -78,6 +80,10 @@ export class WebDashboardComponent implements OnInit {
         const profile = await this.firebaseService.getUserProfile(user.uid);
         this.firstName = profile.firstName || '';
         this.userPhotoURL = user.photoURL || null;
+
+        // Load actual speech count
+        const summary = await this.firebaseService.getSpeechHistorySummary(user.uid);
+        this.totalSpeeches = summary.totalSessions;
       } else {
         this.userId = '';
         this.firstName = '';

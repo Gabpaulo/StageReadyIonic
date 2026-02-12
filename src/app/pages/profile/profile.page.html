@@ -25,19 +25,36 @@
   <ng-container *ngIf="!loading && userProfile">
     <!-- Profile Header Card -->
     <ion-card class="profile-header-card">
+      <div class="profile-card-glow"></div>
       <ion-card-content>
         <div class="profile-header">
-          <ion-avatar *ngIf="currentUserPhotoURL" class="profile-avatar">
-            <img [src]="currentUserPhotoURL" alt="Avatar" />
-          </ion-avatar>
+          <div class="avatar-container">
+            <ion-avatar *ngIf="currentUserPhotoURL" class="profile-avatar">
+              <img [src]="currentUserPhotoURL" alt="Avatar" />
+            </ion-avatar>
+            <ion-avatar *ngIf="!currentUserPhotoURL" class="profile-avatar default-avatar">
+              <ion-icon name="person"></ion-icon>
+            </ion-avatar>
+            <div class="avatar-badge">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
+          </div>
           <div class="profile-text">
             <h1 class="profile-name">{{ (userProfile.firstName || '') + ' ' + (userProfile.lastName || '') }}</h1>
-            <p *ngIf="currentUserEmail" class="profile-email">{{ currentUserEmail }}</p>
+            <p *ngIf="currentUserEmail" class="profile-email">
+              <ion-icon name="mail-outline"></ion-icon>
+              {{ currentUserEmail }}
+            </p>
             <p *ngIf="userProfile.bio" class="profile-bio">{{ userProfile.bio }}</p>
+            <div *ngIf="userProfile.interests && userProfile.interests.length" class="interests-tags">
+              <span *ngFor="let interest of userProfile.interests.slice(0, 3)" class="interest-tag">
+                {{ interest }}
+              </span>
+            </div>
           </div>
         </div>
         <div class="profile-actions">
-          <ion-button expand="block" color="primary" (click)="openEditModal()">
+          <ion-button expand="block" color="primary" (click)="openEditModal()" class="edit-button">
             <ion-icon name="create-outline" slot="start"></ion-icon>
             Edit Profile
           </ion-button>

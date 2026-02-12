@@ -211,6 +211,36 @@
     color: var(--muted);
     font-weight: 500;
   }
+
+  // Single Recording Visualizer - simulates sound waves
+  .recording-visualizer {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: rgba(30, 44, 58, 0.4);
+    border: 1px solid rgba(34, 167, 240, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(34, 167, 240, 0.15);
+    animation: fadeIn 0.5s ease-out;
+
+    .visualizer-bars {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 100px;
+
+      .vis-bar {
+        width: 6px;
+        background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+        border-radius: 3px;
+        box-shadow: 0 0 10px var(--primary-glow);
+        min-height: 15px;
+        max-height: 100px;
+        transform-origin: center bottom;
+        transition: height 0.05s ease-out; // Quick response to audio changes
+      }
+    }
+  }
 }
 
 /* ===== Audio Preview Section ===== */
@@ -656,6 +686,42 @@
   50% { content: '..'; }
   75% { content: '...'; }
   100% { content: ''; }
+}
+
+@keyframes audioWave {
+  0% {
+    height: 15px;
+    opacity: 0.4;
+  }
+  10% {
+    height: 45px;
+    opacity: 0.7;
+  }
+  25% {
+    height: 75px;
+    opacity: 0.9;
+  }
+  40% {
+    height: 90px;
+    opacity: 1;
+    box-shadow: 0 0 15px var(--primary-glow);
+  }
+  55% {
+    height: 60px;
+    opacity: 0.85;
+  }
+  70% {
+    height: 35px;
+    opacity: 0.6;
+  }
+  85% {
+    height: 50px;
+    opacity: 0.75;
+  }
+  100% {
+    height: 15px;
+    opacity: 0.4;
+  }
 }
 
 /* ===== Responsive Design ===== */
