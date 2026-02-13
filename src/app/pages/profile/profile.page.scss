@@ -697,8 +697,14 @@ ion-modal {
     --background: var(--surface-2);
     --border-color: var(--border);
     --color: var(--text);
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
     border-radius: 10px;
     margin-bottom: 12px;
+
+    &::part(native) {
+      padding: 0 16px;
+    }
 
     ion-label {
       color: var(--muted);
@@ -708,6 +714,8 @@ ion-modal {
     ion-input, ion-textarea, ion-select {
       color: var(--text);
       --placeholder-color: var(--muted);
+      --padding-start: 0;
+      --padding-end: 16px;
     }
   }
 

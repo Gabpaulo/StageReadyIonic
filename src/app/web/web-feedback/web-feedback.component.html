@@ -96,23 +96,28 @@
     </mat-card>
   </div>
 
-  <!-- Strengths and Improvements -->
+  <!-- Areas for Improvement and Strengths -->
   <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
-    <mat-card class="feedback-card" *ngIf="feedback.strengths">
+    <mat-card class="feedback-card improvements-card" *ngIf="feedback.areas_improvement">
+      <mat-card-header>
+        <mat-card-title>Areas for Improvement</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="improvement-list">
+          <div *ngFor="let item of getImprovementItems()" class="improvement-item">
+            <strong *ngIf="item.category" class="improvement-category">{{ item.category }}</strong>
+            <p class="improvement-text">{{ item.suggestion }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="feedback-card strengths-card" *ngIf="feedback.strengths">
       <mat-card-header>
         <mat-card-title>Strengths</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <p>{{ feedback.strengths }}</p>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="feedback-card" *ngIf="feedback.areas_improvement">
-      <mat-card-header>
-        <mat-card-title>Areas for Improvement</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ feedback.areas_improvement }}</p>
       </mat-card-content>
     </mat-card>
   </div>
@@ -127,33 +132,40 @@
         <strong>Filler Words Score:</strong> {{ feedback.filler_words || feedback.filler_words_score || 0 }}/5
       </p>
 
-      <div *ngIf="feedback.analysis?.filler_word_details" style="margin-top: 15px;">
-        <p><strong>Total Filler Words:</strong> {{ feedback.analysis.filler_word_details.count }}</p>
-        <p><strong>Percentage:</strong> {{ (feedback.analysis.filler_word_details.ratio * 100).toFixed(1) }}% of speech</p>
+      <div *ngIf="fillerDetails" style="margin-top: 15px;">
+        <div class="filler-stats">
+          <p><strong>Total Filler Words:</strong> {{ fillerDetails.count }}</p>
+          <p *ngIf="fillerDetails.word_count > 0">
+            <strong>Filler Ratio:</strong> {{ ((fillerDetails.count / fillerDetails.word_count) * 100).toFixed(1) }}% of speech
+          </p>
+        </div>
 
-        <div *ngIf="feedback.analysis.filler_word_details.words && feedback.analysis.filler_word_details.words.length > 0" style="margin-top: 10px;">
-          <p><strong>Detected in transcript:</strong></p>
-          <div class="filler-chips">
-            <span *ngFor="let filler of feedback.analysis.filler_word_details.words" class="filler-chip">
-              "{{ filler.word }}" ({{ filler.count }})
-            </span>
+        <!-- Individual filler words with timestamps -->
+        <div *ngIf="fillerDetails.fillers && fillerDetails.fillers.length > 0" style="margin-top: 16px;">
+          <p><strong>Detected filler words:</strong></p>
+          <div class="filler-list">
+            <div *ngFor="let filler of fillerDetails.fillers" class="filler-item">
+              <span class="filler-word">"{{ filler.word }}"</span>
+              <span class="filler-time">{{ formatSecondsToTime(filler.start) }} – {{ formatSecondsToTime(filler.end) }}</span>
+            </div>
           </div>
         </div>
 
-        <div *ngIf="feedback.analysis.filler_word_details.audio_fillers?.count > 0" class="audio-fillers-section">
-          <p><strong>Hesitation sounds (um/uh) detected from audio:</strong> {{ feedback.analysis.filler_word_details.audio_fillers.count }} found</p>
+        <!-- Summary of unique filler words with counts -->
+        <div *ngIf="fillerSummary && fillerSummary.length > 0" style="margin-top: 16px;">
+          <p><strong>Summary:</strong></p>
           <div class="filler-chips">
-            <span *ngFor="let ts of feedback.analysis.filler_word_details.audio_fillers.timestamps" class="filler-chip audio-filler-chip">
-              um/uh at {{ formatSecondsToTime(ts.start) }}
+            <span *ngFor="let item of fillerSummary" class="filler-chip">
+              "{{ item.word }}" ({{ item.count }}x)
             </span>
           </div>
         </div>
       </div>
 
-      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) >= 4" class="no-fillers" style="margin-top: 15px; color: #4caf50;">
+      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) >= 4" class="no-fillers" style="margin-top: 15px;">
         Excellent! Minimal filler words detected.
       </p>
-      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) < 4" class="needs-improvement" style="margin-top: 15px; color: #ff9800;">
+      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) < 4" class="needs-improvement" style="margin-top: 15px;">
         Try to reduce filler words for better fluency. Practice pausing instead.
       </p>
     </mat-card-content>

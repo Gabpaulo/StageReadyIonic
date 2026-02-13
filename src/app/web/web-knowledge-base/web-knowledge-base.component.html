@@ -1,0 +1,70 @@
+<div class="knowledge-base-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <ion-icon name="library-outline" class="header-icon"></ion-icon>
+      <div>
+        <h1>Knowledge Base</h1>
+        <p>Open-source resources to help you become a better speaker. Click any card to visit the resource.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Filter -->
+  <div class="category-filter">
+    <button
+      *ngFor="let cat of categories"
+      class="filter-chip"
+      [class.active]="selectedCategory === cat"
+      (click)="filterByCategory(cat)">
+      {{ cat }}
+    </button>
+  </div>
+
+  <!-- Error Banner -->
+  <div *ngIf="error" class="error-banner">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Loading Skeleton -->
+  <div *ngIf="loading" class="resources-grid">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="resource-card skeleton">
+      <div class="skeleton-icon"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-line title"></div>
+        <div class="skeleton-line badge"></div>
+        <div class="skeleton-line desc"></div>
+        <div class="skeleton-line desc short"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resource Cards Grid -->
+  <div *ngIf="!loading" class="resources-grid">
+    <div
+      *ngFor="let resource of filteredResources"
+      class="resource-card"
+      (click)="openResource(resource.url)">
+      <div class="card-icon-wrapper">
+        <ion-icon [name]="resource.icon" class="card-icon"></ion-icon>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">{{ resource.title }}</h3>
+        <span class="card-category">{{ resource.category }}</span>
+        <p class="card-description">{{ resource.description }}</p>
+        <div class="card-link">
+          <ion-icon name="open-outline"></ion-icon>
+          <span>Visit Resource</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredResources.length === 0" class="empty-state">
+    <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+    <p>No resources found for this category.</p>
+    <button class="show-all-btn" (click)="filterByCategory('All')">Show All</button>
+  </div>
+</div>

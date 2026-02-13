@@ -92,12 +92,12 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #333;
+      color: #e8f1f9 !important;
       font-weight: 600;
       font-size: 1.3rem;
-      
+
       mat-icon {
-        color: #667eea;
+        color: #22a7f0;
       }
     }
   }
@@ -237,18 +237,33 @@
   }
 }
 
-// Feedback Details
+// Feedback Details - Areas for Improvement (wider) + Strengths side by side
 .feedback-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
   gap: 1.5rem;
   margin-bottom: 24px;
+
+  .improvements-card {
+    flex: 2;
+    min-width: 0;
+  }
+
+  .strengths-card {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .feedback-details {
+    flex-direction: column;
+  }
 }
 
 .filler-words-card {
   .filler-feedback {
     font-size: 1rem;
-    color: #666;
+    color: #e8f1f9 !important;
     margin-bottom: 16px;
     line-height: 1.5;
   }
@@ -282,7 +297,7 @@
   }
 
   .no-fillers {
-    color: #4caf50;
+    color: #4caf50 !important;
     font-weight: 500;
     padding: 1rem;
     text-align: center;
@@ -290,11 +305,26 @@
     border-radius: 8px;
   }
 
+  .needs-improvement {
+    color: #ff9800 !important;
+    font-weight: 500;
+    padding: 1rem;
+    text-align: center;
+    background: rgba(255, 152, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .filler-stats {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
   .filler-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    
+
     .filler-item {
       background: rgba(255, 193, 7, 0.1);
       border: 1px solid rgba(255, 193, 7, 0.3);
@@ -304,24 +334,52 @@
       align-items: center;
       gap: 8px;
       transition: all 0.3s ease;
-      
+
       &:hover {
         background: rgba(255, 193, 7, 0.2);
         transform: translateY(-1px);
       }
-      
+
       .filler-word {
         font-weight: 600;
-        color: #f57c00;
+        color: #ffb74d !important;
       }
-      
+
       .filler-time {
         font-size: 0.8rem;
-        color: #666;
-        background: rgba(255, 255, 255, 0.8);
+        color: #9bb2c8 !important;
+        background: rgba(34, 167, 240, 0.1);
         padding: 2px 6px;
         border-radius: 4px;
       }
+    }
+  }
+}
+
+// Improvement List
+.improvement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .improvement-item {
+    padding: 14px 16px;
+    background: #1a2734;
+    border-radius: 12px;
+    border-left: 4px solid #00bcd4;
+
+    .improvement-category {
+      color: #00bcd4 !important;
+      font-size: 0.95rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .improvement-text {
+      color: #e8f1f9 !important;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0;
     }
   }
 }

@@ -13,6 +13,7 @@ import { AnalyzeSpeechForFeedbackOutput } from '../speech-analysis/model';
 export class SpeechFeedbackPage implements OnInit {
   feedback!: AnalyzeSpeechForFeedbackOutput;
   highlightedTranscript: SafeHtml = '';
+  fillerSummary: { word: string; count: number }[] = [];
 
   constructor(public router: Router, private sanitizer: DomSanitizer) {
     const nav = this.router.getCurrentNavigation();
@@ -24,6 +25,7 @@ export class SpeechFeedbackPage implements OnInit {
       return;
     }
     this.feedback = state.feedback;
+    this.fillerSummary = this.buildFillerSummary();
     this.highlightedTranscript = this.buildHighlightedTranscript();
   }
 
@@ -34,19 +36,60 @@ export class SpeechFeedbackPage implements OnInit {
   }
 
   getFillerDetails(): any {
-    return (this.feedback as any).filler_word_details || this.feedback.analysis?.filler_word_details;
+    const details = (this.feedback as any).filler_word_details
+      || this.feedback.analysis?.filler_word_details
+      || null;
+    console.log('Filler details extracted:', details);
+    return details;
+  }
+
+  private buildFillerSummary(): { word: string; count: number }[] {
+    const fillerDetails = this.getFillerDetails();
+    if (!fillerDetails?.fillers?.length) return [];
+
+    const counts = new Map<string, number>();
+    for (const filler of fillerDetails.fillers) {
+      const word = filler.word.toLowerCase();
+      counts.set(word, (counts.get(word) || 0) + 1);
+    }
+
+    return Array.from(counts.entries())
+      .map(([word, count]) => ({ word, count }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  getImprovementItems(): { category: string; suggestion: string }[] {
+    const text = this.feedback.areas_improvement;
+    if (!text) return [];
+
+    // Split on double newlines (from recommendations format: "Category: Suggestion")
+    const lines = text.split('\n\n').filter(line => line.trim());
+    if (lines.length > 1) {
+      return lines.map(line => {
+        const colonIdx = line.indexOf(':');
+        if (colonIdx > 0) {
+          return {
+            category: line.substring(0, colonIdx).trim(),
+            suggestion: line.substring(colonIdx + 1).trim()
+          };
+        }
+        return { category: '', suggestion: line.trim() };
+      });
+    }
+
+    // Fallback: single line, return as-is
+    return [{ category: '', suggestion: text }];
   }
 
   private buildHighlightedTranscript(): SafeHtml {
     const transcript = this.feedback.transcript;
     if (!transcript) return '';
 
-    const fillerDetails = this.getFillerDetails();
-    if (!fillerDetails?.words?.length) {
+    if (!this.fillerSummary.length) {
       return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(transcript));
     }
 
-    const fillerWords: string[] = fillerDetails.words.map((f: any) => f.word);
+    const fillerWords: string[] = this.fillerSummary.map(f => f.word);
     return this.sanitizer.bypassSecurityTrustHtml(this.highlightFillers(transcript, fillerWords));
   }
 

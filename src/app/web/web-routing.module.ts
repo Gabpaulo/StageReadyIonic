@@ -8,6 +8,7 @@ import { WebAnalysisComponent } from './web-analysis/web-analysis.component';
 import { WebFeedbackComponent } from './web-feedback/web-feedback.component';
 import { WebProfileComponent } from './web-profile/web-profile.component';
 import { WebLoginComponent } from './web-login/web-login.component';
+import { WebKnowledgeBaseComponent } from './web-knowledge-base/web-knowledge-base.component';
 import { AuthGuard } from '../../app/guards/auth.guard';
 
 const routes: Routes = [
@@ -25,7 +26,8 @@ const routes: Routes = [
       { path: 'history', component: WebHistoryComponent, canActivate: [AuthGuard] },
       { path: 'analysis', component: WebAnalysisComponent },
       { path: 'feedback', component: WebFeedbackComponent, canActivate: [AuthGuard] },
-      { path: 'profile', component: WebProfileComponent, canActivate: [AuthGuard] }
+      { path: 'profile', component: WebProfileComponent, canActivate: [AuthGuard] },
+      { path: 'knowledge-base', component: WebKnowledgeBaseComponent, canActivate: [AuthGuard] }
     ]
   }
 ];

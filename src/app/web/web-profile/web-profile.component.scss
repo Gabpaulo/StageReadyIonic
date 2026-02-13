@@ -527,10 +527,15 @@
         &.mat-focused .mat-form-field-label {
           color: #22a7f0 !important;
         }
+
+        .mat-form-field-infix {
+          padding: 12px 16px;
+        }
       }
 
       input, textarea, .mat-select-value {
         color: #e8f1f9 !important;
+        padding: 0 4px;
       }
 
       .mat-select-arrow {

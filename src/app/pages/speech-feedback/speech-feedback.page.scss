@@ -283,6 +283,57 @@
 
 /* ===== Filler Words Card ===== */
 .filler-words-card {
+  p {
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .filler-words-list {
+    margin-top: 16px;
+  }
+
+  .filler-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+
+    .filler-item {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(255, 193, 7, 0.2);
+        transform: translateY(-1px);
+      }
+
+      .filler-word {
+        font-weight: 600;
+        color: #ffb74d;
+      }
+
+      .filler-time {
+        font-size: 0.8rem;
+        color: var(--muted);
+        background: rgba(34, 167, 240, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .filler-summary-section {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
   .filler-chips {
     display: flex;
     flex-wrap: wrap;
@@ -299,20 +350,36 @@
     border: 1px solid rgba(255, 152, 0, 0.3);
   }
 
-  .audio-fillers-section {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-
-  .audio-filler-chip {
-    background: rgba(244, 67, 54, 0.15) !important;
-    color: #ef9a9a !important;
-    border-color: rgba(244, 67, 54, 0.3) !important;
-  }
-
   .filler-good {
     color: var(--success);
+  }
+}
+
+/* ===== Improvement List ===== */
+.improvement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .improvement-item {
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border-radius: 12px;
+    border-left: 4px solid var(--accent);
+
+    .improvement-category {
+      color: var(--accent);
+      font-size: 0.95rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .improvement-text {
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0;
+    }
   }
 }
 

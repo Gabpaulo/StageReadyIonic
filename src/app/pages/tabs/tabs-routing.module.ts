@@ -36,6 +36,10 @@ const routes: Routes = [
         loadChildren: () => import('../speech-feedback/speech-feedback.module').then(m => m.SpeechFeedbackPageModule)
       },
       {
+        path: 'knowledge-base',
+        loadChildren: () => import('../knowledge-base/knowledge-base.module').then(m => m.KnowledgeBasePageModule)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

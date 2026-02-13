@@ -12,6 +12,8 @@ import { AnalyzeSpeechForFeedbackOutput } from '../../pages/speech-analysis/mode
 export class WebFeedbackComponent implements OnInit {
   feedback!: AnalyzeSpeechForFeedbackOutput;
   highlightedTranscript: SafeHtml = '';
+  fillerDetails: any = null;
+  fillerSummary: { word: string; count: number }[] = [];
 
   constructor(public router: Router, private sanitizer: DomSanitizer) {
     const nav = this.router.getCurrentNavigation();
@@ -23,6 +25,8 @@ export class WebFeedbackComponent implements OnInit {
       return;
     }
     this.feedback = state.feedback;
+    this.fillerDetails = this.extractFillerDetails();
+    this.fillerSummary = this.buildFillerSummary();
     this.highlightedTranscript = this.buildHighlightedTranscript();
   }
 
@@ -32,16 +36,42 @@ export class WebFeedbackComponent implements OnInit {
     this.router.navigateByUrl('/web/analysis');
   }
 
+  private extractFillerDetails(): any {
+    // Check multiple paths: analysis.filler_word_details (web mapping)
+    // or top-level filler_word_details (direct response)
+    const details = this.feedback.analysis?.filler_word_details
+      || (this.feedback as any).filler_word_details
+      || null;
+    console.log('Filler details extracted:', details);
+    return details;
+  }
+
+  private buildFillerSummary(): { word: string; count: number }[] {
+    if (!this.fillerDetails?.fillers?.length) return [];
+
+    // Count occurrences of each unique filler word
+    const counts = new Map<string, number>();
+    for (const filler of this.fillerDetails.fillers) {
+      const word = filler.word.toLowerCase();
+      counts.set(word, (counts.get(word) || 0) + 1);
+    }
+
+    // Convert to sorted array (most frequent first)
+    return Array.from(counts.entries())
+      .map(([word, count]) => ({ word, count }))
+      .sort((a, b) => b.count - a.count);
+  }
+
   private buildHighlightedTranscript(): SafeHtml {
     const transcript = this.feedback.transcript;
     if (!transcript) return '';
 
-    const fillerDetails = this.feedback.analysis?.filler_word_details;
-    if (!fillerDetails?.words?.length) {
+    // Use the filler words from fillerSummary (derived from backend fillers array)
+    if (!this.fillerSummary.length) {
       return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(transcript));
     }
 
-    const fillerWords: string[] = fillerDetails.words.map((f: any) => f.word);
+    const fillerWords: string[] = this.fillerSummary.map(f => f.word);
     return this.sanitizer.bypassSecurityTrustHtml(this.highlightFillers(transcript, fillerWords));
   }
 
@@ -55,6 +85,29 @@ export class WebFeedbackComponent implements OnInit {
 
   private escapeHtml(text: string): string {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  getImprovementItems(): { category: string; suggestion: string }[] {
+    const text = this.feedback.areas_improvement;
+    if (!text) return [];
+
+    // Split on double newlines (from recommendations format: "Category: Suggestion")
+    const lines = text.split('\n\n').filter(line => line.trim());
+    if (lines.length > 1) {
+      return lines.map(line => {
+        const colonIdx = line.indexOf(':');
+        if (colonIdx > 0) {
+          return {
+            category: line.substring(0, colonIdx).trim(),
+            suggestion: line.substring(colonIdx + 1).trim()
+          };
+        }
+        return { category: '', suggestion: line.trim() };
+      });
+    }
+
+    // Fallback: single line, return as-is
+    return [{ category: '', suggestion: text }];
   }
 
   formatSecondsToTime(seconds: number): string {

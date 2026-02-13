@@ -70,27 +70,33 @@
   <div class="feedback-card filler-words-card" *ngIf="getFillerDetails() as fillerDetails">
     <div class="card-header">
       <ion-icon name="chatbubble-ellipses" class="card-icon"></ion-icon>
-      <h3>Filler Words Analysis</h3>
+      <h3>Filler Word Analysis</h3>
     </div>
     <p><strong>Score:</strong> {{ feedback.filler_words || feedback.filler_words_score || 0 }}/5</p>
     <p><strong>Total Filler Words:</strong> {{ fillerDetails.count }}</p>
-    <p><strong>Percentage:</strong> {{ (fillerDetails.ratio * 100).toFixed(1) }}% of speech</p>
-    <div *ngIf="fillerDetails.words && fillerDetails.words.length > 0" class="filler-words-list">
-      <p><strong>Detected in transcript:</strong></p>
+    <p *ngIf="fillerDetails.word_count > 0"><strong>Filler Ratio:</strong> {{ ((fillerDetails.count / fillerDetails.word_count) * 100).toFixed(1) }}% of speech</p>
+
+    <!-- Individual filler words with timestamps -->
+    <div *ngIf="fillerDetails.fillers && fillerDetails.fillers.length > 0" class="filler-words-list">
+      <p><strong>Detected filler words:</strong></p>
+      <div class="filler-list">
+        <div *ngFor="let filler of fillerDetails.fillers" class="filler-item">
+          <span class="filler-word">"{{ filler.word }}"</span>
+          <span class="filler-time">{{ formatSecondsToTime(filler.start) }} - {{ formatSecondsToTime(filler.end) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary of unique filler words with counts -->
+    <div *ngIf="fillerSummary && fillerSummary.length > 0" class="filler-summary-section">
+      <p><strong>Summary:</strong></p>
       <div class="filler-chips">
-        <span *ngFor="let filler of fillerDetails.words" class="filler-chip">
-          "{{ filler.word }}" ({{ filler.count }})
+        <span *ngFor="let item of fillerSummary" class="filler-chip">
+          "{{ item.word }}" ({{ item.count }}x)
         </span>
       </div>
     </div>
-    <div *ngIf="fillerDetails.audio_fillers?.count > 0" class="audio-fillers-section">
-      <p><strong>Hesitation sounds (um/uh) detected from audio:</strong> {{ fillerDetails.audio_fillers.count }} found</p>
-      <div class="filler-chips">
-        <span *ngFor="let ts of fillerDetails.audio_fillers.timestamps" class="filler-chip audio-filler-chip">
-          um/uh at {{ formatSecondsToTime(ts.start) }}
-        </span>
-      </div>
-    </div>
+
     <p *ngIf="fillerDetails.count === 0" class="filler-good">No filler words detected.</p>
   </div>
 
@@ -127,22 +133,27 @@
     </div>
   </div>
 
-  <!-- Strengths and Improvements -->
+  <!-- Areas for Improvement and Strengths -->
   <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
+    <div class="feedback-card" *ngIf="feedback.areas_improvement">
+      <div class="card-header">
+        <ion-icon name="trending-up" class="card-icon"></ion-icon>
+        <h3>Areas for Improvement</h3>
+      </div>
+      <div class="improvement-list">
+        <div *ngFor="let item of getImprovementItems()" class="improvement-item">
+          <strong class="improvement-category">{{ item.category }}</strong>
+          <p class="improvement-text">{{ item.suggestion }}</p>
+        </div>
+      </div>
+    </div>
+
     <div class="feedback-card" *ngIf="feedback.strengths">
       <div class="card-header">
         <ion-icon name="checkmark-circle" class="card-icon"></ion-icon>
         <h3>Strengths</h3>
       </div>
       <p>{{ feedback.strengths }}</p>
-    </div>
-
-    <div class="feedback-card" *ngIf="feedback.areas_improvement">
-      <div class="card-header">
-        <ion-icon name="trending-up" class="card-icon"></ion-icon>
-        <h3>Areas for Improvement</h3>
-      </div>
-      <p>{{ feedback.areas_improvement }}</p>
     </div>
   </div>
 
