@@ -1,7 +1,6 @@
 export const environment = {
   production: true,
-  geminiApiKey: 'REPLACE_WITH_PROD_GEMINI_KEY',
-  backendApiUrl: 'http://localhost:8000/api', // Update with production backend URL
+  groqApiKey: 'REPLACE_WITH_PROD_GROQ_KEY',
   firebaseConfig: {
     apiKey: "AIzaSyA-gBJBJRTvJNlnMQXRoW-tBj1NI10_qZE",
     authDomain: "stagereadydb.firebaseapp.com",

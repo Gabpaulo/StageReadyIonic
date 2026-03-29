@@ -210,7 +210,6 @@ export class BadgeService {
   }
 
   private getRatingFromFeedback(feedback: AnalyzeSpeechForFeedbackOutput, ratingType: string): string {
-    // Handle new backend response structure where feedback fields may not exist
     switch (ratingType) {
       case 'clarity':
         return feedback.clarity_feedback?.toLowerCase() || this.scoreToRating(feedback.articulation_clarity);

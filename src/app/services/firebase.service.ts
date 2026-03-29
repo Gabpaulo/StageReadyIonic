@@ -315,12 +315,6 @@ export class FirebaseService {
       audioMimeType = speechData.audioBlob.type;
     }
 
-    // The backend response structure is:
-    // { speech_pace, pausing_fluency, loudness_control, pitch_variation,
-    //   articulation_clarity, expressive_emphasis, filler_words, overall,
-    //   transcript, duration, feedback: { overall_assessment, detailed_scores },
-    //   recommendations: [...] }
-
     const feedback = speechData.feedback;
 
     const baseEntry: any = {

@@ -1,7 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { WebRoutingModule } from './web-routing.module';
 import { WebShellComponent } from './web-shell/web-shell.component';
 import { WebDashboardComponent } from './web-dashboard/web-dashboard.component';
@@ -46,7 +45,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
   imports: [
     CommonModule,
     FormsModule,
-    HttpClientModule,
     WebRoutingModule,
     IonicModule,
     SharedModule,

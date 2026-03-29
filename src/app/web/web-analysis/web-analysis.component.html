@@ -1,131 +1,112 @@
 <div class="analysis-page">
-  <div class="hero-section">
-    <h1>Speech Analysis</h1>
-    <p>Get AI-powered feedback on your speaking skills</p>
-    <p style="color: #22a7f0; font-size: 0.9rem; margin-top: 10px;">✓ Component is working!</p>
-  </div>
-
   <div class="main-container">
-    <!-- Processing Recording State (shows immediately when stop is pressed) -->
-    <div *ngIf="isProcessingRecording && !audioUrl" style="background: #1e2c3a; padding: 60px 40px; border-radius: 16px; text-align: center; border: 1px solid #2b3b4c; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-      <div style="margin-bottom: 30px;">
-        <div style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #22a7f0, #1b8fd3); border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite; box-shadow: 0 0 30px rgba(34, 167, 240, 0.5);">
-          <span style="font-size: 3rem;">🎤</span>
-        </div>
-      </div>
-      <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 30px;">
-        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite;"></div>
-        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.2s;"></div>
-        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.4s;"></div>
-      </div>
-      <h2 style="color: #e8f1f9; margin-bottom: 15px; font-size: 1.8rem; font-weight: 600;">Processing Recording</h2>
-      <p style="color: #9bb2c8; font-size: 1.1rem; margin-bottom: 10px;">Please wait while we process your audio...</p>
-      <p style="color: #7a92a8; font-size: 0.95rem;">
-        <span style="animation: fadeInOut 2s infinite;">Duration: {{ formatDuration(recordingDuration) }}</span>
-      </p>
-      <div style="width: 100%; max-width: 400px; height: 4px; background: #2b3b4c; border-radius: 2px; margin: 30px auto 0; overflow: hidden;">
-        <div style="height: 100%; background: linear-gradient(90deg, #1b8fd3, #22a7f0); animation: progressBar 2s ease-in-out infinite;"></div>
-      </div>
+
+    <!-- Speech Type Pill -->
+    <div class="type-row">
+      <span class="type-label">Speech type</span>
+      <button class="type-pill" (click)="openTypeDialog()">
+        <mat-icon>mic</mat-icon>
+        {{ hasConfirmedSpeechType ? (speechType | titlecase) : 'Select type' }}
+        <mat-icon class="chevron">expand_more</mat-icon>
+      </button>
     </div>
 
-    <div *ngIf="!audioUrl && !isLoading && !isProcessingRecording" style="background: #1e2c3a; padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #2b3b4c;">
-      <h2 style="color: #e8f1f9; margin-bottom: 20px;">Recording Interface</h2>
-      <p style="color: #9bb2c8; margin-bottom: 30px;">Click the button below to start recording</p>
+    <!-- ── IDLE / RECORDING ── -->
+    <div class="card record-card" *ngIf="!audioUrl && !isLoading && !isProcessingRecording">
 
-      <div class="recording-container">
+      <div class="mic-wrap" [class.recording]="isRecording">
+        <div class="pulse-ring"         *ngIf="isRecording"></div>
+        <div class="pulse-ring delay-1" *ngIf="isRecording"></div>
+        <div class="pulse-ring delay-2" *ngIf="isRecording"></div>
+
         <button
-          class="record-button"
-          [class.stop-button]="isRecording"
+          class="mic-btn"
+          [class.stop]="isRecording"
           [disabled]="!hasConfirmedSpeechType"
           (click)="isRecording ? stopRecording() : startRecording()"
-          style="width: 150px; height: 150px; border-radius: 50%; border: none; background: linear-gradient(90deg, #1b8fd3, #22a7f0); color: white; font-size: 3rem; cursor: pointer; margin: 20px; position: relative; z-index: 10;"
         >
-          {{ isRecording ? '⏹' : '🎤' }}
+          <mat-icon>{{ isRecording ? 'stop' : 'mic' }}</mat-icon>
         </button>
       </div>
 
-      <!-- Audio-Reactive Visualizer -->
-      <div class="recording-visualizer-web" *ngIf="isRecording">
-        <div class="visualizer-bars-web">
-          <div class="vis-bar-web"
-               *ngFor="let level of audioLevels; let i = index"
-               [style.height.px]="15 + (level * 85)"></div>
+      <!-- Visualizer -->
+      <div class="visualizer" *ngIf="isRecording">
+        <div class="vis-bar"
+             *ngFor="let level of audioLevels"
+             [style.height.px]="10 + (level * 70)">
         </div>
       </div>
 
-      <p *ngIf="!hasConfirmedSpeechType && !isRecording" style="color: #9bb2c8; margin-top: 20px;">
-        <button
-          (click)="openTypeDialog()"
-          style="background: transparent; border: 2px solid #22a7f0; color: #22a7f0; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem;"
-        >
-          Choose Speech Type First
-        </button>
+      <p class="status-text recording" *ngIf="isRecording">
+        <span class="rec-dot"></span>
+        Recording… {{ formatDuration(recordingDuration) }}
       </p>
-
-      <p *ngIf="isRecording" style="color: #ef4444; margin-top: 20px; font-weight: 600; font-size: 1.2rem;">
-        Recording... {{ formatDuration(recordingDuration) }}
+      <p class="status-text" *ngIf="!isRecording && hasConfirmedSpeechType">
+        Click the mic to start
+      </p>
+      <p class="status-text muted" *ngIf="!isRecording && !hasConfirmedSpeechType">
+        Select a speech type above to begin
       </p>
     </div>
 
-    <div *ngIf="audioUrl && !isLoading" style="background: #1e2c3a; padding: 40px; border-radius: 16px; margin-top: 20px; border: 1px solid #2b3b4c;">
-      <h3 style="color: #e8f1f9; margin-bottom: 10px;">Audio Preview</h3>
-      <p style="color: #9bb2c8; margin-bottom: 20px; font-size: 0.95rem;">
-        <span style="color: #22a7f0; font-weight: 600;">Duration:</span> {{ formatDuration(recordingDuration) }}
-      </p>
-      <audio [src]="audioUrl" controls style="width: 100%; margin-bottom: 20px;"></audio>
+    <!-- ── PROCESSING ── -->
+    <div class="card state-card" *ngIf="isProcessingRecording && !audioUrl">
+      <div class="state-icon processing">
+        <mat-icon>mic</mat-icon>
+      </div>
+      <div class="dots">
+        <span></span><span></span><span></span>
+      </div>
+      <h3>Processing audio…</h3>
+      <p>Converting your recording</p>
+    </div>
 
-      <!-- Converting indicator -->
-      <div *ngIf="isConverting" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; padding: 12px; background: rgba(34, 167, 240, 0.1); border-radius: 8px; border: 1px solid rgba(34, 167, 240, 0.3);">
-        <div style="width: 20px; height: 20px; border: 3px solid rgba(34, 167, 240, 0.3); border-top-color: #22a7f0; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <span style="color: #22a7f0; font-size: 0.95rem; font-weight: 500;">Preparing audio for analysis...</span>
+    <!-- ── PREVIEW ── -->
+    <div class="card preview-card" *ngIf="audioUrl && !isLoading">
+      <div class="wave-anim">
+        <span *ngFor="let _ of [1,2,3,4,5]" class="wave-bar"></span>
       </div>
 
-      <div style="display: flex; gap: 16px; justify-content: center;">
+      <audio [src]="audioUrl" controls class="audio-player"></audio>
+
+      <div class="converting-row" *ngIf="isConverting">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Preparing for analysis…</span>
+      </div>
+
+      <div class="btn-row">
         <button
-          class="analyze-button"
+          class="btn-analyze"
           [disabled]="!hasConfirmedSpeechType || isConverting"
           (click)="analyzeRecording()"
-          [style.opacity]="isConverting ? '0.6' : '1'"
-          style="background: linear-gradient(90deg, #1b8fd3, #22a7f0); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;"
         >
-          {{ isConverting ? '⏳ Preparing...' : '📊 Analyze Recording' }}
+          <mat-icon>{{ isConverting ? 'hourglass_empty' : 'analytics' }}</mat-icon>
+          {{ isConverting ? 'Preparing…' : 'Analyze Speech' }}
         </button>
+
         <button
-          (click)="resetRecording()"
+          class="btn-reset"
           [disabled]="isConverting"
-          style="background: transparent; border: 2px solid #2b3b4c; color: #9bb2c8; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 1rem;"
+          (click)="resetRecording()"
         >
-          🔄 Record Again
+          <mat-icon>refresh</mat-icon>
+          Record Again
         </button>
       </div>
     </div>
 
-    <div *ngIf="isLoading" style="background: #1e2c3a; padding: 60px 40px; border-radius: 16px; margin-top: 20px; text-align: center; border: 1px solid #2b3b4c; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-      <!-- Animated microphone icon -->
-      <div style="margin-bottom: 30px;">
-        <div style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #22a7f0, #1b8fd3); border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite; box-shadow: 0 0 30px rgba(34, 167, 240, 0.5);">
-          <span style="font-size: 3rem;">🎤</span>
-        </div>
+    <!-- ── ANALYZING ── -->
+    <div class="card state-card" *ngIf="isLoading">
+      <div class="state-icon analyzing">
+        <mat-icon>analytics</mat-icon>
       </div>
-
-      <!-- Progress dots -->
-      <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 30px;">
-        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite;"></div>
-        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.2s;"></div>
-        <div style="width: 14px; height: 14px; background: #22a7f0; border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.4s;"></div>
+      <div class="dots">
+        <span></span><span></span><span></span>
       </div>
-
-      <!-- Loading text -->
-      <h2 style="color: #e8f1f9; margin-bottom: 15px; font-size: 1.8rem; font-weight: 600;">Analyzing Your Speech</h2>
-      <p style="color: #9bb2c8; font-size: 1.1rem; margin-bottom: 10px;">Our AI is processing your recording...</p>
-      <p style="color: #7a92a8; font-size: 0.95rem;">
-        <span style="animation: fadeInOut 2s infinite;">Extracting audio features</span>
-      </p>
-
-      <!-- Progress bar -->
-      <div style="width: 100%; max-width: 400px; height: 4px; background: #2b3b4c; border-radius: 2px; margin: 30px auto 0; overflow: hidden;">
-        <div style="height: 100%; background: linear-gradient(90deg, #1b8fd3, #22a7f0); animation: progressBar 2s ease-in-out infinite;"></div>
-      </div>
+      <h3>Analyzing your speech</h3>
+      <p>Transcribing &amp; scoring with AI…</p>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
     </div>
+
   </div>
 </div>

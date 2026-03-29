@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
 
 interface KnowledgeResource {
   id: number;
@@ -25,30 +23,15 @@ export class WebKnowledgeBaseComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
 
   ngOnInit() {
     this.loadResources();
   }
 
   loadResources() {
-    this.loading = true;
-    this.error = null;
-
-    this.http.get<KnowledgeResource[]>(`${environment.backendApiUrl}/knowledge-base/`).subscribe({
-      next: (data) => {
-        this.resources = data;
-        this.filteredResources = data;
-        this.categories = ['All', ...new Set(data.map(r => r.category))];
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Failed to load knowledge base:', err);
-        this.error = 'Could not connect to the server. Showing offline resources.';
-        this.loadFallbackResources();
-        this.loading = false;
-      }
-    });
+    this.loadFallbackResources();
+    this.loading = false;
   }
 
   filterByCategory(category: string) {

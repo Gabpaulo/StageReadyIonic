@@ -1,7 +1,7 @@
 // Import shared styles
 @import '../../../theme/shared-styles';
 
-/* ===== Color Tokens - CYAN/TURQUOISE PALETTE ===== */
+/* ===== Color Tokens ===== */
 :host {
   --bg:            #17232f;
   --surface:       #1e2c3a;
@@ -9,17 +9,13 @@
   --primary:       #22a7f0;
   --primary-700:   #1b8fd3;
   --primary-glow:  rgba(34, 167, 240, 0.35);
-  --secondary:     #9c27b0;
-  --secondary-glow: rgba(156, 39, 176, 0.35);
   --accent:        #00bcd4;
-  --accent-glow:   rgba(0, 188, 212, 0.35);
   --success:       #4caf50;
-  --success-glow:  rgba(76, 175, 80, 0.35);
+  --danger:        #f44336;
+  --danger-glow:   rgba(244, 67, 54, 0.35);
   --text:          #e8f1f9;
   --muted:         #9bb2c8;
   --border:        #2b3b4c;
-  --danger:        #f44336;
-  --danger-glow:   rgba(244, 67, 54, 0.35);
 }
 
 /* ===== Header & Content ===== */
@@ -31,507 +27,306 @@
 }
 
 .custom-content {
-  --background: radial-gradient(circle at 20% 20%, rgba(34, 167, 240, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 188, 212, 0.08) 0%, transparent 50%),
+  --background: radial-gradient(circle at 20% 20%, rgba(34, 167, 240, 0.08) 0%, transparent 50%),
                 linear-gradient(180deg, #17232f 0%, #1e2c3a 100%);
   --color: var(--text);
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 300px;
-    background: radial-gradient(ellipse at top, rgba(34, 167, 240, 0.15) 0%, transparent 70%);
-    pointer-events: none;
-  }
-}
-
-/* ===== Hero Section ===== */
-.hero-section {
-  text-align: center;
-  padding: 3rem 1rem 2rem;
-  position: relative;
-  z-index: 1;
-
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 900;
-    margin-bottom: 0.5rem;
-    color: var(--text);
-    background: linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 15px var(--primary-glow);
-    animation: fadeInDown 0.8s ease-out;
-  }
-
-  p {
-    color: var(--muted);
-    font-size: 1.1rem;
-    font-weight: 500;
-    animation: fadeInUp 0.8s ease-out 0.2s both;
-  }
 }
 
 /* ===== Main Container ===== */
 .main-container {
-  padding: 1rem;
-  max-width: 600px;
+  padding: 1rem 1rem 2rem;
+  max-width: 520px;
   margin: 0 auto;
-  position: relative;
-  z-index: 1;
 }
 
-/* ===== Recording Section ===== */
-.recording-section {
+/* ===== Speech Type Row ===== */
+.type-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.type-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.type-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  ion-icon { font-size: 1rem; color: var(--primary); }
+  .chevron { font-size: 0.85rem; color: var(--muted); margin-left: 2px; }
+
+  &:hover { border-color: var(--primary); background: rgba(34, 167, 240, 0.08); }
+}
+
+/* ===== Base Card ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  margin-bottom: 16px;
   text-align: center;
-  padding: 3rem 0;
-  animation: fadeIn 1s ease-out;
+}
 
-  .mic-container {
+/* ===== Record Card ===== */
+.record-card {
+  /* mic wrap holds pulse rings + mic button */
+  .mic-wrap {
     position: relative;
-    width: 150px;
-    height: 150px;
-    margin: 0 auto;
-
-    &.recording {
-      .pulse-ring {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-
-        &.delay-1 {
-          animation-delay: 0.5s;
-        }
-
-        &.delay-2 {
-          animation-delay: 1s;
-        }
-      }
-    }
-  }
-
-  .record-button {
-    width: 150px;
-    height: 150px;
-    --background: linear-gradient(135deg, var(--primary), var(--primary-700));
-    --border-radius: 50%;
-    margin: 0;
-    position: relative;
-    z-index: 10;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 32px var(--primary-glow), 0 0 40px var(--primary-glow);
-    border: 3px solid rgba(255, 255, 255, 0.2);
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: calc(100% + 10px);
-      height: calc(100% + 10px);
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border-radius: 50%;
-      z-index: -1;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      filter: blur(8px);
-    }
-
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 12px 40px var(--primary-glow), 0 0 60px var(--primary-glow);
-
-      &::before {
-        opacity: 0.5;
-      }
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
-
-    &.stop-button {
-      --background: linear-gradient(135deg, var(--danger), #c53030);
-      box-shadow: 0 8px 32px var(--danger-glow), 0 0 40px var(--danger-glow);
-      animation: recordingPulse 1.5s ease-in-out infinite;
-
-      &::before {
-        background: linear-gradient(135deg, var(--danger), var(--secondary));
-      }
-    }
-
-    ion-icon {
-      font-size: 4rem;
-      color: #ffffff;
-      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
-    }
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
   }
 
   .pulse-ring {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 150px;
-    height: 150px;
+    width: 120px; height: 120px;
     border: 2px solid var(--primary);
     border-radius: 50%;
     opacity: 0;
-    box-shadow: 0 0 20px var(--primary-glow);
+    animation: ringPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    &.delay-1 { animation-delay: 0.5s; }
+    &.delay-2 { animation-delay: 1.0s; }
   }
 
-  .recording-text {
-    margin-top: 2.5rem;
-    font-size: 1.2rem;
-    color: var(--danger);
-    font-weight: 700;
-    text-shadow: 0 0 10px var(--danger-glow);
-    animation: blink 1.5s ease-in-out infinite;
+  .mic-btn {
+    position: relative;
+    z-index: 2;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--primary), var(--primary-700));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px var(--primary-glow);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
 
-    &::after {
-      content: '';
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: var(--danger);
-      border-radius: 50%;
-      margin-left: 8px;
-      box-shadow: 0 0 10px var(--danger-glow);
-      animation: recordingDot 1s ease-in-out infinite;
+    ion-icon { font-size: 2.4rem; }
+
+    &:not([disabled]):hover { transform: scale(1.06); box-shadow: 0 12px 40px var(--primary-glow); }
+    &:active                 { transform: scale(0.94); }
+    &[disabled]              { opacity: 0.45; cursor: not-allowed; }
+
+    &.stop {
+      background: linear-gradient(135deg, var(--danger), #c53030);
+      box-shadow: 0 8px 32px var(--danger-glow);
+      animation: stopPulse 1.5s ease-in-out infinite;
     }
   }
 
-  .instruction-text {
-    margin-top: 2.5rem;
-    font-size: 1.1rem;
-    color: var(--muted);
-    font-weight: 500;
+  /* live visualizer */
+  .visualizer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    height: 80px;
+    margin-bottom: 16px;
+
+    .vis-bar {
+      width: 5px;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 3px;
+      min-height: 10px;
+      max-height: 80px;
+      transition: height 0.05s ease-out;
+      box-shadow: 0 0 6px var(--primary-glow);
+    }
   }
 
-  // Single Recording Visualizer - simulates sound waves
-  .recording-visualizer {
-    margin-top: 3rem;
-    padding: 2rem;
-    background: rgba(30, 44, 58, 0.4);
-    border: 1px solid rgba(34, 167, 240, 0.3);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(34, 167, 240, 0.15);
-    animation: fadeIn 0.5s ease-out;
+  /* status text */
+  .status-text {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text);
+    margin: 0;
 
-    .visualizer-bars {
+    &.recording {
+      color: var(--danger);
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      height: 100px;
-
-      .vis-bar {
-        width: 6px;
-        background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
-        border-radius: 3px;
-        box-shadow: 0 0 10px var(--primary-glow);
-        min-height: 15px;
-        max-height: 100px;
-        transform-origin: center bottom;
-        transition: height 0.05s ease-out; // Quick response to audio changes
-      }
+      gap: 8px;
     }
+
+    &.muted { color: var(--muted); font-size: 0.88rem; }
+  }
+
+  .rec-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--danger);
+    border-radius: 50%;
+    animation: blink 1s ease-in-out infinite;
   }
 }
 
-/* ===== Audio Preview Section ===== */
-.preview-section {
-  margin-top: 2rem;
-  animation: slideInUp 0.6s ease-out;
-
-  .audio-card {
-    background: var(--surface);
-    border: 2px solid var(--primary);
-    border-radius: 20px;
-    padding: 2.5rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 40px var(--primary-glow);
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(77, 159, 255, 0.08) 0%, transparent 70%);
-      animation: rotate 20s linear infinite;
-    }
-  }
-
-  .waveform-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 80px;
-    margin-bottom: 2rem;
-    gap: 6px;
-    position: relative;
-    z-index: 1;
-
-    .wave {
-      width: 6px;
-      background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
-      border-radius: 3px;
-      animation: wave-animation 1.2s ease-in-out infinite;
-      box-shadow: 0 0 10px var(--primary-glow);
-
-      &:nth-child(1) {
-        height: 40px;
-        animation-delay: 0s;
-      }
-      &:nth-child(2) {
-        height: 60px;
-        animation-delay: 0.15s;
-      }
-      &:nth-child(3) {
-        height: 50px;
-        animation-delay: 0.3s;
-      }
-      &:nth-child(4) {
-        height: 55px;
-        animation-delay: 0.45s;
-      }
-      &:nth-child(5) {
-        height: 45px;
-        animation-delay: 0.6s;
-      }
-    }
-  }
-
-  .custom-audio {
-    width: 100%;
-    margin-bottom: 1.5rem;
-    position: relative;
-    z-index: 1;
-    border-radius: 25px;
-    background: var(--surface-2);
-    padding: 0.5rem;
-    border: 1px solid var(--border);
-  }
-
-  .converting-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 1.5rem;
-    padding: 12px 16px;
-    background: rgba(34, 167, 240, 0.1);
-    border-radius: 12px;
-    border: 1px solid rgba(34, 167, 240, 0.3);
-    position: relative;
-    z-index: 1;
-
-    ion-spinner {
-      width: 24px;
-      height: 24px;
-    }
-
-    span {
-      color: var(--primary);
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-  }
-
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    position: relative;
-    z-index: 1;
-
-    .analyze-button {
-      --background: linear-gradient(135deg, var(--primary), var(--primary-700));
-      --background-activated: linear-gradient(135deg, var(--primary-700), var(--primary));
-      --border-radius: 12px;
-      --box-shadow: 0 4px 20px var(--primary-glow), 0 0 30px var(--primary-glow);
-      font-weight: 700;
-      letter-spacing: .3px;
-      height: 56px;
-      color: #ffffff;
-      position: relative;
-      overflow: hidden;
-
-      &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-      }
-
-      &:hover::after {
-        width: 300px;
-        height: 300px;
-      }
-
-      ion-icon {
-        font-size: 24px;
-      }
-    }
-
-    .reset-button {
-      --color: var(--muted);
-      font-weight: 600;
-      letter-spacing: .2px;
-
-      &:hover {
-        --color: var(--text);
-      }
-
-      ion-icon {
-        font-size: 22px;
-      }
-    }
-  }
-}
-
-/* ===== Processing Recording Section (shows immediately when stop is pressed) ===== */
-.processing-section {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: var(--surface);
-  border: 2px solid var(--primary);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 40px var(--primary-glow);
-  animation: fadeIn 0.3s ease-out;
-  margin-bottom: 2rem;
-
-  .processing-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 2rem;
-    background: linear-gradient(135deg, var(--primary), var(--primary-700));
+/* ===== State Card (Processing / Analyzing) ===== */
+.state-card {
+  .state-icon {
+    width: 72px; height: 72px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 30px var(--primary-glow);
-    animation: processingPulse 2s ease-in-out infinite;
+    margin: 0 auto 20px;
 
-    ion-icon {
-      font-size: 3rem;
-      color: #ffffff;
+    ion-icon { font-size: 2.2rem; color: #fff; }
+
+    &.processing {
+      background: linear-gradient(135deg, var(--primary), var(--primary-700));
+      box-shadow: 0 0 30px var(--primary-glow);
+      animation: iconPulse 2s ease-in-out infinite;
+    }
+
+    &.analyzing {
+      background: linear-gradient(135deg, var(--accent), #0097a7);
+      box-shadow: 0 0 30px rgba(0, 188, 212, 0.4);
+      animation: iconPulse 2s ease-in-out infinite;
     }
   }
 
-  .loader {
+  .dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 18px;
+
+    span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: dotBounce 1.4s ease-in-out infinite both;
+
+      &:nth-child(1) { animation-delay: -0.32s; }
+      &:nth-child(2) { animation-delay: -0.16s; }
+      &:nth-child(3) { animation-delay:    0s;  }
+    }
+  }
+
+  h3 { color: var(--text); font-size: 1.25rem; font-weight: 700; margin: 0 0 6px; }
+  p  { color: var(--muted); font-size: 0.92rem; margin: 0 0 18px; }
+
+  .progress-bar {
+    width: 100%;
+    max-width: 280px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-700), var(--primary));
+      border-radius: 2px;
+      animation: progressSlide 2s ease-in-out infinite;
+    }
+  }
+}
+
+/* ===== Preview Card ===== */
+.preview-card {
+  .wave-anim {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    height: 60px;
+    margin-bottom: 20px;
+
+    .wave-bar {
+      width: 6px;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 3px;
+      box-shadow: 0 0 8px var(--primary-glow);
+      animation: waveBounce 1.3s ease-in-out infinite;
+
+      &:nth-child(1) { height: 30px; animation-delay: 0s;    }
+      &:nth-child(2) { height: 50px; animation-delay: 0.15s; }
+      &:nth-child(3) { height: 40px; animation-delay: 0.30s; }
+      &:nth-child(4) { height: 55px; animation-delay: 0.45s; }
+      &:nth-child(5) { height: 35px; animation-delay: 0.60s; }
+    }
+  }
+
+  .audio-player {
+    width: 100%;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    background: var(--surface-2);
+  }
+
+  .converting-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 2rem;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: rgba(34, 167, 240, 0.08);
+    border: 1px solid rgba(34, 167, 240, 0.25);
+    border-radius: 10px;
 
-    .loader-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      box-shadow: 0 0 20px var(--primary-glow);
-      animation: loader-bounce 1.4s ease-in-out infinite both;
-
-      &:nth-child(1) {
-        animation-delay: -0.32s;
-      }
-      &:nth-child(2) {
-        animation-delay: -0.16s;
-      }
-      &:nth-child(3) {
-        animation-delay: 0s;
-      }
-    }
+    ion-spinner { --color: var(--primary); width: 20px; height: 20px; }
+    span { color: var(--primary); font-size: 0.88rem; font-weight: 600; }
   }
 
-  h3 {
-    color: var(--text);
-    font-size: 1.5rem;
+  .btn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-analyze {
+    --background: linear-gradient(135deg, var(--primary), var(--primary-700));
+    --background-activated: var(--primary-700);
+    --border-radius: 12px;
+    --box-shadow: 0 4px 16px var(--primary-glow);
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    height: 52px;
+    letter-spacing: 0.3px;
+
+    ion-icon { font-size: 1.3rem; }
   }
 
-  p {
-    color: var(--muted);
-    font-size: 1.1rem;
-    font-weight: 500;
-  }
-}
-
-@keyframes processingPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 30px var(--primary-glow);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 50px var(--primary-glow);
-  }
-}
-
-/* ===== Loading Section ===== */
-.loading-section {
-  text-align: center;
-  padding: 5rem 0;
-  animation: fadeIn 0.5s ease-out;
-
-  .loader {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 2rem;
-
-    .loader-dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      box-shadow: 0 0 20px var(--primary-glow);
-      animation: loader-bounce 1.4s ease-in-out infinite both;
-
-      &:nth-child(1) {
-        animation-delay: -0.32s;
-      }
-      &:nth-child(2) {
-        animation-delay: -0.16s;
-      }
-      &:nth-child(3) {
-        animation-delay: 0s;
-      }
-    }
-  }
-
-  p {
-    color: var(--text);
-    font-size: 1.1rem;
+  .btn-reset {
+    --color: var(--muted);
     font-weight: 600;
-
-    &::after {
-      content: '';
-      animation: loadingDots 1.5s steps(4, end) infinite;
-    }
+    ion-icon { font-size: 1.2rem; }
   }
 }
 
-/* ===== Modal Styles ===== */
-.opaque-modal {
+/* ===== Ion Modal – Speech Type ===== */
+.type-modal {
   --background: var(--surface);
+  --border-radius: 20px;
 
   ion-header ion-toolbar {
     --background: var(--surface);
@@ -539,227 +334,83 @@
     border-bottom: 1px solid var(--border);
   }
 
-  ion-title {
-    color: var(--text);
-    font-weight: 700;
-  }
+  ion-title { color: var(--text); font-weight: 700; }
 
-  ion-content {
-    --background: var(--surface);
-    background: var(--surface);
-    color: var(--text);
-  }
+  ion-content { --background: var(--surface); }
 
-  p {
+  .modal-hint {
     color: var(--muted);
-    margin-bottom: 20px;
-    font-size: 1rem;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
   }
 
-  ion-list {
-    background: transparent;
-  }
-
-  ion-item {
+  .type-item {
     --background: var(--surface-2);
-    --border-color: var(--border);
+    --border-color: transparent;
     --color: var(--text);
     border: 1px solid var(--border);
     border-radius: 12px;
     margin-bottom: 10px;
 
-    ion-label {
-      color: var(--text);
-      font-weight: 600;
-    }
+    h3 { font-size: 0.93rem; font-weight: 700; color: var(--text); margin: 0 0 2px; }
+    p  { font-size: 0.78rem; color: var(--muted); margin: 0; }
 
-    ion-radio {
-      --color: var(--primary);
-      --color-checked: var(--primary);
+    ion-icon[slot="start"] { color: var(--primary); font-size: 1.4rem; }
+    ion-radio { --color: var(--primary); --color-checked: var(--primary); }
+
+    &.selected {
+      border-color: var(--primary);
+      --background: rgba(34, 167, 240, 0.07);
     }
   }
 
-  ion-button[expand="block"] {
-    margin-top: 20px;
+  .modal-confirm {
     --background: linear-gradient(135deg, var(--primary), var(--primary-700));
     --border-radius: 12px;
-    box-shadow: 0 4px 16px var(--primary-glow);
-    color: #ffffff;
+    --box-shadow: 0 4px 16px var(--primary-glow);
+    margin-top: 20px;
     font-weight: 700;
     height: 48px;
   }
 }
 
 /* ===== Animations ===== */
-@keyframes pulse {
-  0% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.8);
-  }
+@keyframes ringPulse {
+  0%   { opacity: 0.8; transform: translate(-50%, -50%) scale(1);   }
+  100% { opacity: 0;   transform: translate(-50%, -50%) scale(1.8); }
+}
+
+@keyframes stopPulse {
+  0%, 100% { transform: scale(1);    }
+  50%       { transform: scale(1.05);}
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.3;}
 }
 
-@keyframes recordingDot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1);    }
+  50%       { transform: scale(1.07);}
 }
 
-@keyframes recordingPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40%           { transform: scale(1); }
 }
 
-@keyframes wave-animation {
-  0%, 100% {
-    transform: scaleY(0.5);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
+@keyframes progressSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%);  }
 }
 
-@keyframes loader-bounce {
-  0%, 80%, 100% {
-    transform: scale(0) rotate(0deg);
-  }
-  40% {
-    transform: scale(1) rotate(360deg);
-  }
+@keyframes waveBounce {
+  0%, 100% { transform: scaleY(0.6); opacity: 0.7; }
+  50%       { transform: scaleY(1);   opacity: 1;   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes loadingDots {
-  0% { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
-  100% { content: ''; }
-}
-
-@keyframes audioWave {
-  0% {
-    height: 15px;
-    opacity: 0.4;
-  }
-  10% {
-    height: 45px;
-    opacity: 0.7;
-  }
-  25% {
-    height: 75px;
-    opacity: 0.9;
-  }
-  40% {
-    height: 90px;
-    opacity: 1;
-    box-shadow: 0 0 15px var(--primary-glow);
-  }
-  55% {
-    height: 60px;
-    opacity: 0.85;
-  }
-  70% {
-    height: 35px;
-    opacity: 0.6;
-  }
-  85% {
-    height: 50px;
-    opacity: 0.75;
-  }
-  100% {
-    height: 15px;
-    opacity: 0.4;
-  }
-}
-
-/* ===== Responsive Design ===== */
-@media (max-width: 576px) {
-  .hero-section {
-    padding: 2rem 1rem 1.5rem;
-
-    h1 {
-      font-size: 2rem;
-    }
-
-    p {
-      font-size: 1rem;
-    }
-  }
-
-  .recording-section {
-    .mic-container,
-    .record-button,
-    .pulse-ring {
-      width: 120px;
-      height: 120px;
-    }
-
-    .record-button ion-icon {
-      font-size: 3rem;
-    }
-  }
-
-  .audio-card {
-    padding: 2rem;
-  }
-}
-
-/* ===== Accessibility ===== */
+/* ===== Responsive ===== */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
+  * { animation: none !important; transition: none !important; }
 }

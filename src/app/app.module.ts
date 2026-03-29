@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { RouteReuseStrategy } from '@angular/router';
 
@@ -26,7 +25,6 @@ export const auth = getAuth(app);
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    HttpClientModule,
     IonicModule.forRoot(),
     AppRoutingModule,
     CommonModule,

@@ -36,23 +36,17 @@ export class SpeechFeedbackPage implements OnInit {
   }
 
   getFillerDetails(): any {
-    const details = (this.feedback as any).filler_word_details
-      || this.feedback.analysis?.filler_word_details
-      || null;
-    console.log('Filler details extracted:', details);
-    return details;
+    return this.feedback.filler_word_details ?? null;
   }
 
   private buildFillerSummary(): { word: string; count: number }[] {
-    const fillerDetails = this.getFillerDetails();
-    if (!fillerDetails?.fillers?.length) return [];
+    const fillers = this.feedback.filler_word_details?.fillers;
+    if (!fillers?.length) return [];
 
     const counts = new Map<string, number>();
-    for (const filler of fillerDetails.fillers) {
-      const word = filler.word.toLowerCase();
-      counts.set(word, (counts.get(word) || 0) + 1);
+    for (const f of fillers) {
+      counts.set(f.word, (counts.get(f.word) || 0) + 1);
     }
-
     return Array.from(counts.entries())
       .map(([word, count]) => ({ word, count }))
       .sort((a, b) => b.count - a.count);
@@ -82,23 +76,47 @@ export class SpeechFeedbackPage implements OnInit {
   }
 
   private buildHighlightedTranscript(): SafeHtml {
+    const words = this.feedback.transcript_words;
+    if (words?.length) {
+      return this.sanitizer.bypassSecurityTrustHtml(this.buildAnnotatedTranscript(words));
+    }
+    // Fallback: plain text with filler highlights only
     const transcript = this.feedback.transcript;
     if (!transcript) return '';
-
-    if (!this.fillerSummary.length) {
-      return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(transcript));
-    }
-
-    const fillerWords: string[] = this.fillerSummary.map(f => f.word);
-    return this.sanitizer.bypassSecurityTrustHtml(this.highlightFillers(transcript, fillerWords));
+    return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(transcript));
   }
 
-  private highlightFillers(text: string, fillerWords: string[]): string {
-    // Sort by length descending so multi-word fillers are matched first
-    const sorted = [...fillerWords].sort((a, b) => b.length - a.length);
-    const escaped = sorted.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
-    return this.escapeHtml(text).replace(pattern, '<mark class="filler-highlight">$1</mark>');
+  private buildAnnotatedTranscript(words: { word: string; start: number; end: number }[]): string {
+    const FILLERS = new Set([
+      'um', 'uh', 'umm', 'uhh',
+      'mm', 'mmm', 'hmm', 'hm', 'mhm',
+      'like', 'you know', 'you know what i mean',
+      'basically', 'literally', 'actually',
+      'so', 'right', 'okay', 'ok',
+      'i mean', 'kind of', 'sort of'
+    ]);
+    const parts: string[] = [];
+
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      const normalized = w.word.toLowerCase().replace(/[^a-z ]/g, '');
+      const escaped = this.escapeHtml(w.word);
+
+      if (FILLERS.has(normalized)) {
+        parts.push(`<mark class="filler-highlight">${escaped}</mark>`);
+      } else {
+        parts.push(escaped);
+      }
+
+      if (i < words.length - 1) {
+        const gap = words[i + 1].start - w.end;
+        if (gap >= 0.5) {
+          const type = gap < 1.0 ? 'short' : gap < 2.0 ? 'medium' : 'long';
+          parts.push(`<span class="pause-marker ${type}" title="${gap.toFixed(1)}s pause">⏸ ${gap.toFixed(1)}s</span>`);
+        }
+      }
+    }
+    return parts.join(' ');
   }
 
   private escapeHtml(text: string): string {
@@ -135,6 +153,13 @@ export class SpeechFeedbackPage implements OnInit {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  getScoreClass(score: number | undefined): string {
+    if (!score) return 'score-avg';
+    if (score >= 4) return 'score-good';
+    if (score >= 3) return 'score-avg';
+    return 'score-poor';
   }
 
   formatMetricName(key: string): string {

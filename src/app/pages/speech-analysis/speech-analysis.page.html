@@ -5,138 +5,159 @@
 </ion-header>
 
 <ion-content class="custom-content">
-  <div class="hero-section">
-    <h1>Speech Analysis</h1>
-    <p>Get AI-powered feedback on your speaking skills</p>
-  </div>
-
   <div class="main-container">
-    <!-- Processing Recording State (shows immediately when stop is pressed) -->
-    <div class="processing-section" *ngIf="isProcessingRecording && !audioUrl">
-      <div class="processing-icon">
-        <ion-icon name="mic"></ion-icon>
-      </div>
-      <div class="loader">
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-      </div>
-      <h3>Processing Recording</h3>
-      <p>Please wait while we process your audio...</p>
+
+    <!-- Speech Type Pill -->
+    <div class="type-row">
+      <span class="type-label">Speech type</span>
+      <button class="type-pill" (click)="openTypeModal()">
+        <ion-icon name="mic-outline"></ion-icon>
+        {{ hasConfirmedSpeechType ? (speechType | titlecase) : 'Select type' }}
+        <ion-icon name="chevron-down-outline" class="chevron"></ion-icon>
+      </button>
     </div>
 
-    <!-- Recording Section -->
-    <div class="recording-section" *ngIf="!audioUrl && !isLoading && !isProcessingRecording">
-      <div class="mic-container" [class.recording]="isRecording">
-        <div class="pulse-ring" *ngIf="isRecording"></div>
-        <div class="pulse-ring delay-1" *ngIf="isRecording"></div>
-        <div class="pulse-ring delay-2" *ngIf="isRecording"></div>
+    <!-- ── IDLE / RECORDING ── -->
+    <div class="card record-card" *ngIf="!audioUrl && !isLoading && !isProcessingRecording">
 
-        <ion-button
-          class="record-button"
-          [class.stop-button]="isRecording"
+      <div class="mic-wrap" [class.recording]="isRecording">
+        <div class="pulse-ring"          *ngIf="isRecording"></div>
+        <div class="pulse-ring delay-1"  *ngIf="isRecording"></div>
+        <div class="pulse-ring delay-2"  *ngIf="isRecording"></div>
+
+        <button
+          class="mic-btn"
+          [class.stop]="isRecording"
           [disabled]="!hasConfirmedSpeechType"
           (click)="isRecording ? stopRecording() : startRecording()"
+          aria-label="{{ isRecording ? 'Stop recording' : 'Start recording' }}"
         >
           <ion-icon [name]="isRecording ? 'stop' : 'mic'"></ion-icon>
+        </button>
+      </div>
+
+      <!-- Visualizer -->
+      <div class="visualizer" *ngIf="isRecording">
+        <div class="vis-bar"
+             *ngFor="let level of audioLevels"
+             [style.height.px]="10 + (level * 70)">
+        </div>
+      </div>
+
+      <p class="status-text recording" *ngIf="isRecording">
+        <span class="rec-dot"></span> Recording…
+      </p>
+      <p class="status-text" *ngIf="!isRecording && hasConfirmedSpeechType">
+        Tap the mic to start
+      </p>
+      <p class="status-text muted" *ngIf="!isRecording && !hasConfirmedSpeechType">
+        Select a speech type above to begin
+      </p>
+    </div>
+
+    <!-- ── PROCESSING ── -->
+    <div class="card state-card" *ngIf="isProcessingRecording && !audioUrl">
+      <div class="state-icon processing">
+        <ion-icon name="mic"></ion-icon>
+      </div>
+      <div class="dots">
+        <span></span><span></span><span></span>
+      </div>
+      <h3>Processing audio…</h3>
+      <p>Converting your recording</p>
+    </div>
+
+    <!-- ── PREVIEW ── -->
+    <div class="card preview-card" *ngIf="audioUrl && !isLoading">
+      <div class="wave-anim">
+        <span *ngFor="let _ of [1,2,3,4,5]" class="wave-bar"></span>
+      </div>
+
+      <audio [src]="audioUrl" controls class="audio-player"></audio>
+
+      <div class="converting-row" *ngIf="isConverting">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Preparing for analysis…</span>
+      </div>
+
+      <div class="btn-row">
+        <ion-button
+          class="btn-analyze"
+          expand="block"
+          [disabled]="!hasConfirmedSpeechType || isConverting"
+          (click)="analyzeRecording()"
+        >
+          <ion-icon slot="start" [name]="isConverting ? 'hourglass-outline' : 'analytics-outline'"></ion-icon>
+          {{ isConverting ? 'Preparing…' : 'Analyze Speech' }}
+        </ion-button>
+
+        <ion-button
+          class="btn-reset"
+          expand="block"
+          fill="clear"
+          [disabled]="isConverting"
+          (click)="resetRecording()"
+        >
+          <ion-icon slot="start" name="refresh-outline"></ion-icon>
+          Record Again
         </ion-button>
       </div>
-
-      <!-- Audio-Reactive Visualizer -->
-      <div class="recording-visualizer" *ngIf="isRecording">
-        <div class="visualizer-bars">
-          <div class="vis-bar"
-               *ngFor="let level of audioLevels; let i = index"
-               [style.height.px]="15 + (level * 85)"></div>
-        </div>
-      </div>
-
-      <p class="recording-text" *ngIf="isRecording">Recording in progress...</p>
-      <p class="instruction-text" *ngIf="!isRecording && hasConfirmedSpeechType">Tap to start recording</p>
-      <p class="instruction-text" *ngIf="!isRecording && !hasConfirmedSpeechType">Choose a speech type to begin.</p>
     </div>
 
-    <!-- Audio Preview Section -->
-    <div class="preview-section" *ngIf="audioUrl && !isLoading">
-      <div class="audio-card">
-        <div class="waveform-placeholder">
-          <div class="wave"></div>
-          <div class="wave"></div>
-          <div class="wave"></div>
-          <div class="wave"></div>
-          <div class="wave"></div>
-        </div>
-        <audio [src]="audioUrl" controls class="custom-audio" type="audio/webm"></audio>
-
-        <!-- Converting indicator -->
-        <div *ngIf="isConverting" class="converting-indicator">
-          <ion-spinner name="crescent" color="primary"></ion-spinner>
-          <span>Preparing audio for analysis...</span>
-        </div>
-
-        <div class="action-buttons">
-          <ion-button
-            class="analyze-button"
-            expand="block"
-            [disabled]="!hasConfirmedSpeechType || isConverting"
-            (click)="analyzeRecording()"
-          >
-            <ion-icon [name]="isConverting ? 'hourglass' : 'analytics'" slot="start"></ion-icon>
-            {{ isConverting ? 'Preparing...' : 'Analyze Recording' }}
-          </ion-button>
-          <ion-button
-            class="reset-button"
-            expand="block"
-            fill="clear"
-            [disabled]="isConverting"
-            (click)="resetRecording()"
-          >
-            <ion-icon name="refresh" slot="start"></ion-icon>
-            Record Again
-          </ion-button>
-        </div>
+    <!-- ── ANALYZING ── -->
+    <div class="card state-card" *ngIf="isLoading">
+      <div class="state-icon analyzing">
+        <ion-icon name="analytics-outline"></ion-icon>
       </div>
+      <div class="dots">
+        <span></span><span></span><span></span>
+      </div>
+      <h3>Analyzing your speech</h3>
+      <p>Transcribing &amp; scoring with AI…</p>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
     </div>
 
-    <!-- Loading State -->
-    <div class="loading-section" *ngIf="isLoading">
-      <div class="loader">
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-      </div>
-      <p>Analyzing your speech...</p>
-    </div>
   </div>
 
-  <!-- Speech Type Modal -->
-  <ion-modal [isOpen]="isTypeModalOpen" cssClass="opaque-modal">
+  <!-- ── SPEECH TYPE MODAL ── -->
+  <ion-modal [isOpen]="isTypeModalOpen" cssClass="type-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-title>Select Speech Type</ion-title>
+          <ion-title>Speech Type</ion-title>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
-        <p>Please choose the type of public speech you are practicing:</p>
-        <ion-list>
-          <ion-radio-group [(ngModel)]="pendingType">
-            <ion-item>
-              <ion-label>Informative</ion-label>
-              <ion-radio slot="start" value="informative"></ion-radio>
-            </ion-item>
-            <ion-item>
-              <ion-label>Motivational</ion-label>
-              <ion-radio slot="start" value="motivational"></ion-radio>
-            </ion-item>
-            <ion-item>
-              <ion-label>Persuasive</ion-label>
-              <ion-radio slot="start" value="persuasive"></ion-radio>
-            </ion-item>
-          </ion-radio-group>
-        </ion-list>
-
-        <ion-button expand="block" (click)="confirmSpeechType()">Continue</ion-button>
+      <ion-content class="ion-padding modal-content">
+        <p class="modal-hint">Choose the type of speech you are practicing:</p>
+        <ion-radio-group [(ngModel)]="pendingType">
+          <ion-item lines="none" class="type-item" [class.selected]="pendingType === 'informative'">
+            <ion-icon slot="start" name="information-circle-outline"></ion-icon>
+            <ion-label>
+              <h3>Informative</h3>
+              <p>Explain or teach a topic clearly</p>
+            </ion-label>
+            <ion-radio slot="end" value="informative"></ion-radio>
+          </ion-item>
+          <ion-item lines="none" class="type-item" [class.selected]="pendingType === 'motivational'">
+            <ion-icon slot="start" name="flame-outline"></ion-icon>
+            <ion-label>
+              <h3>Motivational</h3>
+              <p>Inspire and energise your audience</p>
+            </ion-label>
+            <ion-radio slot="end" value="motivational"></ion-radio>
+          </ion-item>
+          <ion-item lines="none" class="type-item" [class.selected]="pendingType === 'persuasive'">
+            <ion-icon slot="start" name="bulb-outline"></ion-icon>
+            <ion-label>
+              <h3>Persuasive</h3>
+              <p>Convince others of your viewpoint</p>
+            </ion-label>
+            <ion-radio slot="end" value="persuasive"></ion-radio>
+          </ion-item>
+        </ion-radio-group>
+        <ion-button expand="block" class="modal-confirm" (click)="confirmSpeechType()">
+          Confirm
+        </ion-button>
       </ion-content>
     </ng-template>
   </ion-modal>
