@@ -10,6 +10,19 @@
     <p>Get AI-powered feedback on your speaking skills</p>
   </div>
 
+  <!-- Practice Mode Banner -->
+  <div class="practice-mode-banner" [routerLink]="['/ionic/practice-mode']">
+    <div class="pm-icon-wrap">
+      <ion-icon name="musical-notes-outline"></ion-icon>
+    </div>
+    <div class="pm-body">
+      <span class="pm-label">NEW</span>
+      <h3>Practice Mode</h3>
+      <p>Follow a script &amp; get live pace tracking — like karaoke for speeches</p>
+    </div>
+    <ion-icon name="chevron-forward-outline" class="pm-arrow"></ion-icon>
+  </div>
+
   <div class="main-container">
     <!-- Processing Recording State (shows immediately when stop is pressed) -->
     <div class="processing-section" *ngIf="isProcessingRecording && !audioUrl">

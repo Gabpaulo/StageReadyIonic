@@ -27,7 +27,12 @@ const routes: Routes = [
       { path: 'analysis', component: WebAnalysisComponent },
       { path: 'feedback', component: WebFeedbackComponent, canActivate: [AuthGuard] },
       { path: 'profile', component: WebProfileComponent, canActivate: [AuthGuard] },
-      { path: 'knowledge-base', component: WebKnowledgeBaseComponent, canActivate: [AuthGuard] }
+      { path: 'knowledge-base', component: WebKnowledgeBaseComponent, canActivate: [AuthGuard] },
+      {
+        path: 'practice-mode',
+        loadChildren: () => import('../pages/practice-mode/practice-mode.module').then(m => m.PracticeModePageModule),
+        canActivate: [AuthGuard]
+      }
     ]
   }
 ];

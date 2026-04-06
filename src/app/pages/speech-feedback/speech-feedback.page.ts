@@ -1,146 +1,165 @@
-// src/app/pages/speech-feedback/speech-feedback.page.ts
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { AnalyzeSpeechForFeedbackOutput } from '../speech-analysis/model';
+
+const FILLER_WORDS_LIST = [
+  'um','uh','er','ah','hmm','hm','like','basically','literally',
+  'actually','you know','i mean','sort of','kind of','right','so','well','okay','alright'
+];
 
 @Component({
   selector: 'app-speech-feedback',
   templateUrl: './speech-feedback.page.html',
   styleUrls: ['./speech-feedback.page.scss'],
-  standalone:false
+  standalone: false
 })
-export class SpeechFeedbackPage implements OnInit {
-  feedback!: AnalyzeSpeechForFeedbackOutput;
+export class SpeechFeedbackPage {
+  feedback: any = {};
   highlightedTranscript: SafeHtml = '';
   fillerSummary: { word: string; count: number }[] = [];
 
-  constructor(public router: Router, private sanitizer: DomSanitizer) {
-    const nav = this.router.getCurrentNavigation();
-    // cast state to known shape
-    const state = (nav?.extras?.state as { feedback?: AnalyzeSpeechForFeedbackOutput }) || {};
+  constructor(private router: Router, private sanitizer: DomSanitizer) {
+    const nav   = this.router.getCurrentNavigation();
+    const state = (nav?.extras?.state as any) || {};
+
     if (!state.feedback) {
-      // if no feedback in state, go back
-      this.router.navigateByUrl('/speech-analysis');
+      this.router.navigateByUrl('/ionic/speech-analysis');
       return;
     }
+
     this.feedback = state.feedback;
-    this.fillerSummary = this.buildFillerSummary();
+    this.fillerSummary        = this.buildFillerSummary();
     this.highlightedTranscript = this.buildHighlightedTranscript();
   }
 
-  ngOnInit() {}
+  // ─── Getters ───────────────────────────────────────────────────────────────
+
+  get fillerDetails(): any {
+    return this.feedback.filler_word_details || null;
+  }
+
+  get pauseAnalysis(): any {
+    return this.feedback.pause_analysis || null;
+  }
+
+  get strengths(): string[] {
+    const s = this.feedback.strengths;
+    if (Array.isArray(s)) return s.filter(Boolean);
+    if (typeof s === 'string' && s) return s.split(/\n+/).filter(Boolean);
+    return [];
+  }
+
+  get improvements(): string[] {
+    const i = this.feedback.improvements;
+    if (Array.isArray(i)) return i.filter(Boolean);
+    if (typeof i === 'string' && i) return i.split(/\n+/).filter(Boolean);
+    return [];
+  }
+
+  get overallGrade(): string {
+    const s = this.feedback.overall ?? 0;
+    if (s >= 3.5) return 'A';
+    if (s >= 2.5) return 'B';
+    if (s >= 1.5) return 'C';
+    return 'D';
+  }
+
+  get overallPercent(): number {
+    return Math.round(((this.feedback.overall ?? 0) / 4) * 100);
+  }
+
+  get scoreItems(): { label: string; key: string; score: number; feedback: string }[] {
+    const f = this.feedback;
+    return [
+      { label: 'Speech Pace',      key: 'pace',     score: f.speech_pace          ?? 0, feedback: f.pace_feedback    || '' },
+      { label: 'Pausing & Flow',   key: 'pausing',  score: f.pausing_fluency      ?? 0, feedback: f.pausing_feedback || '' },
+      { label: 'Volume Control',   key: 'volume',   score: f.loud_control         ?? 0, feedback: '' },
+      { label: 'Pitch Variation',  key: 'pitch',    score: f.pitch_variation      ?? 0, feedback: '' },
+      { label: 'Clarity',          key: 'clarity',  score: f.articulation_clarity ?? 0, feedback: f.clarity_feedback || '' },
+      { label: 'Expressiveness',   key: 'express',  score: f.expressive_emph      ?? 0, feedback: f.tone_feedback    || '' },
+      { label: 'Filler Words',     key: 'filler',   score: f.filler_words_score   ?? 0, feedback: f.filler_feedback  || '' },
+    ];
+  }
+
+  scoreBarPercent(score: number): number {
+    return Math.round((score / 4) * 100);
+  }
+
+  scoreColor(score: number): string {
+    if (score >= 3) return '#4caf50';
+    if (score >= 2) return '#22a7f0';
+    if (score >= 1) return '#ff9800';
+    return '#f44336';
+  }
+
+  scoreLabel(score: number): string {
+    if (score >= 3.5) return 'Excellent';
+    if (score >= 2.5) return 'Good';
+    if (score >= 1.5) return 'Fair';
+    return 'Needs Work';
+  }
+
+  formatTime(sec: number): string {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  }
+
+  formatTimestamp(sec: number): string {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
 
   tryAgain() {
-    this.router.navigateByUrl('/tabs/speech-analysis');
+    this.router.navigateByUrl('/ionic/speech-analysis');
   }
 
-  getFillerDetails(): any {
-    const details = (this.feedback as any).filler_word_details
-      || this.feedback.analysis?.filler_word_details
-      || null;
-    console.log('Filler details extracted:', details);
-    return details;
-  }
+  // ─── Filler summary ────────────────────────────────────────────────────────
 
   private buildFillerSummary(): { word: string; count: number }[] {
-    const fillerDetails = this.getFillerDetails();
-    if (!fillerDetails?.fillers?.length) return [];
+    const fillers = this.feedback.filler_word_details?.fillers;
+    if (!fillers?.length) return this.fallbackFillerSummary();
 
-    const counts = new Map<string, number>();
-    for (const filler of fillerDetails.fillers) {
-      const word = filler.word.toLowerCase();
-      counts.set(word, (counts.get(word) || 0) + 1);
-    }
-
-    return Array.from(counts.entries())
+    const map = new Map<string, number>();
+    for (const f of fillers) map.set(f.word, (map.get(f.word) || 0) + 1);
+    return Array.from(map.entries())
       .map(([word, count]) => ({ word, count }))
       .sort((a, b) => b.count - a.count);
   }
 
-  getImprovementItems(): { category: string; suggestion: string }[] {
-    const text = this.feedback.areas_improvement;
-    if (!text) return [];
-
-    // Split on double newlines (from recommendations format: "Category: Suggestion")
-    const lines = text.split('\n\n').filter(line => line.trim());
-    if (lines.length > 1) {
-      return lines.map(line => {
-        const colonIdx = line.indexOf(':');
-        if (colonIdx > 0) {
-          return {
-            category: line.substring(0, colonIdx).trim(),
-            suggestion: line.substring(colonIdx + 1).trim()
-          };
-        }
-        return { category: '', suggestion: line.trim() };
-      });
+  /** Fallback: detect from transcript text when Whisper gives no word timestamps */
+  private fallbackFillerSummary(): { word: string; count: number }[] {
+    const t = (this.feedback.transcript || '').toLowerCase();
+    const map = new Map<string, number>();
+    for (const fw of FILLER_WORDS_LIST) {
+      const rx = new RegExp(`\\b${fw.replace(/\s/g, '\\s+')}\\b`, 'gi');
+      const hits = t.match(rx);
+      if (hits) map.set(fw, (map.get(fw) || 0) + hits.length);
     }
-
-    // Fallback: single line, return as-is
-    return [{ category: '', suggestion: text }];
+    return Array.from(map.entries())
+      .map(([word, count]) => ({ word, count }))
+      .sort((a, b) => b.count - a.count);
   }
+
+  // ─── Transcript highlighting ───────────────────────────────────────────────
 
   private buildHighlightedTranscript(): SafeHtml {
-    const transcript = this.feedback.transcript;
-    if (!transcript) return '';
-
+    const t = this.feedback.transcript;
+    if (!t) return '';
     if (!this.fillerSummary.length) {
-      return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(transcript));
+      return this.sanitizer.bypassSecurityTrustHtml(this.esc(t));
     }
-
-    const fillerWords: string[] = this.fillerSummary.map(f => f.word);
-    return this.sanitizer.bypassSecurityTrustHtml(this.highlightFillers(transcript, fillerWords));
+    const words   = this.fillerSummary.map(f => f.word).sort((a, b) => b.length - a.length);
+    const escaped = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const rx      = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+    const html    = this.esc(t).replace(rx,
+      '<mark class="filler-highlight" title="Filler word">$1</mark>'
+    );
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
-  private highlightFillers(text: string, fillerWords: string[]): string {
-    // Sort by length descending so multi-word fillers are matched first
-    const sorted = [...fillerWords].sort((a, b) => b.length - a.length);
-    const escaped = sorted.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
-    return this.escapeHtml(text).replace(pattern, '<mark class="filler-highlight">$1</mark>');
-  }
-
-  private escapeHtml(text: string): string {
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
-  formatTimestamp(timestamp: number | string | undefined | null): string {
-    if (timestamp === undefined || timestamp === null) {
-      return '0.0';
-    }
-
-    // Convert to number if it's a string
-    const numValue = typeof timestamp === 'string' ? parseFloat(timestamp) : timestamp;
-
-    if (isNaN(numValue)) {
-      return '0.0';
-    }
-
-    return numValue.toFixed(1);
-  }
-
-  getDetailedScores(): Array<{key: string, value: any}> {
-    if (!this.feedback.feedback?.detailed_scores) {
-      return [];
-    }
-    const detailedScores = this.feedback.feedback.detailed_scores;
-    return Object.keys(detailedScores).map(key => ({
-      key,
-      value: detailedScores[key]
-    }));
-  }
-
-  formatSecondsToTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  formatMetricName(key: string): string {
-    // Convert snake_case to Title Case
-    return key.split('_').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+  private esc(t: string): string {
+    return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 }

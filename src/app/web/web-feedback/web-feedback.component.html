@@ -1,180 +1,209 @@
 <div class="feedback-container">
-  <div class="page-header">
-    <h1>Speech Feedback</h1>
-    <p>Here's your detailed speech analysis and feedback</p>
+
+  <!-- ═══ OVERALL SCORE HERO ═══ -->
+  <div class="score-hero">
+    <div class="grade-ring" [style.--pct]="overallPercent + '%'" [style.--color]="scoreColor(feedback.overall ?? 0)">
+      <div class="grade-inner">
+        <span class="grade-letter">{{ overallGrade }}</span>
+        <span class="grade-sub">{{ feedback.overall ?? 0 }}/4</span>
+      </div>
+    </div>
+    <div class="hero-text">
+      <h1>{{ scoreLabel(feedback.overall ?? 0) }}</h1>
+      <p *ngIf="feedback.category">{{ feedback.category | titlecase }} Speech
+        <span *ngIf="feedback.duration"> · {{ formatTime(feedback.duration) }}</span>
+        <span *ngIf="feedback.averagePace"> · {{ feedback.averagePace }} WPM</span>
+      </p>
+    </div>
   </div>
 
-  <!-- Transcription -->
-  <mat-card class="feedback-card transcript-card">
+  <!-- ═══ QUICK STATS ═══ -->
+  <div class="stats-row">
+    <div class="stat-pill" [class.warn]="(fillerDetails?.count ?? 0) > 5">
+      <span class="stat-icon">💬</span>
+      <span class="stat-val">{{ fillerDetails?.count ?? 0 }}</span>
+      <span class="stat-lbl">Filler Words</span>
+    </div>
+    <div class="stat-pill" *ngIf="pauseAnalysis">
+      <span class="stat-icon">⏸️</span>
+      <span class="stat-val">{{ pauseAnalysis.count }}</span>
+      <span class="stat-lbl">Pauses</span>
+    </div>
+    <div class="stat-pill" *ngIf="pauseAnalysis">
+      <span class="stat-icon">⏱️</span>
+      <span class="stat-val">{{ pauseAnalysis.average_duration }}s</span>
+      <span class="stat-lbl">Avg Pause</span>
+    </div>
+    <div class="stat-pill" *ngIf="pauseAnalysis">
+      <span class="stat-icon">🔇</span>
+      <span class="stat-val">{{ pauseAnalysis.longest_pause }}s</span>
+      <span class="stat-lbl">Longest Pause</span>
+    </div>
+  </div>
+
+  <!-- ═══ TRANSCRIPT ═══ -->
+  <mat-card class="section-card transcript-card" *ngIf="feedback.transcript">
     <mat-card-header>
-      <mat-card-title>Transcription</mat-card-title>
+      <mat-card-title>
+        <span class="card-title-text">📄 Transcript</span>
+        <span class="filler-legend" *ngIf="fillerSummary.length">
+          <span class="legend-swatch"></span> filler words
+        </span>
+      </mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <div class="transcript-content" [innerHTML]="highlightedTranscript"></div>
+      <div class="transcript-body" [innerHTML]="highlightedTranscript"></div>
     </mat-card-content>
   </mat-card>
 
-  <!-- Scores Overview -->
-  <mat-card class="feedback-card scores-card">
+  <!-- ═══ COACHING REPORT ═══ -->
+  <mat-card class="section-card coaching-card" *ngIf="feedback.overall_assessment || strengths.length || improvements.length">
     <mat-card-header>
-      <mat-card-title>Scores Overview</mat-card-title>
+      <mat-card-title>🎓 Coach's Report</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <div class="scores-grid">
-        <div class="score-item">
-          <div class="score-label">Overall</div>
-          <div class="score-number">{{ feedback.overall }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Speech Pace</div>
-          <div class="score-number">{{ feedback.speech_pace }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Pausing & Fluency</div>
-          <div class="score-number">{{ feedback.pausing_fluency }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Volume Control</div>
-          <div class="score-number">{{ feedback.loud_control }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Pitch Variation</div>
-          <div class="score-number">{{ feedback.pitch_variation }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Clarity</div>
-          <div class="score-number">{{ feedback.articulation_clarity }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Expression</div>
-          <div class="score-number">{{ feedback.expressive_emph }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Filler Words</div>
-          <div class="score-number">{{ feedback.filler_words_score }}/5</div>
-        </div>
+
+      <div class="assessment-block" *ngIf="feedback.overall_assessment">
+        <p>{{ feedback.overall_assessment }}</p>
+      </div>
+
+      <div class="coaching-section" *ngIf="strengths.length">
+        <div class="section-label strengths-label">✅ What You Did Well</div>
+        <ul class="coaching-list">
+          <li *ngFor="let s of strengths" class="strength-item">⭐ {{ s }}</li>
+        </ul>
+      </div>
+
+      <div class="coaching-section" *ngIf="improvements.length">
+        <div class="section-label improvements-label">🎯 Areas to Improve</div>
+        <ol class="coaching-list improvements-list">
+          <li *ngFor="let item of improvements" class="improvement-item">{{ item }}</li>
+        </ol>
+      </div>
+
+      <div class="closing-message" *ngIf="feedback.closing_message">
+        <p>💙 {{ feedback.closing_message }}</p>
       </div>
     </mat-card-content>
   </mat-card>
 
-  <!-- Analysis Grid -->
-  <div class="analysis-grid">
-    <mat-card class="analysis-card">
-      <mat-card-content>
-        <div class="card-header">
-          <h4>Pace</h4>
-        </div>
-        <div class="score-circle">
-          <div class="score-value">{{ feedback.speech_pace }}/5</div>
-        </div>
-        <p class="feedback-text">{{ feedback.pace_feedback }}</p>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="analysis-card">
-      <mat-card-content>
-        <div class="card-header">
-          <h4>Tone</h4>
-        </div>
-        <div class="score-circle">
-          <div class="score-value">{{ feedback.expressive_emph }}/5</div>
-        </div>
-        <p class="feedback-text">{{ feedback.tone_feedback }}</p>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="analysis-card">
-      <mat-card-content>
-        <div class="card-header">
-          <h4>Clarity</h4>
-        </div>
-        <div class="score-circle">
-          <div class="score-value">{{ feedback.articulation_clarity }}/5</div>
-        </div>
-        <p class="feedback-text">{{ feedback.clarity_feedback }}</p>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Areas for Improvement and Strengths -->
-  <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
-    <mat-card class="feedback-card improvements-card" *ngIf="feedback.areas_improvement">
-      <mat-card-header>
-        <mat-card-title>Areas for Improvement</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="improvement-list">
-          <div *ngFor="let item of getImprovementItems()" class="improvement-item">
-            <strong *ngIf="item.category" class="improvement-category">{{ item.category }}</strong>
-            <p class="improvement-text">{{ item.suggestion }}</p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="feedback-card strengths-card" *ngIf="feedback.strengths">
-      <mat-card-header>
-        <mat-card-title>Strengths</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ feedback.strengths }}</p>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Filler Words -->
-  <mat-card class="feedback-card filler-words-card">
+  <!-- ═══ SCORE BREAKDOWN ═══ -->
+  <mat-card class="section-card scores-card">
     <mat-card-header>
-      <mat-card-title>Filler Words Analysis</mat-card-title>
+      <mat-card-title>📊 Score Breakdown</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <p class="filler-feedback">
-        <strong>Filler Words Score:</strong> {{ feedback.filler_words || feedback.filler_words_score || 0 }}/5
-      </p>
-
-      <div *ngIf="fillerDetails" style="margin-top: 15px;">
-        <div class="filler-stats">
-          <p><strong>Total Filler Words:</strong> {{ fillerDetails.count }}</p>
-          <p *ngIf="fillerDetails.word_count > 0">
-            <strong>Filler Ratio:</strong> {{ ((fillerDetails.count / fillerDetails.word_count) * 100).toFixed(1) }}% of speech
-          </p>
-        </div>
-
-        <!-- Individual filler words with timestamps -->
-        <div *ngIf="fillerDetails.fillers && fillerDetails.fillers.length > 0" style="margin-top: 16px;">
-          <p><strong>Detected filler words:</strong></p>
-          <div class="filler-list">
-            <div *ngFor="let filler of fillerDetails.fillers" class="filler-item">
-              <span class="filler-word">"{{ filler.word }}"</span>
-              <span class="filler-time">{{ formatSecondsToTime(filler.start) }} – {{ formatSecondsToTime(filler.end) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Summary of unique filler words with counts -->
-        <div *ngIf="fillerSummary && fillerSummary.length > 0" style="margin-top: 16px;">
-          <p><strong>Summary:</strong></p>
-          <div class="filler-chips">
-            <span *ngFor="let item of fillerSummary" class="filler-chip">
-              "{{ item.word }}" ({{ item.count }}x)
+      <div class="score-rows">
+        <div class="score-row" *ngFor="let item of scoreItems">
+          <div class="score-row-top">
+            <span class="score-row-label">{{ item.label }}</span>
+            <span class="score-row-val" [style.color]="scoreColor(item.score)">
+              {{ item.score }}/4 &nbsp;·&nbsp; {{ scoreLabel(item.score) }}
             </span>
           </div>
+          <div class="score-bar-track">
+            <div class="score-bar-fill"
+                 [style.width]="scoreBarPercent(item.score) + '%'"
+                 [style.background]="scoreColor(item.score)">
+            </div>
+          </div>
+          <p class="score-row-feedback" *ngIf="item.feedback">{{ item.feedback }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ═══ FILLER WORD ANALYSIS ═══ -->
+  <mat-card class="section-card filler-card" *ngIf="fillerDetails">
+    <mat-card-header>
+      <mat-card-title>💬 Filler Word Analysis</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      <div class="filler-meta" *ngIf="fillerDetails.count > 0">
+        <div class="filler-meta-item">
+          <span class="fm-val">{{ fillerDetails.count }}</span>
+          <span class="fm-lbl">total fillers</span>
+        </div>
+        <div class="filler-meta-item">
+          <span class="fm-val">{{ fillerDetails.ratio }}%</span>
+          <span class="fm-lbl">of words spoken</span>
         </div>
       </div>
 
-      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) >= 4" class="no-fillers" style="margin-top: 15px;">
-        Excellent! Minimal filler words detected.
-      </p>
-      <p *ngIf="(feedback.filler_words || feedback.filler_words_score || 0) < 4" class="needs-improvement" style="margin-top: 15px;">
-        Try to reduce filler words for better fluency. Practice pausing instead.
+      <div class="filler-chips" *ngIf="fillerSummary.length">
+        <span class="filler-chip" *ngFor="let f of fillerSummary">
+          "{{ f.word }}" <strong>×{{ f.count }}</strong>
+        </span>
+      </div>
+
+      <div class="filler-timeline" *ngIf="fillerDetails.fillers?.length">
+        <p class="timeline-label">Timeline</p>
+        <div class="timeline-items">
+          <div class="timeline-item" *ngFor="let f of fillerDetails.fillers">
+            <span class="ti-word">"{{ f.word }}"</span>
+            <span class="ti-time">&#64; {{ formatTimestamp(f.start) }} – {{ formatTimestamp(f.end) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-note" *ngIf="feedback.filler_feedback">
+        💡 {{ feedback.filler_feedback }}
+      </div>
+
+      <p class="filler-clean" *ngIf="fillerDetails.count === 0">
+        ✅ No filler words detected — excellent delivery!
       </p>
     </mat-card-content>
   </mat-card>
 
-  <!-- Try Again Button -->
+  <!-- ═══ PAUSE ANALYSIS ═══ -->
+  <mat-card class="section-card pause-card" *ngIf="pauseAnalysis">
+    <mat-card-header>
+      <mat-card-title>⏸️ Pause Analysis</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      <div class="pause-stats">
+        <div class="pause-stat-item">
+          <span class="ps-val">{{ pauseAnalysis.count }}</span>
+          <span class="ps-lbl">Total pauses</span>
+        </div>
+        <div class="pause-stat-item">
+          <span class="ps-val">{{ pauseAnalysis.average_duration }}s</span>
+          <span class="ps-lbl">Average duration</span>
+        </div>
+        <div class="pause-stat-item">
+          <span class="ps-val">{{ pauseAnalysis.longest_pause }}s</span>
+          <span class="ps-lbl">Longest pause</span>
+        </div>
+        <div class="pause-stat-item">
+          <span class="ps-val">{{ pauseAnalysis.total_pause_time }}s</span>
+          <span class="ps-lbl">Total silence</span>
+        </div>
+      </div>
+
+      <div class="filler-timeline" *ngIf="pauseAnalysis.pauses?.length">
+        <p class="timeline-label">Notable pauses</p>
+        <div class="timeline-items">
+          <div class="timeline-item" *ngFor="let p of $any(pauseAnalysis.pauses) | slice:0:8">
+            <span class="ti-word" [class.long-pause]="$any(p).duration >= 2">{{ $any(p).duration }}s pause</span>
+            <span class="ti-time">{{ formatTimestamp($any(p).start) }} – {{ formatTimestamp($any(p).end) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-note" *ngIf="feedback.pausing_feedback">
+        💡 {{ feedback.pausing_feedback }}
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ═══ CTA ═══ -->
   <div class="action-buttons">
-    <button mat-raised-button color="primary" (click)="tryAgain()" class="try-again-button">
-      Try Another Recording
+    <button mat-raised-button color="primary" (click)="tryAgain()" class="try-again-btn">
+      🎤 Record Another Speech
     </button>
   </div>
+
 </div>

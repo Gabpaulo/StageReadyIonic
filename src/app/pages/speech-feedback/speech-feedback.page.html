@@ -1,166 +1,239 @@
-<!-- src/app/pages/speech-feedback/speech-feedback.page.html -->
 <ion-header class="custom-header">
   <ion-toolbar>
     <ion-title>Speech Feedback</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="tryAgain()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="custom-content">
-  <!-- Category and Duration -->
-  <div class="feedback-card category-card" *ngIf="feedback.category || feedback.duration">
-    <div class="card-header">
-      <ion-icon name="pricetag" class="card-icon"></ion-icon>
-      <h3>Category: {{ feedback.category | titlecase }}</h3>
-    </div>
-    <p *ngIf="feedback.duration">Duration: {{ feedback.duration | number:'1.1-1' }} seconds</p>
-  </div>
 
-  <!-- Transcription (with filler words highlighted) -->
-  <div class="feedback-card transcript-card" *ngIf="feedback.transcript">
-    <div class="card-header">
-      <ion-icon name="document-text" class="card-icon"></ion-icon>
-      <h3>Transcription</h3>
+  <!-- ═══ OVERALL SCORE HERO ═══ -->
+  <div class="score-hero">
+    <div class="grade-ring" [style.--pct]="overallPercent + '%'" [style.--color]="scoreColor(feedback.overall ?? 0)">
+      <div class="grade-inner">
+        <span class="grade-letter">{{ overallGrade }}</span>
+        <span class="grade-sub">{{ feedback.overall ?? 0 }}/4</span>
+      </div>
     </div>
-    <div class="transcript-content" [innerHTML]="highlightedTranscript"></div>
-  </div>
-
-  <!-- Scores Overview -->
-  <div class="feedback-card scores-card">
-    <div class="card-header">
-      <ion-icon name="stats-chart" class="card-icon"></ion-icon>
-      <h3>Scores Overview</h3>
-    </div>
-    <div class="scores-grid">
-      <div class="score-item">
-        <div class="score-label">Overall</div>
-        <div class="score-number">{{ feedback.overall }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Speech Pace</div>
-        <div class="score-number">{{ feedback.speech_pace }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Pausing & Fluency</div>
-        <div class="score-number">{{ feedback.pausing_fluency }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Volume Control</div>
-        <div class="score-number">{{ feedback.loudness_control || feedback.loud_control }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Pitch Variation</div>
-        <div class="score-number">{{ feedback.pitch_variation }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Clarity</div>
-        <div class="score-number">{{ feedback.articulation_clarity }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Expression</div>
-        <div class="score-number">{{ feedback.expressive_emphasis || feedback.expressive_emph }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Filler Words</div>
-        <div class="score-number">{{ feedback.filler_words || feedback.filler_words_score }}/5</div>
-      </div>
+    <div class="hero-text">
+      <h2>{{ scoreLabel(feedback.overall ?? 0) }}</h2>
+      <p *ngIf="feedback.category">{{ feedback.category | titlecase }} Speech
+        <span *ngIf="feedback.duration"> · {{ formatTime(feedback.duration) }}</span>
+        <span *ngIf="feedback.averagePace"> · {{ feedback.averagePace }} WPM</span>
+      </p>
     </div>
   </div>
 
-  <!-- Filler Words Analysis -->
-  <div class="feedback-card filler-words-card" *ngIf="getFillerDetails() as fillerDetails">
-    <div class="card-header">
-      <ion-icon name="chatbubble-ellipses" class="card-icon"></ion-icon>
+  <!-- ═══ TRANSCRIPT ═══ -->
+  <div class="section-card transcript-card" *ngIf="feedback.transcript">
+    <div class="card-head">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <h3>Transcript</h3>
+      <span class="filler-legend" *ngIf="fillerSummary.length">
+        <span class="legend-dot"></span> filler words highlighted
+      </span>
+    </div>
+    <div class="transcript-body" [innerHTML]="highlightedTranscript"></div>
+  </div>
+
+  <!-- ═══ QUICK STATS ROW ═══ -->
+  <div class="stats-row">
+    <div class="stat-pill" [class.warn]="(fillerDetails?.count ?? 0) > 5">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+      <span class="stat-val">{{ fillerDetails?.count ?? 0 }}</span>
+      <span class="stat-lbl">Fillers</span>
+    </div>
+    <div class="stat-pill" *ngIf="pauseAnalysis">
+      <ion-icon name="pause-circle-outline"></ion-icon>
+      <span class="stat-val">{{ pauseAnalysis.count }}</span>
+      <span class="stat-lbl">Pauses</span>
+    </div>
+    <div class="stat-pill" *ngIf="pauseAnalysis">
+      <ion-icon name="timer-outline"></ion-icon>
+      <span class="stat-val">{{ pauseAnalysis.average_duration }}s</span>
+      <span class="stat-lbl">Avg Pause</span>
+    </div>
+    <div class="stat-pill" *ngIf="pauseAnalysis">
+      <ion-icon name="hourglass-outline"></ion-icon>
+      <span class="stat-val">{{ pauseAnalysis.longest_pause }}s</span>
+      <span class="stat-lbl">Longest</span>
+    </div>
+  </div>
+
+  <!-- ═══ COACHING REPORT ═══ -->
+  <div class="section-card coaching-card" *ngIf="feedback.overall_assessment || strengths.length || improvements.length">
+    <div class="card-head">
+      <ion-icon name="school-outline"></ion-icon>
+      <h3>Coach's Report</h3>
+    </div>
+
+    <!-- Overall assessment -->
+    <div class="assessment-block" *ngIf="feedback.overall_assessment">
+      <p class="assessment-text">{{ feedback.overall_assessment }}</p>
+    </div>
+
+    <!-- Strengths -->
+    <div class="coaching-section strengths-section" *ngIf="strengths.length">
+      <div class="section-label strengths-label">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <span>What You Did Well</span>
+      </div>
+      <ul class="coaching-list">
+        <li *ngFor="let s of strengths" class="strength-item">
+          <ion-icon name="star-outline"></ion-icon>
+          <span>{{ s }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Improvements -->
+    <div class="coaching-section improvements-section" *ngIf="improvements.length">
+      <div class="section-label improvements-label">
+        <ion-icon name="trending-up-outline"></ion-icon>
+        <span>Areas to Improve</span>
+      </div>
+      <ol class="coaching-list improvements-list">
+        <li *ngFor="let item of improvements" class="improvement-item">
+          <span>{{ item }}</span>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Closing message -->
+    <div class="closing-message" *ngIf="feedback.closing_message">
+      <ion-icon name="heart-outline"></ion-icon>
+      <p>{{ feedback.closing_message }}</p>
+    </div>
+  </div>
+
+  <!-- ═══ SCORE BREAKDOWN ═══ -->
+  <div class="section-card scores-card">
+    <div class="card-head">
+      <ion-icon name="bar-chart-outline"></ion-icon>
+      <h3>Score Breakdown</h3>
+    </div>
+
+    <div class="score-rows">
+      <div class="score-row" *ngFor="let item of scoreItems">
+        <div class="score-row-top">
+          <span class="score-row-label">{{ item.label }}</span>
+          <span class="score-row-val" [style.color]="scoreColor(item.score)">
+            {{ item.score }}/4 · {{ scoreLabel(item.score) }}
+          </span>
+        </div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill"
+               [style.width]="scoreBarPercent(item.score) + '%'"
+               [style.background]="scoreColor(item.score)">
+          </div>
+        </div>
+        <p class="score-row-feedback" *ngIf="item.feedback">{{ item.feedback }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FILLER WORD ANALYSIS ═══ -->
+  <div class="section-card filler-card" *ngIf="fillerDetails">
+    <div class="card-head">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
       <h3>Filler Word Analysis</h3>
     </div>
-    <p><strong>Score:</strong> {{ feedback.filler_words || feedback.filler_words_score || 0 }}/5</p>
-    <p><strong>Total Filler Words:</strong> {{ fillerDetails.count }}</p>
-    <p *ngIf="fillerDetails.word_count > 0"><strong>Filler Ratio:</strong> {{ ((fillerDetails.count / fillerDetails.word_count) * 100).toFixed(1) }}% of speech</p>
 
-    <!-- Individual filler words with timestamps -->
-    <div *ngIf="fillerDetails.fillers && fillerDetails.fillers.length > 0" class="filler-words-list">
-      <p><strong>Detected filler words:</strong></p>
-      <div class="filler-list">
-        <div *ngFor="let filler of fillerDetails.fillers" class="filler-item">
-          <span class="filler-word">"{{ filler.word }}"</span>
-          <span class="filler-time">{{ formatSecondsToTime(filler.start) }} - {{ formatSecondsToTime(filler.end) }}</span>
+    <div class="filler-meta" *ngIf="fillerDetails.count > 0">
+      <div class="filler-meta-item">
+        <span class="fm-val">{{ fillerDetails.count }}</span>
+        <span class="fm-lbl">total fillers</span>
+      </div>
+      <div class="filler-meta-item">
+        <span class="fm-val">{{ fillerDetails.ratio }}%</span>
+        <span class="fm-lbl">of words spoken</span>
+      </div>
+    </div>
+
+    <!-- Summary chips -->
+    <div class="filler-chips" *ngIf="fillerSummary.length">
+      <span class="filler-chip" *ngFor="let f of fillerSummary">
+        "{{ f.word }}" <strong>×{{ f.count }}</strong>
+      </span>
+    </div>
+
+    <!-- Timestamped list -->
+    <div class="filler-timeline" *ngIf="fillerDetails.fillers?.length">
+      <p class="timeline-label">Timeline</p>
+      <div class="timeline-items">
+        <div class="timeline-item" *ngFor="let f of fillerDetails.fillers">
+          <span class="ti-word">"{{ f.word }}"</span>
+          <span class="ti-time">&#64; {{ formatTimestamp(f.start) }} – {{ formatTimestamp(f.end) }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Summary of unique filler words with counts -->
-    <div *ngIf="fillerSummary && fillerSummary.length > 0" class="filler-summary-section">
-      <p><strong>Summary:</strong></p>
-      <div class="filler-chips">
-        <span *ngFor="let item of fillerSummary" class="filler-chip">
-          "{{ item.word }}" ({{ item.count }}x)
-        </span>
-      </div>
+    <!-- Coach's filler feedback -->
+    <div class="coach-note" *ngIf="feedback.filler_feedback">
+      <ion-icon name="bulb-outline"></ion-icon>
+      <p>{{ feedback.filler_feedback }}</p>
     </div>
 
-    <p *ngIf="fillerDetails.count === 0" class="filler-good">No filler words detected.</p>
+    <p class="filler-clean" *ngIf="fillerDetails.count === 0">
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      No filler words detected — excellent delivery!
+    </p>
   </div>
 
-  <!-- Recommendations -->
-  <div class="feedback-card recommendations-card" *ngIf="feedback.recommendations && feedback.recommendations.length > 0">
-    <div class="card-header">
-      <ion-icon name="bulb" class="card-icon"></ion-icon>
-      <h3>Recommendations</h3>
+  <!-- ═══ PAUSE ANALYSIS ═══ -->
+  <div class="section-card pause-card" *ngIf="pauseAnalysis">
+    <div class="card-head">
+      <ion-icon name="pause-circle-outline"></ion-icon>
+      <h3>Pause Analysis</h3>
     </div>
-    <div class="recommendations-list">
-      <div class="recommendation-item" *ngFor="let rec of feedback.recommendations">
-        <div class="rec-category">{{ rec.category }}</div>
-        <div class="rec-issue">{{ rec.issue }}</div>
-        <div class="rec-suggestion">{{ rec.suggestion }}</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Detailed Feedback -->
-  <div class="feedback-card detailed-feedback-card" *ngIf="feedback.feedback">
-    <div class="card-header">
-      <ion-icon name="analytics" class="card-icon"></ion-icon>
-      <h3>Detailed Analysis</h3>
-    </div>
-    <div class="overall-assessment" *ngIf="feedback.feedback.overall_assessment">
-      <strong>Overall:</strong> {{ feedback.feedback.overall_assessment }}
-    </div>
-    <div class="detailed-scores" *ngIf="feedback.feedback.detailed_scores">
-      <div class="detail-item" *ngFor="let item of getDetailedScores()">
-        <div class="detail-label">{{ formatMetricName(item.key) }}</div>
-        <div class="detail-score">{{ item.value.score }}/5</div>
-        <div class="detail-desc">{{ item.value.description }}</div>
+    <div class="pause-stats">
+      <div class="pause-stat-item">
+        <span class="ps-val">{{ pauseAnalysis.count }}</span>
+        <span class="ps-lbl">Total pauses</span>
+      </div>
+      <div class="pause-stat-item">
+        <span class="ps-val">{{ pauseAnalysis.average_duration }}s</span>
+        <span class="ps-lbl">Avg duration</span>
+      </div>
+      <div class="pause-stat-item">
+        <span class="ps-val">{{ pauseAnalysis.longest_pause }}s</span>
+        <span class="ps-lbl">Longest pause</span>
+      </div>
+      <div class="pause-stat-item">
+        <span class="ps-val">{{ pauseAnalysis.total_pause_time }}s</span>
+        <span class="ps-lbl">Total silence</span>
       </div>
     </div>
-  </div>
 
-  <!-- Areas for Improvement and Strengths -->
-  <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
-    <div class="feedback-card" *ngIf="feedback.areas_improvement">
-      <div class="card-header">
-        <ion-icon name="trending-up" class="card-icon"></ion-icon>
-        <h3>Areas for Improvement</h3>
-      </div>
-      <div class="improvement-list">
-        <div *ngFor="let item of getImprovementItems()" class="improvement-item">
-          <strong class="improvement-category">{{ item.category }}</strong>
-          <p class="improvement-text">{{ item.suggestion }}</p>
+    <!-- Top pauses list -->
+    <div class="top-pauses" *ngIf="pauseAnalysis.pauses?.length">
+      <p class="timeline-label">Notable pauses</p>
+      <div class="timeline-items">
+        <div class="timeline-item" *ngFor="let p of $any(pauseAnalysis.pauses) | slice:0:8">
+          <span class="ti-word" [class.long-pause]="$any(p).duration >= 2">{{ $any(p).duration }}s pause</span>
+          <span class="ti-time">{{ formatTimestamp($any(p).start) }} – {{ formatTimestamp($any(p).end) }}</span>
         </div>
       </div>
     </div>
 
-    <div class="feedback-card" *ngIf="feedback.strengths">
-      <div class="card-header">
-        <ion-icon name="checkmark-circle" class="card-icon"></ion-icon>
-        <h3>Strengths</h3>
-      </div>
-      <p>{{ feedback.strengths }}</p>
+    <!-- Coach's pausing feedback -->
+    <div class="coach-note" *ngIf="feedback.pausing_feedback">
+      <ion-icon name="bulb-outline"></ion-icon>
+      <p>{{ feedback.pausing_feedback }}</p>
     </div>
   </div>
 
+  <!-- ═══ TRY AGAIN ═══ -->
+  <div class="cta-section">
+    <ion-button class="try-again-btn" expand="block" (click)="tryAgain()">
+      <ion-icon name="mic-outline" slot="start"></ion-icon>
+      Record Another Speech
+    </ion-button>
+  </div>
 
-  <!-- Try Again Button -->
-  <ion-button class="try-again-button" expand="block" (click)="tryAgain()">
-    <ion-icon name="refresh" slot="start"></ion-icon>
-    Try Another Recording
-  </ion-button>
 </ion-content>

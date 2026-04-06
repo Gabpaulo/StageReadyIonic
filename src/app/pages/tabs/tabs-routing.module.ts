@@ -40,6 +40,10 @@ const routes: Routes = [
         loadChildren: () => import('../knowledge-base/knowledge-base.module').then(m => m.KnowledgeBasePageModule)
       },
       {
+        path: 'practice-mode',
+        loadChildren: () => import('../practice-mode/practice-mode.module').then(m => m.PracticeModePageModule)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
