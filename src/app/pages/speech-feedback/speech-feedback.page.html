@@ -16,7 +16,7 @@
     <div class="grade-ring" [style.--pct]="overallPercent + '%'" [style.--color]="scoreColor(feedback.overall ?? 0)">
       <div class="grade-inner">
         <span class="grade-letter">{{ overallGrade }}</span>
-        <span class="grade-sub">{{ feedback.overall ?? 0 }}/4</span>
+        <span class="grade-sub">{{ feedback.overall ?? 0 }}/5</span>
       </div>
     </div>
     <div class="hero-text">
@@ -122,7 +122,7 @@
         <div class="score-row-top">
           <span class="score-row-label">{{ item.label }}</span>
           <span class="score-row-val" [style.color]="scoreColor(item.score)">
-            {{ item.score }}/4 · {{ scoreLabel(item.score) }}
+            {{ item.score }}/5 · {{ scoreLabel(item.score) }}
           </span>
         </div>
         <div class="score-bar-track">
@@ -184,13 +184,14 @@
     </p>
   </div>
 
-  <!-- ═══ PAUSE ANALYSIS ═══ -->
+  <!-- ═══ PAUSING & FLUENCY ═══ -->
   <div class="section-card pause-card" *ngIf="pauseAnalysis">
     <div class="card-head">
-      <ion-icon name="pause-circle-outline"></ion-icon>
-      <h3>Pause Analysis</h3>
+      <ion-icon name="pulse-outline"></ion-icon>
+      <h3>Pausing &amp; Fluency</h3>
     </div>
 
+    <!-- Pause stats row -->
     <div class="pause-stats">
       <div class="pause-stat-item">
         <span class="ps-val">{{ pauseAnalysis.count }}</span>
@@ -210,13 +211,24 @@
       </div>
     </div>
 
-    <!-- Top pauses list -->
-    <div class="top-pauses" *ngIf="pauseAnalysis.pauses?.length">
+    <!-- Notable pauses timeline -->
+    <div class="filler-timeline" *ngIf="pauseAnalysis.pauses?.length">
       <p class="timeline-label">Notable pauses</p>
       <div class="timeline-items">
         <div class="timeline-item" *ngFor="let p of $any(pauseAnalysis.pauses) | slice:0:8">
           <span class="ti-word" [class.long-pause]="$any(p).duration >= 2">{{ $any(p).duration }}s pause</span>
           <span class="ti-time">{{ formatTimestamp($any(p).start) }} – {{ formatTimestamp($any(p).end) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fastest WPM segments -->
+    <div class="filler-timeline" *ngIf="pauseAnalysis.wpm_segments?.length">
+      <p class="timeline-label">⚡ Fastest Moments</p>
+      <div class="timeline-items">
+        <div class="timeline-item" *ngFor="let seg of $any(pauseAnalysis.wpm_segments)">
+          <span class="ti-word wpm-burst">{{ $any(seg).wpm }} WPM</span>
+          <span class="ti-time">{{ formatTimestamp($any(seg).start) }} – {{ formatTimestamp($any(seg).end) }}</span>
         </div>
       </div>
     </div>

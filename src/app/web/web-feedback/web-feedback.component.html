@@ -5,7 +5,7 @@
     <div class="grade-ring" [style.--pct]="overallPercent + '%'" [style.--color]="scoreColor(feedback.overall ?? 0)">
       <div class="grade-inner">
         <span class="grade-letter">{{ overallGrade }}</span>
-        <span class="grade-sub">{{ feedback.overall ?? 0 }}/4</span>
+        <span class="grade-sub">{{ feedback.overall ?? 0 }}/5</span>
       </div>
     </div>
     <div class="hero-text">
@@ -98,7 +98,7 @@
           <div class="score-row-top">
             <span class="score-row-label">{{ item.label }}</span>
             <span class="score-row-val" [style.color]="scoreColor(item.score)">
-              {{ item.score }}/4 &nbsp;·&nbsp; {{ scoreLabel(item.score) }}
+              {{ item.score }}/5 &nbsp;·&nbsp; {{ scoreLabel(item.score) }}
             </span>
           </div>
           <div class="score-bar-track">
@@ -157,10 +157,10 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- ═══ PAUSE ANALYSIS ═══ -->
+  <!-- ═══ PAUSING & FLUENCY ═══ -->
   <mat-card class="section-card pause-card" *ngIf="pauseAnalysis">
     <mat-card-header>
-      <mat-card-title>⏸️ Pause Analysis</mat-card-title>
+      <mat-card-title>⚡ Pausing &amp; Fluency</mat-card-title>
     </mat-card-header>
     <mat-card-content>
 
@@ -183,12 +183,24 @@
         </div>
       </div>
 
+      <!-- Notable pauses -->
       <div class="filler-timeline" *ngIf="pauseAnalysis.pauses?.length">
         <p class="timeline-label">Notable pauses</p>
         <div class="timeline-items">
           <div class="timeline-item" *ngFor="let p of $any(pauseAnalysis.pauses) | slice:0:8">
             <span class="ti-word" [class.long-pause]="$any(p).duration >= 2">{{ $any(p).duration }}s pause</span>
             <span class="ti-time">{{ formatTimestamp($any(p).start) }} – {{ formatTimestamp($any(p).end) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fastest WPM segments -->
+      <div class="filler-timeline" *ngIf="pauseAnalysis.wpm_segments?.length">
+        <p class="timeline-label">⚡ Fastest Moments</p>
+        <div class="timeline-items">
+          <div class="timeline-item" *ngFor="let seg of $any(pauseAnalysis.wpm_segments)">
+            <span class="ti-word wpm-burst">{{ $any(seg).wpm }} WPM</span>
+            <span class="ti-time">{{ formatTimestamp($any(seg).start) }} – {{ formatTimestamp($any(seg).end) }}</span>
           </div>
         </div>
       </div>

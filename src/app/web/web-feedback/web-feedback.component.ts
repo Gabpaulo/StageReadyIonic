@@ -53,14 +53,15 @@ export class WebFeedbackComponent {
 
   get overallGrade(): string {
     const s = this.feedback.overall ?? 0;
-    if (s >= 3.5) return 'A';
-    if (s >= 2.5) return 'B';
-    if (s >= 1.5) return 'C';
-    return 'D';
+    if (s >= 4.5) return 'A';
+    if (s >= 3.5) return 'B';
+    if (s >= 2.5) return 'C';
+    if (s >= 1.5) return 'D';
+    return 'F';
   }
 
   get overallPercent(): number {
-    return Math.round(((this.feedback.overall ?? 0) / 4) * 100);
+    return Math.round(((this.feedback.overall ?? 0) / 5) * 100);
   }
 
   get scoreItems(): { label: string; score: number; feedback: string }[] {
@@ -68,28 +69,30 @@ export class WebFeedbackComponent {
     return [
       { label: 'Speech Pace',     score: f.speech_pace          ?? 0, feedback: f.pace_feedback    || '' },
       { label: 'Pausing & Flow',  score: f.pausing_fluency      ?? 0, feedback: f.pausing_feedback || '' },
-      { label: 'Volume Control',  score: f.loud_control         ?? 0, feedback: '' },
-      { label: 'Pitch Variation', score: f.pitch_variation      ?? 0, feedback: '' },
+      { label: 'Volume Control',  score: f.loud_control         ?? 0, feedback: f.volume_feedback  || '' },
+      { label: 'Pitch Variation', score: f.pitch_variation      ?? 0, feedback: f.pitch_feedback   || '' },
       { label: 'Clarity',         score: f.articulation_clarity ?? 0, feedback: f.clarity_feedback || '' },
       { label: 'Expressiveness',  score: f.expressive_emph      ?? 0, feedback: f.tone_feedback    || '' },
       { label: 'Filler Words',    score: f.filler_words_score   ?? 0, feedback: f.filler_feedback  || '' },
     ];
   }
 
-  scoreBarPercent(score: number): number { return Math.round((score / 4) * 100); }
+  scoreBarPercent(score: number): number { return Math.round((score / 5) * 100); }
 
   scoreColor(score: number): string {
-    if (score >= 3) return '#4caf50';
-    if (score >= 2) return '#22a7f0';
-    if (score >= 1) return '#ff9800';
+    if (score >= 5) return '#4caf50';
+    if (score >= 4) return '#8bc34a';
+    if (score >= 3) return '#22a7f0';
+    if (score >= 2) return '#ff9800';
     return '#f44336';
   }
 
   scoreLabel(score: number): string {
-    if (score >= 3.5) return 'Excellent';
-    if (score >= 2.5) return 'Good';
-    if (score >= 1.5) return 'Fair';
-    return 'Needs Work';
+    if (score >= 4.5) return 'Excellent';
+    if (score >= 3.5) return 'Good';
+    if (score >= 2.5) return 'Fair';
+    if (score >= 1.5) return 'Poor';
+    return 'Very Poor';
   }
 
   formatTime(sec: number): string {

@@ -415,31 +415,30 @@
 
 .script-word {
   display: inline;
-  padding: 2px 2px;
+  padding: 1px 3px;
   border-radius: 4px;
-  transition: color 0.08s, background 0.08s, opacity 0.08s;
+  /* NO width-changing properties (no bold, no border) so text flow never reflows */
+  transition: color 0.05s ease, background-color 0.05s ease, opacity 0.05s ease;
 
-  /* Confirmed spoken words — dimmed, no strikethrough so text stays readable */
+  /* Confirmed spoken words — dimmed */
   &.spoken {
     color: #4a6a85;
-    opacity: 0.55;
+    opacity: 0.45;
   }
 
-  /* Interim / live match — instantly turns blue as speech is detected */
+  /* Interim / live match — highlighted in blue the instant speech is detected */
   &.live {
-    color: #22a7f0;
-    opacity: 0.9;
+    color: #b3dfff;
+    background-color: rgba(34, 167, 240, 0.18);
   }
 
-  /* The exact word being spoken RIGHT NOW — always in front of liveWordIndex */
+  /* The exact next word — brighter highlight, no bold, no size change */
   &.current {
     color: #fff;
-    background: rgba(34,167,240,0.28);
-    padding: 2px 5px;
-    border-radius: 5px;
-    font-weight: 700;
-    box-shadow: 0 0 14px rgba(34,167,240,0.5);
-    animation: wordPulse 0.9s ease-in-out infinite;
+    background-color: rgba(34, 167, 240, 0.45);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(34, 167, 240, 0.4);
+    animation: wordPulse 0.8s ease-in-out infinite;
   }
 }
 

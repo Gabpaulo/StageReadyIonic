@@ -448,7 +448,8 @@
     font-size: 0.82rem;
     font-weight: 600;
     color: #ffb74d;
-    &.long-pause { color: var(--danger); }
+    &.long-pause  { color: var(--danger); }
+    &.wpm-burst   { color: #4caf50; }
   }
 
   .ti-time {

@@ -90,6 +90,12 @@ export class PracticeModePage implements OnDestroy {
    */
   private normalizedScriptWords: string[] = [];
 
+  /**
+   * Filler words that are intentionally part of the script text.
+   * These must NOT be counted as mistakes when the user speaks them.
+   */
+  private scriptFillerWords = new Set<string>();
+
   constructor(private ngZone: NgZone, private location: Location) {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     this.speechApiSupported = !!SR;
@@ -152,6 +158,18 @@ export class PracticeModePage implements OnDestroy {
     this.selectedScript = script;
     this.scriptWords           = script.rawText.split(/\s+/).filter(Boolean);
     this.normalizedScriptWords = this.scriptWords.map(w => this.norm(w));
+
+    // Determine which filler words are intentionally in the script so we
+    // don't penalise the user for reading them as written.
+    const scriptLower = script.rawText.toLowerCase();
+    this.scriptFillerWords.clear();
+    for (const filler of FILLER_WORDS) {
+      const rx = new RegExp(`(?<![\\w])${filler.replace(/\s+/g, '\\s+')}(?![\\w])`, 'i');
+      if (rx.test(scriptLower)) {
+        this.scriptFillerWords.add(filler);
+      }
+    }
+
     this.step = 'session';
     setTimeout(() => this.startSession(), 400);
   }
@@ -232,12 +250,11 @@ export class PracticeModePage implements OnDestroy {
         this.isListening = false;
         if (!this.isPaused && this.step === 'session' &&
             this.liveWordIndex < this.scriptWords.length) {
-          // Restart immediately – no gap
           setTimeout(() => {
             if (!this.isPaused && this.step === 'session') {
               try { this.recognition?.start(); this.isListening = true; } catch (_) {}
             }
-          }, 50);          // 50ms gap is enough; any less may throw InvalidState
+          }, 30);
         }
       });
     };
@@ -259,10 +276,9 @@ export class PracticeModePage implements OnDestroy {
     }
 
     /*
-     * LIVE PATH – runs on EVERY event (interim & final).
-     * We match all spoken text (final + interim) against the script starting
-     * from confirmedWordIndex so liveWordIndex advances the moment a word is
-     * partially recognised.
+     * LIVE PATH — runs on EVERY event (interim & final).
+     * Combine confirmed final text + latest interim so the highlight fires
+     * as soon as the engine produces even one partial word.
      */
     const allSpoken = (finalText + interimText).trim();
     if (allSpoken) {
@@ -270,7 +286,7 @@ export class PracticeModePage implements OnDestroy {
     }
 
     /*
-     * CONFIRMED PATH – runs only on final results.
+     * CONFIRMED PATH — runs only on final results.
      * Locks confirmedWordIndex so the next interim search starts further ahead.
      */
     if (finalText.trim()) {
@@ -334,7 +350,10 @@ export class PracticeModePage implements OnDestroy {
   private detectFillerWords(transcript: string) {
     const lower = transcript.toLowerCase();
     for (const filler of FILLER_WORDS) {
-      const rx = new RegExp(`\\b${filler.replace(/\s+/g, '\\s+')}\\b`, 'gi');
+      // Skip fillers that appear in the script — the user is reading them, not hesitating
+      if (this.scriptFillerWords.has(filler)) continue;
+
+      const rx = new RegExp(`(?<![\\w])${filler.replace(/\s+/g, '\\s+')}(?![\\w])`, 'gi');
       const hits = lower.match(rx);
       if (hits) {
         this.fillerWordCount += hits.length;

@@ -257,33 +257,18 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
         //                   articulation_clarity, expressive_emphasis, filler_words, overall,
         //                   transcript, duration, feedback: {...}, recommendations: [...] }
 
-        // Extract detailed feedback from nested structure
-        const detailedFeedback = response.feedback?.detailed_scores || {};
-
-        // Map response to expected format
+        // Pass the full service response through — all new fields (filler_word_details,
+        // pause_analysis, overall_assessment, improvements, *_feedback, etc.) are preserved.
         const feedback: AnalyzeSpeechForFeedbackOutput = {
-          transcript: response.transcript || '',
+          ...response,
           category: this.speechType,
-          duration: response.duration || 0,
-          speech_pace: response.speech_pace || 3,
-          pausing_fluency: response.pausing_fluency || 3,
-          loud_control: response.loudness_control || 3, // Backend uses 'loudness_control'
-          loudness_control: response.loudness_control || 3,
-          pitch_variation: response.pitch_variation || 3,
-          articulation_clarity: response.articulation_clarity || 3,
-          expressive_emph: response.expressive_emphasis || 3, // Backend uses 'expressive_emphasis'
-          expressive_emphasis: response.expressive_emphasis || 3,
-          filler_words_score: response.filler_words || 3,
-          filler_words: response.filler_words || 3,
-          overall: response.overall || 3,
-          pace_feedback: detailedFeedback.speech_pace?.description || response.feedback?.overall_assessment || 'No feedback available',
-          tone_feedback: detailedFeedback.pitch_variation?.description || 'No feedback available',
-          clarity_feedback: detailedFeedback.articulation_clarity?.description || 'No feedback available',
-          strengths: this.extractStrengths(response),
-          areas_improvement: this.extractAreasForImprovement(response),
-          feedback: response.feedback,
-          recommendations: response.recommendations,
-          analysis: response
+          // Normalise legacy field aliases so both mobile and web templates find the same keys
+          loud_control:         response.loud_control         ?? response.loudness_control  ?? 2,
+          loudness_control:     response.loudness_control     ?? response.loud_control      ?? 2,
+          expressive_emph:      response.expressive_emph      ?? response.expressive_emphasis ?? 2,
+          expressive_emphasis:  response.expressive_emphasis  ?? response.expressive_emph  ?? 2,
+          filler_words_score:   response.filler_words_score   ?? response.filler_words      ?? 2,
+          filler_words:         response.filler_words         ?? response.filler_words_score ?? 2,
         };
         
         this.snackBar.open('Analysis complete!', 'Close', { duration: 2000 });
