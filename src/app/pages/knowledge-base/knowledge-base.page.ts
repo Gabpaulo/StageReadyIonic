@@ -30,6 +30,8 @@ export class KnowledgeBasePage implements OnInit {
   }
 
   loadResources() {
+    this.loading = true;
+    this.error = null;
     this.loadFallbackResources();
     this.loading = false;
   }

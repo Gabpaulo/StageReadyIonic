@@ -32,6 +32,57 @@
   --color: var(--text);
 }
 
+/* ===== Practice Mode Banner ===== */
+.practice-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 1rem 0.5rem;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, rgba(34,167,240,0.12), rgba(0,188,212,0.08));
+  border: 1px solid rgba(34,167,240,0.35);
+  border-radius: 16px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+
+  &:hover {
+    border-color: rgba(34,167,240,0.6);
+    box-shadow: 0 4px 20px rgba(34,167,240,0.15);
+  }
+  &:active { transform: scale(0.98); }
+
+  .pm-icon-wrap {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 16px var(--primary-glow);
+    ion-icon { font-size: 1.4rem; color: #fff; }
+  }
+
+  .pm-body {
+    flex: 1;
+    .pm-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 1px 0 3px; }
+    p  { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+  }
+
+  .pm-arrow { color: var(--muted); font-size: 1.1rem; }
+}
+
 /* ===== Main Container ===== */
 .main-container {
   padding: 1rem 1rem 2rem;
