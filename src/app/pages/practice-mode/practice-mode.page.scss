@@ -503,31 +503,102 @@
   padding-top: 1rem;
 }
 
-.results-hero {
+/* ── Score ring hero ── */
+.score-hero {
   text-align: center;
   margin-bottom: 1.5rem;
 
-  .trophy-wrap {
-    width: 72px;
-    height: 72px;
+  .score-ring-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
     margin: 0 auto 1rem;
-    background: linear-gradient(135deg, #ff9800, #ffc107);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 24px rgba(255,152,0,0.4);
-    ion-icon { font-size: 2.2rem; color: #fff; }
 
-    &.complete {
-      background: linear-gradient(135deg, #ffd700, #ff9800);
-      box-shadow: 0 0 30px rgba(255,215,0,0.5);
-      animation: trophyGlow 2s ease-in-out infinite;
+    .score-ring {
+      width: 100%; height: 100%;
+      transform: rotate(-90deg);
+
+      .ring-track {
+        fill: none;
+        stroke: var(--border);
+        stroke-width: 10;
+      }
+      .ring-fill {
+        fill: none;
+        stroke-width: 10;
+        stroke-linecap: round;
+        stroke-dasharray: 314;
+        transition: stroke-dashoffset 1s ease, stroke 0.5s ease;
+      }
+    }
+
+    .score-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      .score-num  { font-size: 2.4rem; font-weight: 900; color: var(--text); line-height: 1; }
+      .score-pct  { font-size: 0.9rem; font-weight: 700; color: var(--muted); margin-top: -2px; }
+      .score-grade { font-size: 0.75rem; font-weight: 800; color: var(--primary); letter-spacing: 0.05em; margin-top: 2px; }
     }
   }
 
-  h1 { font-size: 1.8rem; font-weight: 900; color: var(--text); margin-bottom: 0.3rem; }
-  p  { color: var(--muted); font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; font-weight: 900; color: var(--text); margin-bottom: 0.3rem; }
+  .score-sub { color: var(--muted); font-size: 0.8rem; }
+}
+
+/* ── Score breakdown bars ── */
+.score-breakdown {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    .breakdown-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 80px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      ion-icon { font-size: 0.95rem; }
+    }
+
+    .breakdown-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .breakdown-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s ease;
+    }
+
+    .breakdown-val {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 34px;
+      text-align: right;
+    }
+  }
 }
 
 .results-grid {
@@ -557,7 +628,9 @@
     margin-bottom: 0.3rem;
     ion-icon { font-size: 1.3rem; color: var(--muted); }
   }
-  .result-val   { font-size: 1.8rem; font-weight: 900; color: var(--text); line-height: 1.1; }
+  .result-val   { font-size: 1.8rem; font-weight: 900; color: var(--text); line-height: 1.1;
+    .result-total { font-size: 1rem; color: var(--muted); font-weight: 600; }
+  }
   .result-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
   .result-sub   { font-size: 0.7rem; font-weight: 600; margin-top: 0.2rem; }
 }

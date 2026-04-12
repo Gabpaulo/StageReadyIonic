@@ -201,43 +201,81 @@
   ════════════════════════════════════════════════════════════════════════ -->
   <div class="screen results-screen" *ngIf="step === 'results' && results">
 
-    <div class="results-hero">
-      <div class="trophy-wrap" [class.complete]="results.completionRate === 100">
-        <ion-icon [name]="results.completionRate === 100 ? 'trophy' : 'ribbon-outline'"></ion-icon>
+    <!-- ── Score Ring ── -->
+    <div class="score-hero">
+      <div class="score-ring-wrap">
+        <svg class="score-ring" viewBox="0 0 120 120">
+          <!-- track -->
+          <circle cx="60" cy="60" r="50" class="ring-track"/>
+          <!-- fill — dasharray: circumference = 2π×50 ≈ 314 -->
+          <circle cx="60" cy="60" r="50" class="ring-fill"
+            [style.stroke]="results.deliveryScore >= 80 ? '#4caf50' : results.deliveryScore >= 60 ? '#22a7f0' : '#ff9800'"
+            [style.stroke-dashoffset]="314 - (314 * results.deliveryScore / 100)"/>
+        </svg>
+        <div class="score-center">
+          <span class="score-num">{{ results.deliveryScore }}</span>
+          <span class="score-pct">%</span>
+          <span class="score-grade">Grade {{ results.deliveryGrade }}</span>
+        </div>
       </div>
-      <h1>{{ results.completionRate === 100 ? 'Script Complete!' : 'Session Done!' }}</h1>
-      <p>Here is how your practice went</p>
+      <h1>{{ results.deliveryScore >= 85 ? 'Outstanding!' : results.deliveryScore >= 70 ? 'Good Job!' : results.deliveryScore >= 55 ? 'Keep Practising' : 'Room to Improve' }}</h1>
+      <p class="score-sub">Delivery score based on pace, filler words &amp; completion</p>
     </div>
 
+    <!-- ── Score Breakdown ── -->
+    <div class="score-breakdown">
+      <div class="breakdown-row">
+        <span class="breakdown-label"><ion-icon name="speedometer-outline"></ion-icon> Pace</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar" [style.width]="results.paceScore + '%'"
+               [style.background]="results.paceScore >= 80 ? '#4caf50' : results.paceScore >= 60 ? '#ff9800' : '#f44336'"></div>
+        </div>
+        <span class="breakdown-val">{{ results.paceScore }}%</span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label"><ion-icon name="chatbubble-ellipses-outline"></ion-icon> Fluency</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar" [style.width]="results.fillerScore + '%'"
+               [style.background]="results.fillerScore >= 80 ? '#4caf50' : results.fillerScore >= 60 ? '#ff9800' : '#f44336'"></div>
+        </div>
+        <span class="breakdown-val">{{ results.fillerScore }}%</span>
+      </div>
+      <div class="breakdown-row">
+        <span class="breakdown-label"><ion-icon name="checkmark-circle-outline"></ion-icon> Completion</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar" [style.width]="results.completionRate + '%'"
+               [style.background]="results.completionRate >= 80 ? '#4caf50' : results.completionRate >= 60 ? '#ff9800' : '#f44336'"></div>
+        </div>
+        <span class="breakdown-val">{{ results.completionRate }}%</span>
+      </div>
+    </div>
+
+    <!-- ── Stats Row ── -->
     <div class="results-grid">
-      <div class="result-card highlight">
+      <div class="result-card">
         <div class="result-icon"><ion-icon name="analytics-outline"></ion-icon></div>
         <div class="result-val">{{ results.averageWpm }}</div>
         <div class="result-label">Avg WPM</div>
-        <div class="result-sub" [style.color]="results.averageWpm >= 110 && results.averageWpm <= 150 ? '#4caf50' : '#ff9800'">
+        <div class="result-sub" [style.color]="results.paceScore >= 80 ? '#4caf50' : '#ff9800'">
           {{ results.paceRating }}
         </div>
       </div>
-
       <div class="result-card">
-        <div class="result-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
-        <div class="result-val">{{ results.completionRate }}%</div>
-        <div class="result-label">Completed</div>
-        <div class="result-sub">{{ results.wordsCompleted }} / {{ results.totalWords }} words</div>
+        <div class="result-icon"><ion-icon name="text-outline"></ion-icon></div>
+        <div class="result-val">{{ results.wordsCompleted }}<span class="result-total">/{{ results.totalWords }}</span></div>
+        <div class="result-label">Words</div>
       </div>
-
       <div class="result-card">
         <div class="result-icon"><ion-icon name="time-outline"></ion-icon></div>
         <div class="result-val">{{ Math.floor(results.duration / 60) }}:{{ (results.duration % 60).toString().padStart(2,'0') }}</div>
         <div class="result-label">Duration</div>
       </div>
-
       <div class="result-card" [class.warning]="results.fillerWordCount > 5">
         <div class="result-icon"><ion-icon name="chatbubble-ellipses-outline"></ion-icon></div>
         <div class="result-val">{{ results.fillerWordCount }}</div>
         <div class="result-label">Filler Words</div>
-        <div class="result-sub" *ngIf="results.fillerWordCount === 0" style="color: #4caf50">Clean delivery!</div>
-        <div class="result-sub" *ngIf="results.fillerWordCount > 0" style="color: #ff9800">Try to reduce</div>
+        <div class="result-sub" *ngIf="results.fillerWordCount === 0" style="color:#4caf50">Clean!</div>
+        <div class="result-sub" *ngIf="results.fillerWordCount > 0" style="color:#ff9800">Reduce these</div>
       </div>
     </div>
 
@@ -249,12 +287,13 @@
       </div>
     </div>
 
-    <!-- Pace tips -->
+    <!-- Tip -->
     <div class="pace-tip-box">
       <ion-icon name="bulb-outline"></ion-icon>
-      <p *ngIf="results.paceRating === 'Excellent'">Excellent pace! You spoke at a natural, easy-to-follow speed.</p>
-      <p *ngIf="results.paceRating === 'Too Slow' || results.paceRating === 'Slightly Slow'">Try to speak a little faster. Aim for 120–150 words per minute for most speech types.</p>
-      <p *ngIf="results.paceRating === 'Too Fast' || results.paceRating === 'Slightly Fast'">Slow down a bit. Pausing between sentences helps the audience absorb your message.</p>
+      <p *ngIf="results.paceRating === 'Excellent' && results.fillerWordCount === 0">Perfect delivery! You nailed the pace and spoke cleanly.</p>
+      <p *ngIf="results.paceRating === 'Excellent' && results.fillerWordCount > 0">Great pace! Work on cutting filler words like "um" and "uh" to push your score higher.</p>
+      <p *ngIf="results.paceRating === 'Too Slow' || results.paceRating === 'Slightly Slow'">Try to speak a bit faster — aim for 120–150 WPM to sound more confident and engaging.</p>
+      <p *ngIf="results.paceRating === 'Too Fast' || results.paceRating === 'Slightly Fast'">Slow down a touch. Pausing between key sentences gives your audience time to absorb your message.</p>
     </div>
 
     <div class="results-actions">

@@ -20,6 +20,11 @@ export interface SessionResults {
   detectedFillerWords: string[];
   completionRate: number;
   paceRating: string;
+  /** 0–100 delivery score: weighted blend of pace, filler penalty, and completion */
+  deliveryScore: number;
+  deliveryGrade: string;
+  paceScore: number;
+  fillerScore: number;
 }
 
 @Component({
@@ -432,8 +437,13 @@ export class PracticeModePage implements OnDestroy {
   private finishSession() {
     this.stopRecognition();
     this.clearIntervals();
-    const avgWpm = this.confirmedWordIndex > 0 && this.sessionDuration > 0
+    const avgWpm        = this.confirmedWordIndex > 0 && this.sessionDuration > 0
       ? Math.round((this.confirmedWordIndex / this.sessionDuration) * 60) : 0;
+    const completionRate = Math.round((this.confirmedWordIndex / this.scriptWords.length) * 100);
+    const paceScore      = this.calcPaceScore(avgWpm);
+    const fillerScore    = this.calcFillerScore(this.fillerWordCount, this.confirmedWordIndex);
+    const deliveryScore  = Math.round(0.50 * paceScore + 0.30 * fillerScore + 0.20 * completionRate);
+
     this.results = {
       duration:            this.sessionDuration,
       wordsCompleted:      this.confirmedWordIndex,
@@ -441,10 +451,43 @@ export class PracticeModePage implements OnDestroy {
       averageWpm:          avgWpm,
       fillerWordCount:     this.fillerWordCount,
       detectedFillerWords: [...new Set(this.detectedFillerWords)],
-      completionRate:      Math.round((this.confirmedWordIndex / this.scriptWords.length) * 100),
-      paceRating:          this.resolvePaceRating(avgWpm)
+      completionRate,
+      paceRating:          this.resolvePaceRating(avgWpm),
+      deliveryScore,
+      deliveryGrade:       this.resolveGrade(deliveryScore),
+      paceScore:           Math.round(paceScore),
+      fillerScore:         Math.round(fillerScore),
     };
     this.step = 'results';
+  }
+
+  /**
+   * Pace score (0–100).
+   * Ideal range 120–150 WPM scores 100. Each WPM outside a ±15-WPM deadband
+   * around 135 loses 1.5 points. Floor at 20.
+   */
+  private calcPaceScore(wpm: number): number {
+    if (wpm === 0) return 0;
+    const diff = Math.max(0, Math.abs(wpm - 135) - 15);
+    return Math.max(20, 100 - diff * 1.5);
+  }
+
+  /**
+   * Filler score (0–100).
+   * 0 fillers = 100. Every 1% filler-rate (fillers/words spoken) costs 10 points. Floor 0.
+   */
+  private calcFillerScore(fillerCount: number, wordCount: number): number {
+    if (wordCount === 0) return 100;
+    const rate = (fillerCount / wordCount) * 100;
+    return Math.max(0, 100 - rate * 10);
+  }
+
+  private resolveGrade(score: number): string {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
   }
 
   private resolvePaceRating(wpm: number): string {
