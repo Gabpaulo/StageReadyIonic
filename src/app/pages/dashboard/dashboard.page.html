@@ -1,193 +1,147 @@
-<ion-header [translucent]="true">
+<ion-header class="dash-header">
   <ion-toolbar>
-    <ion-title>dashboard</ion-title>
+    <ion-title>StageReady</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Welcome {{ (firstName) }},</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="dash-content">
+  <div class="dash-wrap">
 
-  <!-- Tip of the Day -->
-  <ion-card class="tip-of-day-card">
-    <ion-card-content>
-      <div class="tip-content">
-        <ion-icon name="bulb" class="tip-icon"></ion-icon>
-        <div class="tip-text">
-          <div class="tip-header">
-            <h3>Tip of the Day</h3>
-            <ion-badge color="warning" class="tip-category">{{ tipCategory }}</ion-badge>
-          </div>
-          <p>{{ tipOfTheDay }}</p>
+    <!-- Greeting -->
+    <div class="greeting">
+      <h1>Hey{{ firstName ? ', ' + firstName : '' }}.</h1>
+      <p>Ready to practice today?</p>
+    </div>
+
+    <!-- Level & XP -->
+    <div class="card level-card">
+      <div class="level-left">
+        <div class="level-ring">
+          <span class="level-num">{{ userLevel }}</span>
+        </div>
+        <div class="level-meta">
+          <span class="level-label">Level {{ userLevel }}</span>
+          <span class="xp-label">{{ currentXP }} / {{ nextLevelXP }} XP</span>
         </div>
       </div>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Level & XP Card -->
-  <ion-card class="level-card">
-    <ion-card-content>
-      <div class="level-section">
-        <div class="level-badge">
-          <span class="level-number">{{ userLevel }}</span>
-        </div>
-        <div class="level-info">
-          <h3>Level {{ userLevel }}</h3>
-          <p>{{ currentXP }} / {{ nextLevelXP }} XP</p>
-          <div class="xp-bar">
-            <div class="xp-fill" [style.width.%]="xpPercentage"></div>
-          </div>
-        </div>
+      <div class="xp-track">
+        <div class="xp-fill" [style.width.%]="xpPercentage"></div>
       </div>
-    </ion-card-content>
-  </ion-card>
+    </div>
 
-  <!-- Stats Overview -->
-  <div class="stats-grid">
-    <ion-card class="stat-card">
-      <ion-card-content>
-        <div class="stat-content">
-          <ion-icon name="mic" class="stat-icon"></ion-icon>
-          <div class="stat-info">
-            <h3>{{ totalSpeeches }}</h3>
-            <p>Speeches</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="stat-card">
-      <ion-card-content>
-        <div class="stat-content">
-          <ion-icon name="trophy" class="stat-icon"></ion-icon>
-          <div class="stat-info">
-            <h3>{{ badgeProgress.unlocked }}</h3>
-            <p>Badges</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="stat-card">
-      <ion-card-content>
-        <div class="stat-content">
-          <ion-icon name="flame" class="stat-icon"></ion-icon>
-          <div class="stat-info">
-            <h3>{{ currentStreak }}</h3>
-            <p>Day Streak</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Daily Challenge Card -->
-  <ion-card class="daily-challenge-card">
-    <ion-card-content>
-      <div class="challenge-content">
-        <ion-icon name="barbell" class="challenge-icon"></ion-icon>
-        <div class="challenge-text">
-          <h3>Daily Challenge</h3>
-          <p>{{ dailyChallenge }}</p>
-          <ion-badge color="success" class="challenge-reward">+{{ dailyChallengeXP }} XP</ion-badge>
-        </div>
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-num">{{ totalSpeeches }}</span>
+        <span class="stat-lbl">Speeches</span>
       </div>
-    </ion-card-content>
-  </ion-card>
+      <div class="stat-divider"></div>
+      <div class="stat-box">
+        <span class="stat-num">{{ badgeProgress.unlocked }}</span>
+        <span class="stat-lbl">Badges</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-box">
+        <span class="stat-num">{{ currentStreak }}</span>
+        <span class="stat-lbl">Day streak</span>
+      </div>
+    </div>
 
-  <!-- Upcoming Badge Preview -->
-  <ion-card *ngIf="upcomingBadge" class="upcoming-badge-card">
-    <ion-card-content>
-      <div class="upcoming-badge-content">
-        <div class="badge-preview-icon">
+    <!-- Quick Actions -->
+    <div class="actions-section">
+      <h2 class="section-title">Practice</h2>
+      <div class="action-list">
+        <a class="action-row primary" [routerLink]="['/ionic/speech-analysis']">
+          <div class="action-body">
+            <span class="action-name">Free Speech</span>
+            <span class="action-desc">Record, get AI feedback on your delivery</span>
+          </div>
+          <span class="action-arrow">→</span>
+        </a>
+        <a class="action-row" [routerLink]="['/ionic/practice-mode']">
+          <div class="action-body">
+            <span class="action-name">Script Practice</span>
+            <span class="action-desc">Follow a script and get a delivery score</span>
+          </div>
+          <span class="action-arrow">→</span>
+        </a>
+        <a class="action-row" [routerLink]="['/ionic/speech-history']">
+          <div class="action-body">
+            <span class="action-name">History</span>
+            <span class="action-desc">Review your past sessions</span>
+          </div>
+          <span class="action-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Today's Tip -->
+    <div class="card tip-card">
+      <div class="tip-top">
+        <span class="tip-tag">Tip of the day</span>
+        <span class="tip-category">{{ tipCategory }}</span>
+      </div>
+      <p class="tip-text">{{ tipOfTheDay }}</p>
+    </div>
+
+    <!-- Daily Challenge -->
+    <div class="card challenge-card">
+      <div class="challenge-top">
+        <span class="challenge-tag">Daily challenge</span>
+        <span class="challenge-xp">+{{ dailyChallengeXP }} XP</span>
+      </div>
+      <p class="challenge-text">{{ dailyChallenge }}</p>
+    </div>
+
+    <!-- Upcoming Badge -->
+    <div class="card badge-next-card" *ngIf="upcomingBadge">
+      <span class="section-label">Up next</span>
+      <div class="badge-next-row">
+        <div class="badge-img-wrap">
           <img [src]="getBadgeIconPath(upcomingBadge.icon)" [alt]="upcomingBadge.name"
-               class="locked-badge-icon" (error)="onImageError($event)">
-          <div class="lock-overlay">
-            <ion-icon name="lock-closed"></ion-icon>
-          </div>
+               class="badge-img locked" (error)="onImageError($event)">
+          <span class="locked-tag">Locked</span>
         </div>
-        <div class="badge-preview-info">
-          <h3>Next Badge</h3>
+        <div class="badge-next-info">
           <h4>{{ upcomingBadge.name }}</h4>
           <p>{{ upcomingBadge.description }}</p>
-          <div class="badge-progress-bar">
-            <div class="badge-progress-fill" [style.width.%]="upcomingBadgeProgress"></div>
+          <div class="badge-track">
+            <div class="badge-fill" [style.width.%]="upcomingBadgeProgress"></div>
           </div>
-          <span class="progress-label">{{ upcomingBadge.progress || 0 }} / {{ upcomingBadge.maxProgress }}</span>
+          <span class="badge-prog-label">{{ upcomingBadge.progress || 0 }} / {{ upcomingBadge.maxProgress }}</span>
         </div>
       </div>
-    </ion-card-content>
-  </ion-card>
+    </div>
 
-  <!-- Practice Calendar -->
-  <app-practice-calendar *ngIf="userId" [userId]="userId"></app-practice-calendar>
+    <!-- Practice Calendar -->
+    <app-practice-calendar *ngIf="userId" [userId]="userId"></app-practice-calendar>
 
-  <!-- Badge Progress Card -->
-  <ion-card *ngIf="badgeProgress.total > 0" class="badge-progress-card">
-    <ion-card-header>
-      <ion-card-title>Badge Progress</ion-card-title>
-      <ion-card-subtitle>{{ badgeProgress.unlocked }} of {{ badgeProgress.total }} badges unlocked</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <div class="progress-bar-container">
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="badgeProgress.percentage"></div>
-        </div>
-        <span class="progress-text">{{ badgeProgress.percentage }}%</span>
+    <!-- Badge Progress -->
+    <div class="card badge-prog-card" *ngIf="badgeProgress.total > 0">
+      <div class="badge-prog-top">
+        <span class="section-label">Badges</span>
+        <a [routerLink]="['/ionic/badges']" class="see-all">See all</a>
       </div>
-      <ion-button routerLink="/ionic/badges" fill="outline" size="small" class="view-badges-btn">
-        View All Badges
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+      <p class="badge-prog-sub">{{ badgeProgress.unlocked }} of {{ badgeProgress.total }} unlocked</p>
+      <div class="prog-track">
+        <div class="prog-fill" [style.width.%]="badgeProgress.percentage"></div>
+      </div>
+    </div>
 
-  <!-- Recent Badges -->
-  <ion-card *ngIf="recentBadges.length > 0" class="recent-badges-card">
-    <ion-card-header>
-      <ion-card-title>Recent Badges</ion-card-title>
-      <ion-card-subtitle>Your latest achievements</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <div class="recent-badges-grid">
-        <div *ngFor="let badge of recentBadges" class="badge-preview">
-          <img [src]="getBadgeIconPath(badge.icon)" [alt]="badge.name" class="badge-icon"
-               (error)="onImageError($event)">
-          <div class="badge-info">
+    <!-- Recent Badges -->
+    <div class="card recent-card" *ngIf="recentBadges.length > 0">
+      <span class="section-label">Recent badges</span>
+      <div class="recent-list">
+        <div class="recent-item" *ngFor="let badge of recentBadges">
+          <img [src]="getBadgeIconPath(badge.icon)" [alt]="badge.name"
+               class="recent-badge-img" (error)="onImageError($event)">
+          <div>
             <h4>{{ badge.name }}</h4>
             <p>{{ badge.description }}</p>
           </div>
         </div>
       </div>
-    </ion-card-content>
-  </ion-card>
+    </div>
 
-  <!-- Quick Actions -->
-  <ion-card class="quick-actions-card">
-    <ion-card-header>
-      <ion-card-title>Quick Actions</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div class="action-buttons">
-        <ion-button routerLink="/ionic/practice-mode" expand="block" color="primary">
-          <ion-icon name="musical-notes-outline" slot="start"></ion-icon>
-          Practice Mode (Karaoke)
-        </ion-button>
-        <ion-button routerLink="/ionic/speech-analysis" expand="block" fill="outline">
-          <ion-icon name="mic-outline" slot="start"></ion-icon>
-          Free Speech Practice
-        </ion-button>
-        <ion-button routerLink="/ionic/speech-history" expand="block" fill="outline">
-          <ion-icon name="time-outline" slot="start"></ion-icon>
-          View History
-        </ion-button>
-        <ion-button routerLink="/ionic/profile" expand="block" fill="outline">
-          <ion-icon name="person-outline" slot="start"></ion-icon>
-          View Profile
-        </ion-button>
-      </div>
-    </ion-card-content>
-  </ion-card>
+  </div>
 </ion-content>

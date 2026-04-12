@@ -1,260 +1,174 @@
-<div class="dashboard-container">
-  <div class="app-header">
-    <img src="assets/icon/logo.svg" alt="Stage Ready Logo" class="dashboard-logo">
-  </div>
-  <div class="welcome-section">
-    <div class="welcome-content">
-      <div class="welcome-text">
-        <h1>Welcome back, {{ firstName }}! 👋</h1>
-        <p>Ready to improve your public speaking skills?</p>
-        <div class="level-badge">
-          <span class="level-label">Level {{ userLevel }}</span>
-          <span class="xp-label">{{ currentXP }} / {{ nextLevelXP }} XP</span>
+<div class="wd">
+
+  <!-- Greeting + Level row -->
+  <div class="wd-top">
+    <div class="greeting">
+      <h1>Hey{{ firstName ? ', ' + firstName : '' }}.</h1>
+      <p>Ready to practice today?</p>
+    </div>
+    <div class="level-block card">
+      <div class="level-left">
+        <div class="level-ring">
+          <span class="level-num">{{ userLevel }}</span>
         </div>
-        <div class="xp-bar-container">
-          <div class="xp-bar">
-            <div class="xp-fill" [style.width.%]="xpPercentage"></div>
-          </div>
+        <div class="level-meta">
+          <span class="level-label">Level {{ userLevel }}</span>
+          <span class="xp-lbl">{{ currentXP }} / {{ nextLevelXP }} XP</span>
         </div>
       </div>
-      <div class="welcome-image">
-        <img [src]="userPhotoURL || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'"
-             alt="Profile picture" class="profile-avatar">
-        <div class="level-ring">{{ userLevel }}</div>
+      <div class="xp-track">
+        <div class="xp-fill" [style.width.%]="xpPercentage"></div>
       </div>
     </div>
   </div>
 
-  <!-- Tip of the Day -->
-  <mat-card class="tip-of-day-card">
-    <mat-card-content>
-      <div class="tip-content">
-        <div class="tip-icon">💡</div>
-        <div class="tip-text">
-          <div class="tip-header">
-            <h3>Tip of the Day</h3>
-            <span class="tip-category">{{ tipCategory }}</span>
-          </div>
-          <p>{{ tipOfTheDay }}</p>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Stats Overview -->
-  <div class="stats-grid">
-    <mat-card class="stat-card pulse-card">
-      <mat-card-content>
-        <div class="stat-content">
-          <div class="stat-icon">
-            🎤
-          </div>
-          <div class="stat-info">
-            <h3>{{ totalSpeeches }}</h3>
-            <p>Total Speeches</p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card pulse-card">
-      <mat-card-content>
-        <div class="stat-content">
-          <div class="stat-icon">
-            🏆
-          </div>
-          <div class="stat-info">
-            <h3>{{ badgeProgress.unlocked }}</h3>
-            <p>Badges Earned</p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card pulse-card">
-      <mat-card-content>
-        <div class="stat-content">
-          <div class="stat-icon">
-            🔥
-          </div>
-          <div class="stat-info">
-            <h3>{{ currentStreak }}</h3>
-            <p>Day Streak</p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card pulse-card">
-      <mat-card-content>
-        <div class="stat-content">
-          <div class="stat-icon">
-            ⭐
-          </div>
-          <div class="stat-info">
-            <h3>{{ badgeProgress.percentage }}%</h3>
-            <p>Completion</p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <span class="stat-num">{{ totalSpeeches }}</span>
+      <span class="stat-lbl">Speeches</span>
+    </div>
+    <div class="stat-div"></div>
+    <div class="stat-box">
+      <span class="stat-num">{{ badgeProgress.unlocked }}</span>
+      <span class="stat-lbl">Badges</span>
+    </div>
+    <div class="stat-div"></div>
+    <div class="stat-box">
+      <span class="stat-num">{{ currentStreak }}</span>
+      <span class="stat-lbl">Day streak</span>
+    </div>
+    <div class="stat-div"></div>
+    <div class="stat-box">
+      <span class="stat-num">{{ badgeProgress.percentage }}%</span>
+      <span class="stat-lbl">Completion</span>
+    </div>
   </div>
 
-  <!-- Badge Progress Card -->
-  <mat-card *ngIf="badgeProgress.total > 0" class="badge-progress-card achievement-card">
-    <mat-card-header>
-      <mat-card-title>
-        🏅 Achievement Progress
-      </mat-card-title>
-      <mat-card-subtitle>{{ badgeProgress.unlocked }} of {{ badgeProgress.total }} badges unlocked</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="progress-section">
-        <div class="progress-bar-container">
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="badgeProgress.percentage">
-              <div class="progress-shine"></div>
+  <!-- Main grid -->
+  <div class="main-grid">
+
+    <!-- Left column -->
+    <div class="col-left">
+
+      <!-- Quick Actions -->
+      <div class="section-head">Practice</div>
+      <div class="action-list">
+        <a class="action-row primary" routerLink="/web/practice-mode">
+          <div class="action-body">
+            <span class="action-name">Script Practice</span>
+            <span class="action-desc">Follow a script and get a delivery score</span>
+          </div>
+          <span class="action-arr">→</span>
+        </a>
+        <a class="action-row" routerLink="/web/analysis">
+          <div class="action-body">
+            <span class="action-name">Free Speech</span>
+            <span class="action-desc">Record, get AI feedback on your delivery</span>
+          </div>
+          <span class="action-arr">→</span>
+        </a>
+        <a class="action-row" routerLink="/web/history">
+          <div class="action-body">
+            <span class="action-name">History</span>
+            <span class="action-desc">Review your past sessions</span>
+          </div>
+          <span class="action-arr">→</span>
+        </a>
+        <a class="action-row" routerLink="/web/badges">
+          <div class="action-body">
+            <span class="action-name">Badges</span>
+            <span class="action-desc">Track your achievements</span>
+          </div>
+          <span class="action-arr">→</span>
+        </a>
+      </div>
+
+      <!-- Upcoming Badge -->
+      <ng-container *ngIf="upcomingBadge">
+        <div class="section-head" style="margin-top:20px">Up next</div>
+        <div class="card badge-next-card">
+          <div class="badge-next-row">
+            <div class="badge-img-wrap">
+              <img [src]="getBadgeIconPath(upcomingBadge.icon)" [alt]="upcomingBadge.name"
+                   class="badge-img locked" (error)="onImageError($event)">
+              <span class="locked-tag">Locked</span>
+            </div>
+            <div class="badge-next-info">
+              <h4>{{ upcomingBadge.name }}</h4>
+              <p>{{ upcomingBadge.description }}</p>
+              <div class="badge-track">
+                <div class="badge-fill" [style.width.%]="upcomingBadgeProgress"></div>
+              </div>
+              <span class="badge-prog-lbl">{{ upcomingBadge.progress || 0 }} / {{ upcomingBadge.maxProgress }}</span>
             </div>
           </div>
-          <span class="progress-text">{{ badgeProgress.percentage }}%</span>
         </div>
-        <button mat-raised-button routerLink="/web/badges" class="view-badges-btn">
-          🏆 View All Badges
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
+      </ng-container>
 
-  <!-- Recent Badges -->
-  <mat-card *ngIf="recentBadges.length > 0" class="recent-badges-card achievement-card">
-    <mat-card-header>
-      <mat-card-title>
-        ✨ Recent Achievements
-      </mat-card-title>
-      <mat-card-subtitle>Your latest accomplishments - keep up the great work!</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="recent-badges-grid">
-        <div *ngFor="let badge of recentBadges; let i = index" class="badge-preview achievement-item" [style.animation-delay.ms]="i * 100">
-          <div class="badge-image">
-            <img [src]="getBadgeIconPath(badge.icon)" class="badge-icon" [alt]="badge.name" (error)="onImageError($event)">
-            <div class="badge-glow"></div>
-          </div>
-          <div class="badge-info">
-            <h4>{{ badge.name }}</h4>
-            <p>{{ badge.description }}</p>
-            <span class="badge-date">🎉 {{ badge.unlockedAt | date:'short' }}</span>
-          </div>
+      <!-- Badge Progress -->
+      <div class="card badge-prog-card" *ngIf="badgeProgress.total > 0">
+        <div class="badge-prog-top">
+          <span class="tag-label">Badges</span>
+          <a routerLink="/web/badges" class="see-all">See all</a>
+        </div>
+        <p class="badge-prog-sub">{{ badgeProgress.unlocked }} of {{ badgeProgress.total }} unlocked</p>
+        <div class="prog-track">
+          <div class="prog-fill" [style.width.%]="badgeProgress.percentage"></div>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- Quick Actions -->
-  <mat-card class="quick-actions-card">
-    <mat-card-header>
-      <mat-card-title>
-        🚀 Quick Actions
-      </mat-card-title>
-      <mat-card-subtitle>Start practicing or explore your progress</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="action-buttons">
-        <button mat-raised-button color="primary" routerLink="/web/practice-mode" class="action-btn primary-action">
-          <div class="action-icon">🎵</div>
-          <div class="action-content">
-            <span class="action-title">Practice Mode</span>
-            <span class="action-subtitle">Karaoke-style scripted practice</span>
-          </div>
-        </button>
-        <button mat-stroked-button routerLink="/web/analysis" class="action-btn">
-          <div class="action-icon">🎤</div>
-          <div class="action-content">
-            <span class="action-title">Free Speech Practice</span>
-            <span class="action-subtitle">+10 XP per session</span>
-          </div>
-        </button>
-        <button mat-stroked-button routerLink="/web/history" class="action-btn">
-          <div class="action-icon">📊</div>
-          <div class="action-content">
-            <span class="action-title">View History</span>
-            <span class="action-subtitle">Review your progress</span>
-          </div>
-        </button>
-        <button mat-stroked-button routerLink="/web/badges" class="action-btn">
-          <div class="action-icon">🏆</div>
-          <div class="action-content">
-            <span class="action-title">View Badges</span>
-            <span class="action-subtitle">Track achievements</span>
-          </div>
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
 
-  <!-- Daily Challenge -->
-  <mat-card class="daily-challenge-card">
-    <mat-card-content>
-      <div class="challenge-content">
-        <div class="challenge-icon">💪</div>
-        <div class="challenge-text">
-          <h3>Daily Challenge</h3>
-          <p>{{ dailyChallenge }}</p>
-          <div class="challenge-reward">+{{ dailyChallengeXP }} XP</div>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <!-- Right column -->
+    <div class="col-right">
 
-  <!-- Upcoming Badge Preview -->
-  <mat-card *ngIf="upcomingBadge" class="upcoming-badge-card">
-    <mat-card-header>
-      <mat-card-title>
-        🎯 Next Badge
-      </mat-card-title>
-      <mat-card-subtitle>You're making progress!</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="upcoming-badge-content">
-        <div class="upcoming-badge-image">
-          <img [src]="getBadgeIconPath(upcomingBadge.icon)" [alt]="upcomingBadge.name" class="upcoming-badge-icon" (error)="onImageError($event)">
-          <div class="badge-locked-overlay">
-            <span>🔒</span>
-          </div>
+      <!-- Tip of the Day -->
+      <div class="card tip-card">
+        <div class="tip-top">
+          <span class="tip-tag">Tip of the day</span>
+          <span class="tip-cat">{{ tipCategory }}</span>
         </div>
-        <div class="upcoming-badge-info">
-          <h4>{{ upcomingBadge.name }}</h4>
-          <p>{{ upcomingBadge.description }}</p>
-          <div class="upcoming-progress-container">
-            <div class="upcoming-progress-bar">
-              <div class="upcoming-progress-fill" [style.width.%]="upcomingBadgeProgress"></div>
-            </div>
-            <span class="upcoming-progress-text">{{ upcomingBadge.progress || 0 }} / {{ upcomingBadge.maxProgress }}</span>
-          </div>
-        </div>
+        <p class="tip-text">{{ tipOfTheDay }}</p>
       </div>
-    </mat-card-content>
-  </mat-card>
+
+      <!-- Daily Challenge -->
+      <div class="card challenge-card">
+        <div class="challenge-top">
+          <span class="challenge-tag">Daily challenge</span>
+          <span class="challenge-xp">+{{ dailyChallengeXP }} XP</span>
+        </div>
+        <p class="challenge-text">{{ dailyChallenge }}</p>
+      </div>
+
+      <!-- Motivational Quote -->
+      <div class="card quote-card">
+        <blockquote class="quote-text">"{{ motivationalQuote }}"</blockquote>
+        <cite class="quote-author">— {{ quoteAuthor }}</cite>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Practice Calendar -->
-  <mat-card class="calendar-card">
-    <mat-card-content>
-      <app-practice-calendar [userId]="userId"></app-practice-calendar>
-    </mat-card-content>
-  </mat-card>
+  <div class="card calendar-card" *ngIf="userId">
+    <span class="tag-label">Practice calendar</span>
+    <app-practice-calendar [userId]="userId"></app-practice-calendar>
+  </div>
 
-  <!-- Motivational Quote -->
-  <mat-card class="motivation-card">
-    <mat-card-content>
-      <div class="motivation-content">
-        <div class="quote-icon">💬</div>
-        <div class="motivation-text">
-          <blockquote>"{{ motivationalQuote }}"</blockquote>
-          <cite>- {{ quoteAuthor }}</cite>
+  <!-- Recent Badges -->
+  <div class="card recent-card" *ngIf="recentBadges.length > 0">
+    <span class="tag-label">Recent badges</span>
+    <div class="recent-grid">
+      <div class="recent-item" *ngFor="let badge of recentBadges">
+        <img [src]="getBadgeIconPath(badge.icon)" [alt]="badge.name"
+             class="recent-badge-img" (error)="onImageError($event)">
+        <div>
+          <h4>{{ badge.name }}</h4>
+          <p>{{ badge.description }}</p>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
+
 </div>
-
-
