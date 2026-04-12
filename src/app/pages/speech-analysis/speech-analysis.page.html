@@ -30,7 +30,7 @@
           [class.stop]="isRecording"
           [disabled]="!hasConfirmedSpeechType"
           (click)="isRecording ? stopRecording() : startRecording()"
-          aria-label="{{ isRecording ? 'Stop recording' : 'Start recording' }}"
+          [attr.aria-label]="isRecording ? 'Stop recording' : 'Start recording'"
         >
           <ion-icon [name]="isRecording ? 'stop' : 'mic'"></ion-icon>
         </button>
