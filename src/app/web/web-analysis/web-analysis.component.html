@@ -1,111 +1,241 @@
-<div class="analysis-page">
-  <div class="main-container">
+<div class="wa-page">
 
-    <!-- Speech Type Pill -->
-    <div class="type-row">
-      <span class="type-label">Speech type</span>
-      <button class="type-pill" (click)="openTypeDialog()">
-        <mat-icon>mic</mat-icon>
-        {{ hasConfirmedSpeechType ? (speechType | titlecase) : 'Select type' }}
-        <mat-icon class="chevron">expand_more</mat-icon>
-      </button>
-    </div>
+  <!-- Page Header -->
+  <div class="wa-header">
+    <h1>Free Speech Practice</h1>
+    <p>Record your speech and receive AI-powered feedback on delivery, pace, and clarity</p>
+  </div>
 
-    <!-- ── IDLE / RECORDING ── -->
-    <div class="card record-card" *ngIf="!audioUrl && !isLoading && !isProcessingRecording">
+  <!-- 2-Column Grid -->
+  <div class="wa-grid">
 
-      <div class="mic-wrap" [class.recording]="isRecording">
-        <div class="pulse-ring"         *ngIf="isRecording"></div>
-        <div class="pulse-ring delay-1" *ngIf="isRecording"></div>
-        <div class="pulse-ring delay-2" *ngIf="isRecording"></div>
+    <!-- ── Left: Recording Panel ── -->
+    <div class="wa-left">
 
-        <button
-          class="mic-btn"
-          [class.stop]="isRecording"
-          [disabled]="!hasConfirmedSpeechType"
-          (click)="isRecording ? stopRecording() : startRecording()"
-        >
-          <mat-icon>{{ isRecording ? 'stop' : 'mic' }}</mat-icon>
+      <!-- Speech Type -->
+      <div class="type-row">
+        <span class="type-label">Speech type</span>
+        <button class="type-pill" (click)="openTypeDialog()">
+          <mat-icon>mic</mat-icon>
+          {{ hasConfirmedSpeechType ? (speechType | titlecase) : 'Select type' }}
+          <mat-icon class="chevron">expand_more</mat-icon>
         </button>
+        <span class="type-hint" *ngIf="!hasConfirmedSpeechType">Choose a type before recording</span>
       </div>
 
-      <!-- Visualizer -->
-      <div class="visualizer" *ngIf="isRecording">
-        <div class="vis-bar"
-             *ngFor="let level of audioLevels"
-             [style.height.px]="10 + (level * 70)">
+      <!-- IDLE / RECORDING -->
+      <div class="card record-card" *ngIf="!audioUrl && !isLoading && !isProcessingRecording">
+        <div class="mic-wrap" [class.recording]="isRecording">
+          <div class="pulse-ring"         *ngIf="isRecording"></div>
+          <div class="pulse-ring delay-1" *ngIf="isRecording"></div>
+          <div class="pulse-ring delay-2" *ngIf="isRecording"></div>
+
+          <button
+            class="mic-btn"
+            [class.stop]="isRecording"
+            [disabled]="!hasConfirmedSpeechType"
+            (click)="isRecording ? stopRecording() : startRecording()"
+          >
+            <mat-icon>{{ isRecording ? 'stop' : 'mic' }}</mat-icon>
+          </button>
+        </div>
+
+        <!-- Visualizer -->
+        <div class="visualizer" *ngIf="isRecording">
+          <div class="vis-bar"
+               *ngFor="let level of audioLevels"
+               [style.height.px]="10 + (level * 70)">
+          </div>
+        </div>
+
+        <p class="status-text recording" *ngIf="isRecording">
+          <span class="rec-dot"></span>
+          Recording… {{ formatDuration(recordingDuration) }}
+        </p>
+        <p class="status-text" *ngIf="!isRecording && hasConfirmedSpeechType">
+          Click the mic to start recording
+        </p>
+        <p class="status-text muted" *ngIf="!isRecording && !hasConfirmedSpeechType">
+          Select a speech type to enable recording
+        </p>
+
+        <!-- Recording guidelines -->
+        <div class="record-guide" *ngIf="!isRecording">
+          <div class="guide-row"><span class="guide-dot"></span><span>Speak for at least 30 seconds for meaningful analysis</span></div>
+          <div class="guide-row"><span class="guide-dot"></span><span>Use a quiet environment for best transcription accuracy</span></div>
+          <div class="guide-row"><span class="guide-dot"></span><span>Speak naturally — don't try to sound perfect</span></div>
         </div>
       </div>
 
-      <p class="status-text recording" *ngIf="isRecording">
-        <span class="rec-dot"></span>
-        Recording… {{ formatDuration(recordingDuration) }}
-      </p>
-      <p class="status-text" *ngIf="!isRecording && hasConfirmedSpeechType">
-        Click the mic to start
-      </p>
-      <p class="status-text muted" *ngIf="!isRecording && !hasConfirmedSpeechType">
-        Select a speech type above to begin
-      </p>
+      <!-- PROCESSING -->
+      <div class="card state-card" *ngIf="isProcessingRecording && !audioUrl">
+        <div class="state-icon processing">
+          <mat-icon>mic</mat-icon>
+        </div>
+        <div class="dots">
+          <span></span><span></span><span></span>
+        </div>
+        <h3>Processing audio…</h3>
+        <p>Converting your recording</p>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="card preview-card" *ngIf="audioUrl && !isLoading">
+        <div class="preview-header">
+          <div class="wave-anim">
+            <span *ngFor="let _ of [1,2,3,4,5,6,7]" class="wave-bar"></span>
+          </div>
+          <div class="preview-meta">
+            <span class="preview-label">Recording ready</span>
+            <span class="preview-duration">{{ formatDuration(recordingDuration) }}</span>
+          </div>
+        </div>
+
+        <audio [src]="audioUrl" controls class="audio-player"></audio>
+
+        <div class="converting-row" *ngIf="isConverting">
+          <mat-spinner diameter="18"></mat-spinner>
+          <span>Preparing for analysis…</span>
+        </div>
+
+        <div class="btn-row">
+          <button
+            class="btn-analyze"
+            [disabled]="!hasConfirmedSpeechType || isConverting"
+            (click)="analyzeRecording()"
+          >
+            <mat-icon>{{ isConverting ? 'hourglass_empty' : 'analytics' }}</mat-icon>
+            {{ isConverting ? 'Preparing…' : 'Analyze Speech' }}
+          </button>
+          <button
+            class="btn-reset"
+            [disabled]="isConverting"
+            (click)="resetRecording()"
+          >
+            <mat-icon>refresh</mat-icon>
+            Record again
+          </button>
+        </div>
+      </div>
+
+      <!-- ANALYZING -->
+      <div class="card state-card" *ngIf="isLoading">
+        <div class="state-icon analyzing">
+          <mat-icon>analytics</mat-icon>
+        </div>
+        <div class="dots">
+          <span></span><span></span><span></span>
+        </div>
+        <h3>Analyzing your speech</h3>
+        <p>Transcribing &amp; scoring with AI…</p>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <p class="analyze-note">This usually takes 15–30 seconds</p>
+      </div>
+
     </div>
 
-    <!-- ── PROCESSING ── -->
-    <div class="card state-card" *ngIf="isProcessingRecording && !audioUrl">
-      <div class="state-icon processing">
-        <mat-icon>mic</mat-icon>
-      </div>
-      <div class="dots">
-        <span></span><span></span><span></span>
-      </div>
-      <h3>Processing audio…</h3>
-      <p>Converting your recording</p>
-    </div>
+    <!-- ── Right: Info Panel ── -->
+    <div class="wa-right">
 
-    <!-- ── PREVIEW ── -->
-    <div class="card preview-card" *ngIf="audioUrl && !isLoading">
-      <div class="wave-anim">
-        <span *ngFor="let _ of [1,2,3,4,5]" class="wave-bar"></span>
+      <!-- What gets analyzed -->
+      <div class="card info-card">
+        <h3 class="card-head">What gets analyzed</h3>
+        <div class="dimension-list">
+          <div class="dim-row">
+            <div class="dim-dot" style="background:#22a7f0"></div>
+            <div class="dim-body">
+              <span class="dim-label">Pace</span>
+              <span class="dim-desc">Words per minute · Ideal range 120–150 WPM</span>
+            </div>
+            <span class="dim-weight">50%</span>
+          </div>
+          <div class="dim-row">
+            <div class="dim-dot" style="background:#4caf50"></div>
+            <div class="dim-body">
+              <span class="dim-label">Filler Words</span>
+              <span class="dim-desc">Um, uh, like, you know — frequency per minute</span>
+            </div>
+            <span class="dim-weight">30%</span>
+          </div>
+          <div class="dim-row">
+            <div class="dim-dot" style="background:#ff9800"></div>
+            <div class="dim-body">
+              <span class="dim-label">Structure</span>
+              <span class="dim-desc">Clear opening, body, and conclusion</span>
+            </div>
+            <span class="dim-weight">10%</span>
+          </div>
+          <div class="dim-row">
+            <div class="dim-dot" style="background:#9c27b0"></div>
+            <div class="dim-body">
+              <span class="dim-label">Engagement</span>
+              <span class="dim-desc">Tone variation and energy across the speech</span>
+            </div>
+            <span class="dim-weight">10%</span>
+          </div>
+        </div>
       </div>
 
-      <audio [src]="audioUrl" controls class="audio-player"></audio>
+      <!-- Speech type tips -->
+      <div class="card tips-card">
+        <h3 class="card-head">
+          {{ hasConfirmedSpeechType ? (speechType | titlecase) + ' Tips' : 'Speech Tips' }}
+        </h3>
 
-      <div class="converting-row" *ngIf="isConverting">
-        <mat-spinner diameter="20"></mat-spinner>
-        <span>Preparing for analysis…</span>
+        <!-- Informative -->
+        <ng-container *ngIf="!hasConfirmedSpeechType || speechType === 'informative'">
+          <ul class="tips-list">
+            <li>Speak clearly at a steady pace — aim for 120–150 WPM</li>
+            <li>Use pauses to let key facts land before moving on</li>
+            <li>Avoid filler words — they undermine credibility</li>
+            <li>Organise content: intro → 3 points → summary</li>
+          </ul>
+        </ng-container>
+
+        <!-- Motivational -->
+        <ng-container *ngIf="speechType === 'motivational' && hasConfirmedSpeechType">
+          <ul class="tips-list">
+            <li>Build energy progressively towards the conclusion</li>
+            <li>Use short, punchy sentences for emphasis</li>
+            <li>Personal stories create connection — include one</li>
+            <li>End with a strong, memorable call-to-action</li>
+          </ul>
+        </ng-container>
+
+        <!-- Persuasive -->
+        <ng-container *ngIf="speechType === 'persuasive' && hasConfirmedSpeechType">
+          <ul class="tips-list">
+            <li>Open strong — your first 10 seconds set the tone</li>
+            <li>State your position clearly, then back it with evidence</li>
+            <li>Acknowledge counterarguments to appear fair-minded</li>
+            <li>Close with a clear, specific call-to-action</li>
+          </ul>
+        </ng-container>
       </div>
 
-      <div class="btn-row">
-        <button
-          class="btn-analyze"
-          [disabled]="!hasConfirmedSpeechType || isConverting"
-          (click)="analyzeRecording()"
-        >
-          <mat-icon>{{ isConverting ? 'hourglass_empty' : 'analytics' }}</mat-icon>
-          {{ isConverting ? 'Preparing…' : 'Analyze Speech' }}
-        </button>
+      <!-- Scoring guide -->
+      <div class="card score-guide-card">
+        <h3 class="card-head">Score guide</h3>
+        <div class="score-band-list">
+          <div class="score-band">
+            <span class="band-range" style="color:#4caf50">90–100</span>
+            <span class="band-label">Excellent delivery</span>
+          </div>
+          <div class="score-band">
+            <span class="band-range" style="color:#22a7f0">75–89</span>
+            <span class="band-label">Good — minor refinements</span>
+          </div>
+          <div class="score-band">
+            <span class="band-range" style="color:#ff9800">55–74</span>
+            <span class="band-label">Developing — clear areas to work on</span>
+          </div>
+          <div class="score-band">
+            <span class="band-range" style="color:#f44336">0–54</span>
+            <span class="band-label">Needs practice — detailed feedback provided</span>
+          </div>
+        </div>
+      </div>
 
-        <button
-          class="btn-reset"
-          [disabled]="isConverting"
-          (click)="resetRecording()"
-        >
-          <mat-icon>refresh</mat-icon>
-          Record Again
-        </button>
-      </div>
-    </div>
-
-    <!-- ── ANALYZING ── -->
-    <div class="card state-card" *ngIf="isLoading">
-      <div class="state-icon analyzing">
-        <mat-icon>analytics</mat-icon>
-      </div>
-      <div class="dots">
-        <span></span><span></span><span></span>
-      </div>
-      <h3>Analyzing your speech</h3>
-      <p>Transcribing &amp; scoring with AI…</p>
-      <div class="progress-bar"><div class="progress-fill"></div></div>
     </div>
 
   </div>
