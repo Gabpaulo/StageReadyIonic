@@ -301,10 +301,57 @@ export class PracticeModePage implements OnInit, OnDestroy {
         this.selectedScript.targetDimensions
       );
       this.step = 'results';
+
+      // Save session data for ML training dataset (fire-and-forget)
+      const uid = this.firebaseService.auth.currentUser?.uid;
+      if (uid && this.results && !this.results.noSpeechDetected && !this.results.contentMismatch) {
+        this.savePracticeSessionData(uid).catch(() => { /* silently skip */ });
+      }
     } catch (e: any) {
       this.analysisError = e?.message ?? 'Analysis failed. Please try again.';
       this.step = 'results';
     }
+  }
+
+  private async savePracticeSessionData(uid: string): Promise<void> {
+    if (!this.results || !this.selectedScript) return;
+
+    const post = this.results.dimensionScores;
+    const pre  = (this.weeklyPlan?.avgScores ?? {}) as Record<string, number>;
+
+    const dims = ['speech_pace', 'pausing_fluency', 'loud_control',
+                  'pitch_variation', 'articulation_clarity', 'expressive_emph', 'filler_words_score'];
+
+    const preScores:    Record<string, number> = {};
+    const postScores:   Record<string, number> = {};
+    const improvement:  Record<string, number> = {};
+
+    for (const dim of dims) {
+      preScores[dim]   = parseFloat((pre[dim]  ?? 0).toFixed(2));
+      postScores[dim]  = parseFloat((post[dim] ?? 3).toFixed(2));
+      improvement[dim] = parseFloat((postScores[dim] - preScores[dim]).toFixed(2));
+    }
+    postScores['overall'] = this.results.overall;
+    improvement['overall'] = parseFloat((this.results.overall - (pre['overall'] ?? 0)).toFixed(2));
+
+    await this.firebaseService.savePracticeSession(uid, {
+      scriptId:                this.selectedScript.id,
+      scriptTitle:             this.selectedScript.title,
+      scriptCategory:          this.selectedScript.category,
+      scriptDifficulty:        this.selectedScript.difficulty,
+      scriptTargetPausing:     this.selectedScript.scriptTargetPausing,
+      scriptTargetPitch:       this.selectedScript.scriptTargetPitch,
+      scriptTargetFiller:      this.selectedScript.scriptTargetFiller,
+      scriptTargetArticulation: this.selectedScript.scriptTargetArticulation,
+      preScores,
+      postScores,
+      improvement,
+      preSessionCount: this.weeklyPlan?.sessionCount ?? 0,
+      wordAccuracy:    this.results.wordAccuracy,
+      actualWpm:       this.results.actualWpm,
+      duration:        this.results.duration,
+      fillerCount:     this.results.fillerCount,
+    });
   }
 
   tryAgain() {

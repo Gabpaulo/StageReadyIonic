@@ -77,6 +77,14 @@
             </div>
           </ion-item>
         </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false" *ngIf="isAdmin">
+          <ion-item routerLink="/web/admin" routerLinkActive="active" detail="false" class="nav-item admin-nav-item">
+            <div class="nav-item-content">
+              <ion-icon slot="start" name="shield-outline"></ion-icon>
+              <ion-label>Admin</ion-label>
+            </div>
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
   </ion-menu>

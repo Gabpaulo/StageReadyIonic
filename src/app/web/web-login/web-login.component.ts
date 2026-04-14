@@ -67,7 +67,7 @@ export class WebLoginComponent implements OnInit {
 
       // Check if user needs onboarding
       if (!this.onboardingService.hasCompletedOnboarding()) {
-        this.router.navigate(['/onboarding']);
+        this.router.navigate(['/onboarding'], { queryParams: { returnTo: 'web' } });
       } else if (!(await this.firebaseService.userProfileExists(user.uid))) {
         this.router.navigate(['/setup-profile'], {
           queryParams: { returnUrl: this.returnUrl }
@@ -110,7 +110,7 @@ export class WebLoginComponent implements OnInit {
 
       // Check if user needs onboarding
       if (!this.onboardingService.hasCompletedOnboarding()) {
-        this.router.navigate(['/onboarding']);
+        this.router.navigate(['/onboarding'], { queryParams: { returnTo: 'web' } });
       } else {
         // Check if user profile exists in Firestore
         const profileExists = await this.firebaseService.userProfileExists(user.uid);

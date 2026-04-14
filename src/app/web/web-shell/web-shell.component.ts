@@ -20,8 +20,15 @@ export class WebShellComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {}
 
+  isAdmin = false;
+
   ngOnInit() {
-    // No specific logic needed here for routing, AuthGuard handles it.
+    this.firebaseService.auth.onAuthStateChanged(async user => {
+      if (user) {
+        const profile = await this.firebaseService.getUserProfile(user.uid);
+        this.isAdmin = !!profile?.isAdmin;
+      }
+    });
   }
 
   toggleSidebar() {

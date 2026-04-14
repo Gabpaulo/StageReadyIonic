@@ -9,6 +9,7 @@ import { WebFeedbackComponent } from './web-feedback/web-feedback.component';
 import { WebProfileComponent } from './web-profile/web-profile.component';
 import { WebLoginComponent } from './web-login/web-login.component';
 import { WebKnowledgeBaseComponent } from './web-knowledge-base/web-knowledge-base.component';
+import { WebAdminComponent } from './web-admin/web-admin.component';
 import { AuthGuard } from '../../app/guards/auth.guard';
 
 const routes: Routes = [
@@ -28,6 +29,7 @@ const routes: Routes = [
       { path: 'feedback', component: WebFeedbackComponent, canActivate: [AuthGuard] },
       { path: 'profile', component: WebProfileComponent, canActivate: [AuthGuard] },
       { path: 'knowledge-base', component: WebKnowledgeBaseComponent, canActivate: [AuthGuard] },
+      { path: 'admin', component: WebAdminComponent, canActivate: [AuthGuard] },
       {
         path: 'practice-mode',
         loadChildren: () => import('../pages/practice-mode/practice-mode.module').then(m => m.PracticeModePageModule),

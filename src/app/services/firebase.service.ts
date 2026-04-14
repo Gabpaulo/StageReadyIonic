@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, GoogleAuthProvider, signInWithPopup, UserCredential } from 'firebase/auth';
-import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp, collection, collectionGroup, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
 import { UserBadgeProgress } from '../models/badge.model';
 import { SpeechHistoryEntry, SpeechHistorySummary } from '../models/speech-history.model';
@@ -699,5 +699,47 @@ export class FirebaseService {
     }
 
     return gamification.dailyChallenge;
+  }
+
+  // ── Practice Session Data (ML training dataset) ─────────────────────────────
+
+  async savePracticeSession(uid: string, data: {
+    scriptId:                string;
+    scriptTitle:             string;
+    scriptCategory:          string;
+    scriptDifficulty:        string;
+    scriptTargetPausing:     string;
+    scriptTargetPitch:       string;
+    scriptTargetFiller:      string;
+    scriptTargetArticulation: string;
+    preScores:               Record<string, number>;  // user averages before this session
+    postScores:              Record<string, number>;  // scores from this session
+    improvement:             Record<string, number>;  // post - pre per dimension
+    preSessionCount:         number;
+    wordAccuracy:            number;
+    actualWpm:               number;
+    duration:                number;
+    fillerCount:             number;
+  }): Promise<void> {
+    const sessionRef = doc(collection(this.firestore, `users/${uid}/practice_sessions`));
+    await setDoc(sessionRef, {
+      ...data,
+      userId:    uid,
+      createdAt: Timestamp.now(),
+    });
+  }
+
+  async getPracticeSessions(uid: string, limitCount = 50): Promise<any[]> {
+    const ref  = collection(this.firestore, `users/${uid}/practice_sessions`);
+    const q    = query(ref, orderBy('createdAt', 'desc'), limit(limitCount));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  /** Admin only — fetches practice sessions across ALL users via collection group query */
+  async getAllPracticeSessions(): Promise<any[]> {
+    const q    = query(collectionGroup(this.firestore, 'practice_sessions'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 }

@@ -3,6 +3,8 @@ export type DimensionKey =
   'pitch_variation' | 'articulation_clarity' |
   'expressive_emph' | 'filler_words_score';
 
+export type ScriptTargetLevel = 'low' | 'medium' | 'high';
+
 export interface PracticeScript {
   id: string;
   title: string;
@@ -14,6 +16,11 @@ export interface PracticeScript {
   targetDimensions: DimensionKey[];
   /** Ideal WPM range for this script */
   targetWpmRange: { min: number; max: number };
+  /** Demand level per dimension — used for supervised recommendation model */
+  scriptTargetPausing:      ScriptTargetLevel;
+  scriptTargetPitch:        ScriptTargetLevel;
+  scriptTargetFiller:       ScriptTargetLevel;
+  scriptTargetArticulation: ScriptTargetLevel;
 }
 
 export const PRACTICE_SCRIPTS: PracticeScript[] = [
@@ -30,6 +37,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['articulation_clarity', 'speech_pace', 'pausing_fluency'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Sleep is one of the most vital processes for human health, yet most of us take it for granted. ' +
       'During sleep, your brain consolidates memories, processes emotions, and removes toxic waste products that build up during waking hours. ' +
@@ -50,6 +61,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['articulation_clarity', 'pausing_fluency', 'speech_pace'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'The water cycle is one of Earth\'s most important natural processes. ' +
       'It describes how water moves continuously through the environment, from the oceans to the sky and back again. ' +
@@ -69,6 +84,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['speech_pace', 'articulation_clarity', 'filler_words_score'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'low',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Vaccines are one of the greatest achievements of modern medicine. ' +
       'They protect us from dangerous diseases by training our immune systems to recognize and fight specific pathogens. ' +
@@ -89,6 +108,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['pausing_fluency', 'speech_pace', 'articulation_clarity'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Yawning is something everyone does, yet scientists are still not entirely sure why we do it. ' +
       'The most popular theory is that yawning helps cool the brain. ' +
@@ -109,6 +132,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['articulation_clarity', 'loud_control', 'pausing_fluency'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Humans perceive the world through five primary senses: sight, hearing, smell, taste, and touch. ' +
       'Each sense collects different types of information from the environment and sends signals to the brain for interpretation. ' +
@@ -134,6 +161,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['articulation_clarity', 'loud_control', 'pausing_fluency'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Climate change is one of the defining challenges of our time. ' +
       'The Earth\'s atmosphere naturally traps heat from the sun, keeping our planet warm enough for life. ' +
@@ -154,6 +185,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['pausing_fluency', 'articulation_clarity', 'speech_pace'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Memory is not a single system but a complex network of processes distributed across the brain. ' +
       'When you experience something, your brain encodes it through a process involving the hippocampus and the surrounding cortex. ' +
@@ -174,6 +209,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['speech_pace', 'filler_words_score', 'articulation_clarity'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'high',
+    scriptTargetArticulation: 'high',
     rawText:
       'Artificial intelligence, or AI, refers to computer systems designed to perform tasks that normally require human intelligence, such as recognizing images, understanding language, or making decisions. ' +
       'Most modern AI is built on a technique called machine learning, where a system learns from large amounts of data rather than being programmed with explicit rules. ' +
@@ -193,6 +232,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['loud_control', 'pausing_fluency', 'expressive_emph'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'The space age began on October fourth, nineteen fifty seven, when the Soviet Union launched Sputnik, the first artificial satellite to orbit Earth. ' +
       'This triggered the Space Race between the United States and the Soviet Union, driving rapid advances in rocket technology. ' +
@@ -213,6 +256,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['articulation_clarity', 'speech_pace', 'loud_control'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'The stock market is a system where investors buy and sell shares of publicly traded companies. ' +
       'When a company wants to raise money, it can offer shares of itself to the public through a process called an initial public offering, or IPO. ' +
@@ -237,6 +284,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['articulation_clarity', 'speech_pace', 'filler_words_score'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'high',
+    scriptTargetArticulation: 'high',
     rawText:
       'The internet began as a military research project in the nineteen sixties called ARPANET, designed to allow computers to communicate with each other. ' +
       'In nineteen eighty nine, British scientist Tim Berners-Lee invented the World Wide Web, a system of linked documents accessible through a browser. ' +
@@ -256,6 +307,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['speech_pace', 'pausing_fluency', 'filler_words_score'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'high',
+    scriptTargetArticulation: 'high',
     rawText:
       'Every decision you make, from what to eat for breakfast to how to respond in a crisis, involves a complex interplay between different brain regions. ' +
       'The prefrontal cortex handles rational analysis, weighing costs and benefits in a deliberate, logical way. ' +
@@ -275,6 +330,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['articulation_clarity', 'pausing_fluency', 'loud_control'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'high',
+    scriptTargetArticulation: 'high',
     rawText:
       'Quantum entanglement is one of the strangest and most counterintuitive phenomena in physics. ' +
       'When two particles become entangled, they form a shared quantum state. ' +
@@ -294,6 +353,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['filler_words_score', 'speech_pace', 'articulation_clarity'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'high',
+    scriptTargetArticulation: 'high',
     rawText:
       'CRISPR-Cas9, a gene-editing technology discovered in the last decade, allows scientists to precisely alter DNA sequences in living organisms. ' +
       'The potential applications are extraordinary: curing inherited diseases, eliminating genetic disorders before birth, developing more resilient crops, and even engineering resistance to pandemics. ' +
@@ -315,6 +378,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['pausing_fluency', 'loud_control', 'speech_pace'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'high',
+    scriptTargetArticulation: 'high',
     rawText:
       'A black hole is a region of space where gravity is so intense that nothing, not even light, can escape from it. ' +
       'Most black holes form when a massive star runs out of nuclear fuel and can no longer support itself against the inward pull of its own gravity. ' +
@@ -339,6 +406,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['expressive_emph', 'pitch_variation', 'loud_control'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Regular physical exercise is one of the most powerful things you can do for your health and wellbeing. ' +
       'Yet despite knowing this, most people still fail to make it a daily habit. ' +
@@ -361,6 +432,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['expressive_emph', 'loud_control', 'pausing_fluency'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Reading is one of the simplest and most powerful habits you can develop. ' +
       'Books expand your vocabulary, sharpen your thinking, and expose you to perspectives and ideas you would never encounter in your daily life. ' +
@@ -382,6 +457,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['pitch_variation', 'loud_control', 'expressive_emph'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Think about the last time you sat down for a meal with family or friends. ' +
       'Was your phone on the table? Were you checking notifications between bites? ' +
@@ -403,6 +482,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['pausing_fluency', 'speech_pace', 'expressive_emph'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'low',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Your body is roughly sixty percent water, and it needs a constant supply to function properly. ' +
       'Yet most people walk around mildly dehydrated without even knowing it. ' +
@@ -424,6 +507,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['loud_control', 'expressive_emph', 'pitch_variation'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'We live in a culture that glorifies busyness and wears sleeplessness as a badge of honor. ' +
       'Staying up late and pushing through exhaustion is seen as dedication. ' +
@@ -451,6 +538,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['pausing_fluency', 'articulation_clarity', 'expressive_emph'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'In a world dominated by social media, streaming services, and constant digital distractions, reading books has become a radical act of self-improvement. ' +
       'Books offer something screens cannot: deep, sustained engagement with complex ideas. ' +
@@ -472,6 +563,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['pitch_variation', 'expressive_emph', 'pausing_fluency'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'For over a century, the five-day, forty-hour work week has been the standard. But is it actually the best way to work? ' +
       'A growing body of research suggests that a four-day work week does not reduce productivity. In many cases, it increases it. ' +
@@ -491,6 +586,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['loud_control', 'articulation_clarity', 'expressive_emph'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'Universal Basic Income, the idea of providing every citizen with a regular, unconditional cash payment, sounds radical. But the evidence in its favor is growing. ' +
       'Pilot programs in Finland, Kenya, and Stockton, California have shown that unconditional cash does not make people lazy. ' +
@@ -511,6 +610,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['expressive_emph', 'pitch_variation', 'loud_control'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'We would never tell someone with a broken leg to just push through it. Yet every day, we expect people struggling with depression, anxiety, or trauma to simply toughen up. ' +
       'Mental illness is not a weakness. It is a health condition, just as real and just as serious as any physical disease. ' +
@@ -531,6 +634,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['pausing_fluency', 'loud_control', 'pitch_variation'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'The era of fossil fuels must end. Not in fifty years. Not in thirty. Now. ' +
       'The scientific consensus is unambiguous: burning coal, oil, and gas is the primary driver of climate change, threatening the stability of every ecosystem on Earth. ' +
@@ -555,6 +662,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['pitch_variation', 'expressive_emph', 'loud_control'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'The average person now spends over seven hours a day staring at screens. ' +
       'Our phones have become extensions of ourselves, yet this constant connectivity comes at a serious cost. ' +
@@ -576,6 +687,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['expressive_emph', 'loud_control', 'pitch_variation'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'Solitary confinement — locking a person alone in a small cell for twenty-two to twenty-four hours a day — is used in prisons across the country. ' +
       'It is presented as a necessary tool for maintaining safety. But the evidence tells a different story. ' +
@@ -599,6 +714,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['filler_words_score', 'articulation_clarity', 'expressive_emph'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'high',
+    scriptTargetArticulation: 'high',
     rawText:
       'Artificial intelligence is no longer the future. It is the present, and it is moving faster than our institutions can keep up. ' +
       'AI systems are already making decisions about who gets a job interview, who receives a loan, who is flagged by law enforcement, and what information we see online. ' +
@@ -620,6 +739,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['pausing_fluency', 'pitch_variation', 'expressive_emph'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'Right now, a child is dying from a preventable disease. Not because the cure doesn\'t exist, but because it costs a few dollars that no one gave. ' +
       'Philosopher Peter Singer posed a famous challenge: if you saw a child drowning in a shallow pond, you would rescue them without hesitation, even if it meant ruining your shoes. ' +
@@ -641,6 +764,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['loud_control', 'articulation_clarity', 'pausing_fluency'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'The death penalty is the ultimate, irreversible punishment. And because it is irreversible, it demands a standard of certainty we cannot meet. ' +
       'Since nineteen seventy three, more than one hundred and ninety people on death row in the United States have been exonerated and freed. ' +
@@ -667,6 +794,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['expressive_emph', 'pitch_variation', 'loud_control'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Every great achievement in history began with a single belief: that it was possible. ' +
       'The people who changed the world were not always the smartest or the most talented. ' +
@@ -688,6 +819,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['expressive_emph', 'loud_control', 'pausing_fluency'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'You are more capable than you think. That is not a platitude. It is a documented fact. ' +
       'Study after study shows that people consistently underestimate what they can accomplish when they commit fully to a goal. ' +
@@ -710,6 +845,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['pausing_fluency', 'speech_pace', 'expressive_emph'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'We often wait for a perfect moment, a big opportunity, a dramatic turning point before we start changing our lives. ' +
       'But transformation rarely comes from a single grand gesture. ' +
@@ -732,6 +871,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['loud_control', 'pitch_variation', 'expressive_emph'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'There is a lie we tell ourselves. That we will start when we feel ready. ' +
       'When we have more time, more money, more confidence, more experience. ' +
@@ -755,6 +898,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'beginner',
     targetDimensions: ['expressive_emph', 'pausing_fluency', 'pitch_variation'],
     targetWpmRange: { min: 110, max: 130 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'low',
     rawText:
       'Your mindset is not just your attitude. It is the lens through which you experience everything. ' +
       'Research in positive psychology shows that optimistic people are healthier, more resilient, more successful, and live longer than pessimists. ' +
@@ -781,6 +928,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['pitch_variation', 'expressive_emph', 'pausing_fluency'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Fear of failure is the greatest obstacle standing between you and the life you want to live. ' +
       'It whispers that you are not ready, that you might embarrass yourself, that success is for other people, not for you. ' +
@@ -802,6 +953,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['expressive_emph', 'loud_control', 'pitch_variation'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Every person who has ever grown beyond who they were has had to pass through discomfort to get there. ' +
       'Growth and comfort do not coexist. You must choose one. ' +
@@ -824,6 +979,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['pausing_fluency', 'speech_pace', 'expressive_emph'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'medium',
     rawText:
       'The most powerful force in achieving your goals is not motivation or talent. It is compounding. ' +
       'Just as money grows exponentially when invested and left to compound, so do skills, habits, and character. ' +
@@ -845,6 +1004,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['pitch_variation', 'pausing_fluency', 'loud_control'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Motivation is unreliable. It rises and falls with your mood, your energy, your circumstances. ' +
       'What sustains great people through adversity is not motivation. It is purpose. ' +
@@ -867,6 +1030,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'intermediate',
     targetDimensions: ['expressive_emph', 'pitch_variation', 'pausing_fluency'],
     targetWpmRange: { min: 120, max: 140 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'medium',
     rawText:
       'Everyone falls. Everyone faces moments when the path ahead looks impossible and the weight of failure presses down. ' +
       'What separates people is not whether they fall. It is what they do after. ' +
@@ -893,6 +1060,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['pausing_fluency', 'speech_pace', 'pitch_variation'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'Most of us spend our lives either regretting the past or worrying about the future. ' +
       'We replay old mistakes and rehearse imaginary problems, while the present moment slips by unnoticed. ' +
@@ -914,6 +1085,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['expressive_emph', 'loud_control', 'pitch_variation'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'medium',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'high',
     rawText:
       'It is not the critic who counts. Not the man who points out how the strong man stumbles, or where the doer of deeds could have done them better. ' +
       'The credit belongs to the man who is actually in the arena, whose face is marred by dust and sweat and blood. ' +
@@ -935,6 +1110,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['expressive_emph', 'pitch_variation', 'pausing_fluency'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'We choose to go to the Moon. We choose to go to the Moon in this decade and do the other things, not because they are easy, but because they are hard. ' +
       'Because that goal will serve to organize and measure the best of our energies and skills. ' +
@@ -957,6 +1136,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['pausing_fluency', 'expressive_emph', 'loud_control'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'medium',
+    scriptTargetFiller:       'medium',
+    scriptTargetArticulation: 'high',
     rawText:
       'It always seems impossible until it is done. ' +
       'Those words, attributed to Nelson Mandela, carry the weight of a man who spent twenty-seven years in prison and still emerged to lead a nation. ' +
@@ -981,6 +1164,10 @@ export const PRACTICE_SCRIPTS: PracticeScript[] = [
     difficulty: 'advanced',
     targetDimensions: ['pausing_fluency', 'pitch_variation', 'expressive_emph'],
     targetWpmRange: { min: 130, max: 155 },
+    scriptTargetPausing:      'high',
+    scriptTargetPitch:        'high',
+    scriptTargetFiller:       'low',
+    scriptTargetArticulation: 'high',
     rawText:
       'We live in a culture that treats vulnerability as weakness. ' +
       'We are taught to project confidence, to have the answers, to appear strong at all times. ' +

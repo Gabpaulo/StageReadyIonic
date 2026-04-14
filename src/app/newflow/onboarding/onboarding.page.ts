@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { OnboardingService } from '../../services/onboarding.service';
 import { FirebaseService } from '../../services/firebase.service';
 
@@ -36,15 +36,21 @@ export class OnboardingPage implements OnInit {
   ];
 
   isLastSlide = false;
+  private returnTo: string = 'ionic';
 
   constructor(
     private ngZone: NgZone,
     private router: Router,
+    private route: ActivatedRoute,
     private onboardingService: OnboardingService,
     private firebaseService: FirebaseService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.returnTo = params['returnTo'] ?? 'ionic';
+    });
+  }
 
   onSlideChange(event: Event) {
     const swiper = (event.target as any).swiper;
@@ -59,15 +65,17 @@ export class OnboardingPage implements OnInit {
   }
 
   async completeOnboarding() {
-    // Mark onboarding as completed
     this.onboardingService.setOnboardingCompleted();
 
-    // Check if user needs to set up profile
     const user = this.firebaseService.auth.currentUser;
+    const dashboard = this.returnTo === 'web' ? '/web/dashboard' : '/ionic/dashboard';
+
     if (user && !(await this.firebaseService.userProfileExists(user.uid))) {
-      this.router.navigate(['/setup-profile']);
+      this.router.navigate(['/setup-profile'], {
+        queryParams: { returnUrl: dashboard }
+      });
     } else {
-      this.router.navigate(['/ionic/dashboard']);
+      this.router.navigate([dashboard]);
     }
   }
 }
