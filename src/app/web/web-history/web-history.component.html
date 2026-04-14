@@ -1,28 +1,26 @@
 <div class="history-container">
   <div class="page-header">
-    <h1>
-      Speech History
-    </h1>
-    <p>Review your past speeches and track your improvement over time</p>
-    <button mat-icon-button (click)="loadSpeechHistory()" [disabled]="loading" class="refresh-btn">
+    <div>
+      <h1>Speech History</h1>
+      <p>Review your past speeches and track your improvement over time</p>
+    </div>
+    <button mat-icon-button (click)="loadSpeechHistory()" [disabled]="loading" class="refresh-btn" title="Refresh">
       ↻
     </button>
   </div>
 
-  <!-- Loading State -->
+  <!-- Loading -->
   <div *ngIf="loading" class="loading-state">
     <mat-spinner diameter="50"></mat-spinner>
-    <p>Loading speech history...</p>
+    <p>Loading speech history…</p>
   </div>
 
-  <!-- Error State -->
+  <!-- Error -->
   <div *ngIf="error && !loading" class="error-state">
     <div class="error-icon">⚠</div>
     <h3>Error</h3>
     <p>{{ error }}</p>
-    <button mat-stroked-button (click)="loadSpeechHistory()">
-      Try Again
-    </button>
+    <button mat-stroked-button (click)="loadSpeechHistory()">Try Again</button>
   </div>
 
   <!-- Summary Card -->
@@ -34,21 +32,19 @@
       <div class="summary-stats">
         <div class="stat-item">
           <div class="stat-value">{{ summary.totalSessions }}</div>
-          <div class="stat-label">Total Sessions</div>
+          <div class="stat-label">Sessions</div>
         </div>
         <div class="stat-item">
           <div class="stat-value">{{ formatInteger(summary.totalWords) }}</div>
-          <div class="stat-label">Words Spoken</div>
+          <div class="stat-label">Words</div>
         </div>
         <div class="stat-item">
           <div class="stat-value">{{ formatDuration(summary.totalDuration) }}</div>
           <div class="stat-label">Total Time</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">
-            <div class="trend-icon" [class]="getTrendColor(summary.improvementTrend)">
-              {{ getTrendIcon(summary.improvementTrend) }}
-            </div>
+          <div class="stat-value trend-icon" [class]="getTrendColor(summary.improvementTrend)">
+            {{ getTrendIcon(summary.improvementTrend) }}
           </div>
           <div class="stat-label">{{ summary.improvementTrend | titlecase }}</div>
         </div>
@@ -56,42 +52,131 @@
     </mat-card-content>
   </mat-card>
 
+  <!-- ── Progress Trend Analytics ── -->
+  <div *ngIf="speechHistory.length >= 2 && !loading && !error" class="trend-analytics">
+
+    <div class="ta-header">
+      <div>
+        <h3 class="ta-title">Progress Trend Analytics</h3>
+        <p class="ta-sub">Overall score across your last {{ chartSessions.length }} sessions</p>
+      </div>
+      <div class="ta-trend-badge" [style.color]="trendColor(dimTrend('overall'))" [style.borderColor]="trendColor(dimTrend('overall'))">
+        {{ trendIcon(dimTrend('overall')) }}
+        <span>{{ dimTrend('overall') > 0 ? 'Improving' : dimTrend('overall') < 0 ? 'Declining' : 'Stable' }}</span>
+      </div>
+    </div>
+
+    <!-- Main overall chart -->
+    <div class="chart-wrap">
+      <svg class="trend-chart" viewBox="0 0 568 136" preserveAspectRatio="none">
+        <!-- Grid lines at 1, 2, 3, 4, 5 -->
+        <line *ngFor="let score of [1,2,3,4,5]"
+              x1="0" [attr.y1]="gridY(score)" x2="568" [attr.y2]="gridY(score)"
+              class="grid-line"/>
+        <!-- Gradient fill under the line -->
+        <defs>
+          <linearGradient id="overallGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#22a7f0" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#22a7f0" stop-opacity="0.03"/>
+          </linearGradient>
+        </defs>
+        <!-- Fill area (closed polygon) -->
+        <polyline *ngIf="chartSessions.length >= 2"
+                  [attr.points]="'4,' + gridY(0) + ' ' + getChartPoints('overall') + ' ' + (4 + (560/(chartSessions.length > 1 ? chartSessions.length - 1 : 1)) * (chartSessions.length - 1)).toFixed(1) + ',' + gridY(0)"
+                  class="chart-fill" fill="url(#overallGrad)" stroke="none"/>
+        <!-- Score line -->
+        <polyline [attr.points]="getChartPoints('overall')" class="chart-line" fill="none" stroke="#22a7f0"/>
+        <!-- Dots -->
+        <ng-container *ngFor="let s of chartSessions; let i = index">
+          <circle
+            [attr.cx]="+(4 + (i / (chartSessions.length - 1 || 1)) * 560).toFixed(1)"
+            [attr.cy]="gridY(s.feedback?.overall ?? 0)"
+            r="3.5" class="chart-dot"/>
+        </ng-container>
+      </svg>
+
+      <!-- Y-axis labels -->
+      <div class="y-labels">
+        <span *ngFor="let v of [5,4,3,2,1]">{{ v }}</span>
+      </div>
+    </div>
+
+    <!-- X-axis date labels (first, mid, last) -->
+    <div class="x-labels" *ngIf="chartSessions.length >= 2">
+      <span>{{ chartXLabel(0) }}</span>
+      <span>{{ chartXLabel(Math.floor(chartSessions.length / 2)) }}</span>
+      <span>{{ chartXLabel(chartSessions.length - 1) }}</span>
+    </div>
+
+    <!-- Per-dimension breakdown -->
+    <div class="dim-breakdown">
+      <div class="dim-row" *ngFor="let d of DIMS">
+        <div class="dim-label-cell">
+          <span class="dim-dot" [style.background]="d.color"></span>
+          <span class="dim-label">{{ d.label }}</span>
+        </div>
+        <div class="dim-bar-cell">
+          <div class="dim-bar-track">
+            <div class="dim-bar-fill" [style.width.%]="(dimAvg(d.key) / 5) * 100" [style.background]="d.color"></div>
+          </div>
+        </div>
+        <span class="dim-avg" [style.color]="d.color">{{ dimAvg(d.key) | number:'1.1-1' }}</span>
+        <span class="dim-trend-arrow" [style.color]="trendColor(dimTrend(d.key))">
+          {{ trendIcon(dimTrend(d.key)) }}
+        </span>
+      </div>
+    </div>
+
+  </div>
+
   <!-- History List -->
   <div *ngIf="speechHistory.length > 0 && !loading && !error" class="history-section">
     <h3>Recent Sessions</h3>
-    <mat-list>
-      <mat-list-item
+    <div class="history-list">
+      <div
         *ngFor="let entry of speechHistory"
-        (click)="openSession(entry)"
-        class="history-item">
-        <div matListItemIcon class="mic-icon">🎤</div>
-        <div matListItemTitle>
-          {{ formatDate(entry.createdAt) }}
-          <span *ngIf="entry.speechType" class="speech-type-badge">{{ entry.speechType }}</span>
+        class="history-card"
+        (click)="openSession(entry)">
+
+        <!-- Grade badge -->
+        <div class="entry-grade" [style.background]="getGradeColor(entry.feedback?.overall)">
+          {{ getGradeLetter(entry.feedback?.overall) }}
         </div>
-        <div matListItemLine *ngIf="entry.duration">
-          Duration: {{ formatDuration(entry.duration) }} |
-          Words: {{ entry.wordCount || 0 }} |
-          Overall Score: {{ entry.feedback?.overall || 0 }}/5
+
+        <!-- Info -->
+        <div class="entry-info">
+          <div class="entry-top">
+            <span class="entry-date">{{ formatDate(entry.createdAt) }}</span>
+            <span *ngIf="entry.speechType" class="speech-type-badge">{{ entry.speechType | titlecase }}</span>
+          </div>
+          <div class="entry-meta">
+            <span *ngIf="entry.feedback?.overall" class="score-text">
+              {{ entry.feedback?.overall | number:'1.1-1' }}/5
+            </span>
+            <span *ngIf="entry.duration"> · {{ formatDuration(entry.duration) }}</span>
+            <span *ngIf="entry.averagePace"> · {{ formatInteger(entry.averagePace) }} WPM</span>
+            <span *ngIf="entry.wordCount"> · {{ entry.wordCount }} words</span>
+          </div>
+          <div class="entry-scores" *ngIf="entry.feedback">
+            <span class="score-chip">Pace {{ entry.feedback.speech_pace | number:'1.1-1' }}</span>
+            <span class="score-chip">Clarity {{ entry.feedback.articulation_clarity | number:'1.1-1' }}</span>
+            <span class="score-chip">Pitch {{ entry.feedback.pitch_variation | number:'1.1-1' }}</span>
+            <span class="score-chip">Volume {{ entry.feedback.loud_control | number:'1.1-1' }}</span>
+          </div>
         </div>
-        <div matListItemLine class="preview-scores" *ngIf="entry.feedback">
-          <span class="score-chip">Pace: {{ entry.feedback.speech_pace || 0 }}/5</span>
-          <span class="score-chip">Clarity: {{ entry.feedback.articulation_clarity || 0 }}/5</span>
-          <span class="score-chip">Tone: {{ entry.feedback.pitch_variation || 0 }}/5</span>
-        </div>
-        <div matListItemMeta class="chevron-icon">›</div>
-      </mat-list-item>
-    </mat-list>
+
+        <div class="entry-chevron">›</div>
+      </div>
+    </div>
   </div>
 
   <!-- Empty State -->
   <div *ngIf="speechHistory.length === 0 && !loading && !error" class="empty-state">
-    <img [src]="userPhotoURL || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'"
-         alt="Profile picture" class="empty-image">
+    <div class="empty-icon">🎤</div>
     <h3>No Speech History Yet</h3>
     <p>Start practicing to see your speech analysis history here!</p>
     <button mat-raised-button color="primary" routerLink="/web/analysis">
-      🎤 Start Practicing
+      Start Practicing
     </button>
   </div>
 </div>

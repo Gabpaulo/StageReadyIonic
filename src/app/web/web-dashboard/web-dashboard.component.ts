@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 import { BadgeService } from '../../services/badge.service';
 import { GamificationService } from '../../services/gamification.service';
+import { AdaptiveLearningService, WeeklyPlan, RecommendedScript } from '../../services/adaptive-learning.service';
 import { Badge } from '../../models/badge.model';
 import { XP_PER_LEVEL } from '../../models/gamification.model';
 
@@ -30,6 +32,10 @@ export class WebDashboardComponent implements OnInit {
   quoteAuthor: string = 'Walt Disney';
 
   totalSpeeches: number = 0;
+
+  // Weekly plan
+  weeklyPlan: WeeklyPlan | null = null;
+  planLoading = false;
 
   // Upcoming badge preview
   upcomingBadge: Badge | null = null;
@@ -68,9 +74,11 @@ export class WebDashboardComponent implements OnInit {
   ];
 
   constructor(
+    private router: Router,
     private firebaseService: FirebaseService,
     private badgeService: BadgeService,
-    private gamificationService: GamificationService
+    private gamificationService: GamificationService,
+    private adaptiveLearning: AdaptiveLearningService
   ) { }
 
   ngOnInit() {
@@ -84,6 +92,14 @@ export class WebDashboardComponent implements OnInit {
         // Load actual speech count
         const summary = await this.firebaseService.getSpeechHistorySummary(user.uid);
         this.totalSpeeches = summary.totalSessions;
+
+        // Load weekly AI plan
+        this.planLoading = true;
+        try {
+          this.weeklyPlan = await this.adaptiveLearning.generatePlan(user.uid);
+        } catch { /* silently skip */ } finally {
+          this.planLoading = false;
+        }
       } else {
         this.userId = '';
         this.firstName = '';
@@ -153,6 +169,39 @@ export class WebDashboardComponent implements OnInit {
       this.upcomingBadge = null;
       this.upcomingBadgeProgress = 0;
     }
+  }
+
+  humanLabel(dim: string): string {
+    return this.adaptiveLearning.humanLabel(dim as any);
+  }
+
+  getMetricItems(): Array<{ label: string; value: number }> {
+    if (!this.weeklyPlan?.avgScores) return [];
+    const order: Array<[string, string]> = [
+      ['speech_pace',          'Speech Pace'],
+      ['pausing_fluency',      'Pausing & Fluency'],
+      ['loud_control',         'Volume Control'],
+      ['pitch_variation',      'Pitch Variation'],
+      ['articulation_clarity', 'Articulation & Clarity'],
+      ['expressive_emph',      'Expressiveness'],
+      ['filler_words_score',   'Filler Words'],
+    ];
+    const scores = this.weeklyPlan!.avgScores as Record<string, number>;
+    return order.map(([key, label]) => ({
+      label,
+      value: +(scores[key] ?? 0).toFixed(2)
+    }));
+  }
+
+  getScoreColor(v: number): string {
+    if (v >= 4) return '#4caf50';
+    if (v >= 3) return '#22a7f0';
+    if (v >= 2) return '#ff9800';
+    return '#f44336';
+  }
+
+  navigateToScript(rec: RecommendedScript) {
+    this.router.navigate(['/web/practice-mode'], { state: { recommendation: rec } });
   }
 
   getBadgeIconPath(icon: string): string {

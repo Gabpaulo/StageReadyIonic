@@ -25,7 +25,6 @@ export class SpeechHistoryPage implements OnInit {
   }
 
   ionViewWillEnter() {
-    // Refresh list each time view becomes active
     this.loadSpeechHistory();
   }
 
@@ -34,7 +33,6 @@ export class SpeechHistoryPage implements OnInit {
     this.error = null;
 
     try {
-      // Wait for auth state to be ready
       const user = await new Promise<any>((resolve) => {
         const unsubscribe = this.firebaseService.auth.onAuthStateChanged((user) => {
           unsubscribe();
@@ -47,11 +45,9 @@ export class SpeechHistoryPage implements OnInit {
           this.firebaseService.getSpeechHistory(user.uid),
           this.firebaseService.getSpeechHistorySummary(user.uid)
         ]);
-
         this.speechHistory = history;
         this.summary = summary;
       } else {
-        // Clear state if no auth
         this.speechHistory = [];
         this.summary = null;
         this.error = 'No user is currently logged in.';
@@ -64,32 +60,67 @@ export class SpeechHistoryPage implements OnInit {
     }
   }
 
-  getRatingColor(rating: string): string {
-    switch (rating.toLowerCase()) {
-      case 'excellent': return 'success';
-      case 'good': return 'primary';
-      case 'fair': return 'warning';
-      case 'poor': return 'danger';
-      default: return 'medium';
-    }
+  // ── Grade helpers ────────────────────────────────────────────────────────────
+  getGradeLetter(overall: number | undefined): string {
+    const v = overall ?? 0;
+    if (v >= 4.5) return 'A';
+    if (v >= 3.5) return 'B';
+    if (v >= 2.5) return 'C';
+    if (v >= 1.5) return 'D';
+    return 'F';
   }
 
-  getRatingIcon(rating: string): string {
-    switch (rating.toLowerCase()) {
-      case 'excellent': return 'star';
-      case 'good': return 'star-half';
-      case 'fair': return 'star-outline';
-      case 'poor': return 'close-circle';
-      default: return 'help-circle';
-    }
+  getGradeLabel(overall: number | undefined): string {
+    const v = overall ?? 0;
+    if (v >= 4.5) return 'Excellent';
+    if (v >= 3.5) return 'Good';
+    if (v >= 2.5) return 'Fair';
+    if (v >= 1.5) return 'Needs Work';
+    return 'Poor';
   }
 
+  getGradeColor(overall: number | undefined): string {
+    const v = overall ?? 0;
+    if (v >= 4.5) return '#4caf50';
+    if (v >= 3.5) return '#8bc34a';
+    if (v >= 2.5) return '#22a7f0';
+    if (v >= 1.5) return '#ff9800';
+    return '#f44336';
+  }
+
+  // ── Score breakdown ──────────────────────────────────────────────────────────
+  getScoreItems(entry: SpeechHistoryEntry): Array<{ label: string; value: number; feedback: string; icon: string }> {
+    if (!entry.feedback) return [];
+    const f = entry.feedback;
+    return [
+      { label: 'Speech Pace',       value: f.speech_pace,          feedback: f.pace_feedback     || '', icon: 'speedometer-outline' },
+      { label: 'Pausing & Fluency', value: f.pausing_fluency,      feedback: f.pausing_feedback  || '', icon: 'pause-circle-outline' },
+      { label: 'Volume Control',    value: f.loud_control,         feedback: f.volume_feedback   || '', icon: 'volume-high-outline' },
+      { label: 'Pitch Variation',   value: f.pitch_variation,      feedback: f.pitch_feedback    || '', icon: 'musical-notes-outline' },
+      { label: 'Articulation',      value: f.articulation_clarity, feedback: f.clarity_feedback  || '', icon: 'mic-outline' },
+      { label: 'Expressiveness',    value: f.expressive_emph,      feedback: f.tone_feedback     || '', icon: 'color-palette-outline' },
+      { label: 'Filler Words',      value: f.filler_words_score,   feedback: f.filler_feedback   || '', icon: 'chatbubble-ellipses-outline' },
+    ];
+  }
+
+  getScoreColor(value: number): string {
+    if (value >= 4) return 'success';
+    if (value >= 3) return 'primary';
+    if (value >= 2) return 'warning';
+    return 'danger';
+  }
+
+  getProgressWidth(value: number | undefined | null): number {
+    if (value === undefined || value === null || isNaN(value)) return 0;
+    return Math.max(0, Math.min(100, (value / 5) * 100));
+  }
+
+  // ── Trend helpers ─────────────────────────────────────────────────────────────
   getTrendIcon(trend: string): string {
     switch (trend) {
       case 'improving': return 'trending-up';
       case 'declining': return 'trending-down';
-      case 'stable': return 'remove';
-      default: return 'help-circle';
+      default: return 'remove';
     }
   }
 
@@ -97,73 +128,18 @@ export class SpeechHistoryPage implements OnInit {
     switch (trend) {
       case 'improving': return 'success';
       case 'declining': return 'danger';
-      case 'stable': return 'medium';
       default: return 'medium';
     }
   }
 
-  formatDuration(seconds: number): string {
-    const totalSeconds = Math.floor(seconds || 0);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const remainingSeconds = totalSeconds % 60;
-
-    // Build the duration string with labels
-    const parts = [];
-
-    if (hours > 0) {
-      parts.push(`${hours}h`);
-    }
-
-    if (minutes > 0 || hours > 0) {
-      parts.push(`${minutes}m`);
-    }
-
-    parts.push(`${remainingSeconds}s`);
-
-    return parts.join(' ');
-  }
-
-  formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  }
-
-  getAverageRating(entry: SpeechHistoryEntry): number {
-    const clarity = entry.feedback?.articulation_clarity || 0;
-    const pace = entry.feedback?.speech_pace || 0;
-    const tone = entry.feedback?.pitch_variation || 0;
-    return (clarity + pace + tone) / 3;
-  }
-
-  formatNumber(value: number | undefined | null): string {
-    if (value === undefined || value === null || isNaN(value)) {
-      return '0.0';
-    }
-    return value.toFixed(1);
-  }
-
-  formatInteger(value: number | undefined | null): string {
-    if (value === undefined || value === null || isNaN(value)) {
-      return '0';
-    }
-    return Math.round(value).toString();
-  }
-
+  // ── Modal ────────────────────────────────────────────────────────────────────
   async openSession(entry: SpeechHistoryEntry) {
     this.modalError = null;
     this.modalLoading = true;
     this.selectedEntry = entry;
     this.isModalOpen = true;
 
-    // If no embedded audio, try fetch from speeches collection nearest by time
-    if (!entry.audioData) {
+    if (!entry.audioData && !entry.audioUrl) {
       try {
         const user = this.firebaseService.auth.currentUser;
         if (user) {
@@ -171,6 +147,7 @@ export class SpeechHistoryPage implements OnInit {
           if (nearest) {
             this.selectedEntry = {
               ...entry,
+              audioUrl: nearest.audioUrl,
               audioData: nearest.audioData,
               audioMimeType: nearest.audioMimeType || 'audio/webm'
             };
@@ -191,27 +168,33 @@ export class SpeechHistoryPage implements OnInit {
     this.modalError = null;
   }
 
-  getProgressWidth(value: number | undefined | null): number {
-    if (value === undefined || value === null || isNaN(value)) {
-      return 0;
-    }
-    return Math.max(0, Math.min(100, (value / 4) * 100));
+  // ── Formatting ────────────────────────────────────────────────────────────────
+  formatDuration(seconds: number): string {
+    const total = Math.floor(seconds || 0);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    const parts: string[] = [];
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0 || h > 0) parts.push(`${m}m`);
+    parts.push(`${s}s`);
+    return parts.join(' ');
   }
 
-  getRatingColorSafe(value: number | undefined | null): string {
-    if (value === undefined || value === null || isNaN(value)) {
-      return 'medium';
-    }
-    if (value >= 3) return 'success';
-    if (value >= 2) return 'warning';
-    return 'danger';
+  formatDate(date: Date): string {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    }).format(date);
   }
 
-  getFeedbackProgressWidth(value: number): number {
-    return this.getProgressWidth(value);
+  formatNumber(value: number | undefined | null): string {
+    if (value === undefined || value === null || isNaN(value)) return '0.0';
+    return value.toFixed(1);
   }
 
-  getFeedbackRatingColor(value: number): string {
-    return this.getRatingColorSafe(value);
+  formatInteger(value: number | undefined | null): string {
+    if (value === undefined || value === null || isNaN(value)) return '0';
+    return Math.round(value).toString();
   }
 }

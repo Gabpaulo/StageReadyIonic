@@ -1,31 +1,24 @@
-import { Component, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnDestroy, NgZone, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
-import { PRACTICE_SCRIPTS, PracticeScript } from '../../data/practice-scripts.data';
+import { Router } from '@angular/router';
+import { PRACTICE_SCRIPTS, PracticeScript, DimensionKey } from '../../data/practice-scripts.data';
+import { AdaptiveLearningService, WeeklyPlan, RecommendedScript } from '../../services/adaptive-learning.service';
+import { FirebaseService } from '../../services/firebase.service';
+import { AudioRecorderService } from '../../services/audio-recorder.service';
+import { SpeechAnalysisApiService, PracticeAnalysisResult } from '../../services/speech-analysis-api.service';
 
-type Step     = 'category' | 'script' | 'session' | 'results';
+type Step     = 'category' | 'script' | 'session' | 'analyzing' | 'results';
 type Category = 'informative' | 'persuasive' | 'motivational';
 
-const FILLER_WORDS = [
-  'um', 'uh', 'er', 'ah', 'hmm',
-  'like', 'basically', 'literally', 'actually',
-  'you know', 'i mean', 'sort of', 'kind of'
-];
-
-export interface SessionResults {
-  duration: number;
-  wordsCompleted: number;
-  totalWords: number;
-  averageWpm: number;
-  fillerWordCount: number;
-  detectedFillerWords: string[];
-  completionRate: number;
-  paceRating: string;
-  /** 0–100 delivery score: weighted blend of pace, filler penalty, and completion */
-  deliveryScore: number;
-  deliveryGrade: string;
-  paceScore: number;
-  fillerScore: number;
-}
+const DIM_LABELS: Record<string, string> = {
+  speech_pace:          'Speech Pace',
+  pausing_fluency:      'Pausing & Fluency',
+  loud_control:         'Volume Control',
+  pitch_variation:      'Pitch Variation',
+  articulation_clarity: 'Articulation & Clarity',
+  expressive_emph:      'Expressive Emphasis',
+  filler_words_score:   'Filler Words'
+};
 
 @Component({
   selector: 'app-practice-mode',
@@ -33,40 +26,30 @@ export interface SessionResults {
   styleUrls: ['./practice-mode.page.scss'],
   standalone: false
 })
-export class PracticeModePage implements OnDestroy {
+export class PracticeModePage implements OnInit, OnDestroy {
 
   step: Step = 'category';
   selectedCategory: Category | null = null;
   selectedScript: PracticeScript | null = null;
 
-  // Session flags
-  isPaused         = false;
-  isListening      = false;
-  speechApiSupported = true;
-
-  // ── Word tracking ──────────────────────────────────────────────────────────
-  scriptWords: string[] = [];
-
-  /**
-   * confirmedWordIndex – advanced only when the API fires a FINAL result.
-   * This is the "ground truth" position and is used as the anchor for new searches.
-   */
-  confirmedWordIndex = 0;
-
-  /**
-   * liveWordIndex – advanced on EVERY interim event, giving instant visual feedback.
-   * Always >= confirmedWordIndex.  This drives the highlighted "current" word.
-   */
-  liveWordIndex = 0;
-
-  // ── Live stats ─────────────────────────────────────────────────────────────
-  currentWpm      = 0;
+  // ── Session state ──────────────────────────────────────────────────────────
+  isRecording     = false;
+  sessionStarted  = false;   // true once user clicks "Start Recording"
   sessionDuration = 0;
-  fillerWordCount = 0;
-  detectedFillerWords: string[] = [];
+
+  // ── Live WPM ───────────────────────────────────────────────────────────────
+  currentWpm      = 0;
+  wpmAvailable    = false;   // false when SpeechRecognition not supported
+  private recognition: any = null;
+  private spokenWordCount   = 0;
 
   // ── Results ────────────────────────────────────────────────────────────────
-  results: SessionResults | null = null;
+  results: PracticeAnalysisResult | null = null;
+  analysisError: string | null = null;
+
+  // ── Adaptive Learning Plan ─────────────────────────────────────────────────
+  weeklyPlan: WeeklyPlan | null = null;
+  planLoading = false;
 
   readonly allScripts = PRACTICE_SCRIPTS;
   readonly Math       = Math;
@@ -81,40 +64,53 @@ export class PracticeModePage implements OnDestroy {
   };
 
   // ── Private ────────────────────────────────────────────────────────────────
-  private recognition: any   = null;
   private timerInterval: any = null;
-  private wpmInterval: any   = null;
-  private sessionStartTime   = 0;
-  private wordTimestamps: number[] = [];
-  private pauseStartTime   = 0;
-  private totalPausedTime  = 0;
+  private _pendingRecommendation: RecommendedScript | null = null;
 
-  /**
-   * Pre-normalised script words – computed once per script selection so that
-   * the hot-path (every interim event) never calls normalize() on scriptWords.
-   */
-  private normalizedScriptWords: string[] = [];
-
-  /**
-   * Filler words that are intentionally part of the script text.
-   * These must NOT be counted as mistakes when the user speaks them.
-   */
-  private scriptFillerWords = new Set<string>();
-
-  constructor(private ngZone: NgZone, private location: Location) {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    this.speechApiSupported = !!SR;
+  constructor(
+    private ngZone: NgZone,
+    private location: Location,
+    private router: Router,
+    private adaptiveLearning: AdaptiveLearningService,
+    private firebaseService: FirebaseService,
+    private audioRecorder: AudioRecorderService,
+    private analysisApi: SpeechAnalysisApiService
+  ) {
+    // Read navigation state before it's cleared (only available during navigation)
+    const nav = this.router.getCurrentNavigation();
+    const state = nav?.extras?.state ?? (window.history.state || {});
+    if (state['recommendation']) {
+      this._pendingRecommendation = state['recommendation'] as RecommendedScript;
+    }
   }
 
-  // ─── Computed getters ──────────────────────────────────────────────────────
+  async ngOnInit() {
+    // If a recommended script was passed via navigation state, jump straight to it
+    if (this._pendingRecommendation) {
+      this.startFromRecommendation(this._pendingRecommendation);
+      this._pendingRecommendation = null;
+    }
+
+    const uid = this.firebaseService.auth.currentUser?.uid;
+    if (!uid) return;
+    this.planLoading = true;
+    try {
+      this.weeklyPlan = await this.adaptiveLearning.generatePlan(uid);
+    } catch (e) {
+      console.warn('Adaptive plan generation failed:', e);
+    } finally {
+      this.planLoading = false;
+    }
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  humanLabel(dim: DimensionKey | string): string {
+    return DIM_LABELS[dim] ?? dim;
+  }
 
   get filteredScripts(): PracticeScript[] {
     return this.allScripts.filter(s => s.category === this.selectedCategory);
-  }
-
-  get progressPercent(): number {
-    if (!this.scriptWords.length) return 0;
-    return Math.min(Math.round((this.liveWordIndex / this.scriptWords.length) * 100), 100);
   }
 
   get formattedTime(): string {
@@ -123,33 +119,58 @@ export class PracticeModePage implements OnDestroy {
     return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
-  get paceLevel(): string {
-    if (this.currentWpm === 0)   return 'idle';
-    if (this.currentWpm < 90)    return 'too-slow';
-    if (this.currentWpm < 110)   return 'slow';
-    if (this.currentWpm <= 150)  return 'good';
-    if (this.currentWpm <= 175)  return 'fast';
-    return 'too-fast';
-  }
-
-  get paceLabel(): string {
-    const m: Record<string, string> = {
-      idle: 'Waiting…', 'too-slow': 'Too slow', slow: 'A bit slow',
-      good: 'Great pace!', fast: 'A bit fast', 'too-fast': 'Too fast'
-    };
-    return m[this.paceLevel];
-  }
-
-  get paceColor(): string {
-    const m: Record<string, string> = {
-      idle: '#9bb2c8', 'too-slow': '#f44336', slow: '#ff9800',
-      good: '#4caf50', fast: '#ff9800', 'too-fast': '#f44336'
-    };
-    return m[this.paceLevel];
-  }
-
   get categoryColor(): string {
     return this.selectedCategory ? this.categoryMeta[this.selectedCategory].color : '#22a7f0';
+  }
+
+  getScoreColor(score: number): string {
+    if (score >= 4.5) return '#4caf50';
+    if (score >= 3.5) return '#22a7f0';
+    if (score >= 2.5) return '#ff9800';
+    if (score >= 1.5) return '#f44336';
+    return '#9e9e9e';
+  }
+
+  getGradeLetter(score: number): string {
+    if (score >= 4.5) return 'A';
+    if (score >= 3.5) return 'B';
+    if (score >= 2.5) return 'C';
+    if (score >= 1.5) return 'D';
+    return 'F';
+  }
+
+  getScoreBarColor(score: number): string {
+    if (score >= 4.0) return 'success';
+    if (score >= 3.0) return 'primary';
+    if (score >= 2.0) return 'warning';
+    return 'danger';
+  }
+
+  /** Returns color for live WPM chip relative to script's target range */
+  get liveWpmStatus(): 'good' | 'fast' | 'slow' | 'idle' {
+    if (!this.wpmAvailable || this.currentWpm === 0 || this.sessionDuration < 8) return 'idle';
+    const range = this.selectedScript?.targetWpmRange;
+    if (!range) return 'idle';
+    if (this.currentWpm < range.min - 10) return 'slow';
+    if (this.currentWpm > range.max + 10) return 'fast';
+    return 'good';
+  }
+
+  getAccuracyColor(pct: number): string {
+    if (pct >= 90) return '#4caf50';
+    if (pct >= 75) return '#22a7f0';
+    if (pct >= 60) return '#ff9800';
+    return '#f44336';
+  }
+
+  /** Returns the dimension scores for the script's targetDimensions only */
+  get targetDimScores(): { dim: string; label: string; score: number }[] {
+    if (!this.results || !this.selectedScript) return [];
+    return this.selectedScript.targetDimensions.map(dim => ({
+      dim,
+      label: this.humanLabel(dim),
+      score: this.results!.dimensionScores[dim] ?? 3
+    }));
   }
 
   // ─── Navigation ───────────────────────────────────────────────────────────
@@ -160,33 +181,29 @@ export class PracticeModePage implements OnDestroy {
   }
 
   selectScript(script: PracticeScript) {
-    this.selectedScript = script;
-    this.scriptWords           = script.rawText.split(/\s+/).filter(Boolean);
-    this.normalizedScriptWords = this.scriptWords.map(w => this.norm(w));
+    this.selectedScript  = script;
+    this.sessionStarted  = false;
+    this.step            = 'session';
+  }
 
-    // Determine which filler words are intentionally in the script so we
-    // don't penalise the user for reading them as written.
-    const scriptLower = script.rawText.toLowerCase();
-    this.scriptFillerWords.clear();
-    for (const filler of FILLER_WORDS) {
-      const rx = new RegExp(`(?<![\\w])${filler.replace(/\s+/g, '\\s+')}(?![\\w])`, 'i');
-      if (rx.test(scriptLower)) {
-        this.scriptFillerWords.add(filler);
-      }
-    }
+  beginRecording() {
+    this.sessionStarted = true;
+    this.startSession();
+  }
 
-    this.step = 'session';
-    setTimeout(() => this.startSession(), 400);
+  startFromRecommendation(rec: RecommendedScript) {
+    this.selectedCategory = rec.script.category;
+    this.selectScript(rec.script);
   }
 
   goBack() {
     if (this.step === 'script') {
       this.step = 'category';
     } else if (this.step === 'session') {
-      this.stopRecognition();
-      this.clearIntervals();
+      this.stopSession(false);
       this.step = 'script';
     } else if (this.step === 'results') {
+      this.results = null;
       this.step = 'script';
     } else {
       this.location.back();
@@ -195,327 +212,141 @@ export class PracticeModePage implements OnDestroy {
 
   // ─── Session control ──────────────────────────────────────────────────────
 
-  startSession() {
-    this.confirmedWordIndex = 0;
-    this.liveWordIndex      = 0;
-    this.currentWpm         = 0;
-    this.sessionDuration    = 0;
-    this.fillerWordCount    = 0;
-    this.detectedFillerWords = [];
-    this.wordTimestamps      = [];
-    this.totalPausedTime     = 0;
-    this.isPaused            = false;
-    this.sessionStartTime    = Date.now();
+  private startSession() {
+    this.sessionDuration  = 0;
+    this.results          = null;
+    this.analysisError    = null;
+    this.isRecording      = false;
+    this.currentWpm       = 0;
+    this.spokenWordCount  = 0;
 
-    this.startRecognition();
     this.startTimer();
-    this.startWpmCalculator();
+    this.audioRecorder.startRecording().then(() => {
+      this.ngZone.run(() => {
+        this.isRecording = true;
+        this.startLiveWpm();
+      });
+    });
   }
 
-  togglePause() {
-    this.isPaused = !this.isPaused;
-    if (this.isPaused) {
-      this.pauseStartTime = Date.now();
-      this.recognition?.stop();
-      this.isListening = false;
-    } else {
-      this.totalPausedTime += Date.now() - this.pauseStartTime;
-      try { this.recognition?.start(); this.isListening = true; } catch (_) {}
-    }
-  }
+  // ── Live WPM via Web Speech API word counting ────────────────────────────
 
-  stopSession()     { this.finishSession(); }
-  tryAgain()        { this.results = null; this.step = 'session'; setTimeout(() => this.startSession(), 300); }
-  chooseDifferent() { this.results = null; this.step = 'script'; }
+  private startLiveWpm() {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) { this.wpmAvailable = false; return; }
 
-  // ─── Speech Recognition ───────────────────────────────────────────────────
-
-  private startRecognition() {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { this.speechApiSupported = false; return; }
-
-    this.recognition = new SR();
+    this.wpmAvailable    = true;
+    this.spokenWordCount = 0;
+    this.recognition     = new SpeechRecognition();
     this.recognition.continuous      = true;
-    this.recognition.interimResults  = true;   // MUST be true for real-time tracking
+    this.recognition.interimResults  = false;   // final only for accuracy
     this.recognition.lang            = 'en-US';
     this.recognition.maxAlternatives = 1;
 
     this.recognition.onresult = (event: any) => {
-      // Run inside Angular zone so the view updates immediately
-      this.ngZone.run(() => this.processResults(event));
+      let newWords = 0;
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          const words = event.results[i][0].transcript.trim().split(/\s+/).filter(Boolean);
+          newWords += words.length;
+        }
+      }
+      this.spokenWordCount += newWords;
+      // Need at least 8 seconds of speech before showing WPM
+      if (this.sessionDuration >= 8 && this.spokenWordCount > 0) {
+        this.ngZone.run(() => {
+          this.currentWpm = Math.round((this.spokenWordCount / this.sessionDuration) * 60);
+        });
+      }
     };
 
-    this.recognition.onerror = (event: any) => {
-      if (event.error === 'no-speech') return; // harmless, onend will restart
-      console.warn('SR error:', event.error);
+    this.recognition.onerror = (e: any) => {
+      // 'no-speech' is normal during pauses — ignore it
+      if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        this.wpmAvailable = false;
+      }
     };
 
     this.recognition.onend = () => {
-      this.ngZone.run(() => {
-        this.isListening = false;
-        if (!this.isPaused && this.step === 'session' &&
-            this.liveWordIndex < this.scriptWords.length) {
-          setTimeout(() => {
-            if (!this.isPaused && this.step === 'session') {
-              try { this.recognition?.start(); this.isListening = true; } catch (_) {}
-            }
-          }, 30);
-        }
-      });
+      // Auto-restart while still recording (recognition stops after silence)
+      if (this.isRecording && this.recognition) {
+        try { this.recognition.start(); } catch { /* already started */ }
+      }
     };
 
-    try { this.recognition.start(); this.isListening = true; }
-    catch (e) { console.error('SR start failed:', e); }
+    try { this.recognition.start(); } catch { this.wpmAvailable = false; }
   }
 
-  // ─── Core result processing ────────────────────────────────────────────────
-
-  private processResults(event: any) {
-    let interimText = '';
-    let finalText   = '';
-
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const r = event.results[i];
-      if (r.isFinal) finalText   += r[0].transcript + ' ';
-      else           interimText += r[0].transcript + ' ';
-    }
-
-    /*
-     * LIVE PATH — runs on EVERY event (interim & final).
-     * Combine confirmed final text + latest interim so the highlight fires
-     * as soon as the engine produces even one partial word.
-     */
-    const allSpoken = (finalText + interimText).trim();
-    if (allSpoken) {
-      this.advanceLive(allSpoken);
-    }
-
-    /*
-     * CONFIRMED PATH — runs only on final results.
-     * Locks confirmedWordIndex so the next interim search starts further ahead.
-     */
-    if (finalText.trim()) {
-      this.lockConfirmed(finalText.trim());
-      this.detectFillerWords(finalText.trim());
-    }
-
-    this.scrollToLive();
-  }
-
-  // ─── Live word advance (interim-driven) ──────────────────────────────────
-
-  private advanceLive(spokenText: string) {
-    const tokens = this.tokenizeSpoken(spokenText);
-    let idx = this.confirmedWordIndex;
-
-    for (const token of tokens) {
-      if (idx >= this.normalizedScriptWords.length) break;
-
-      // Try up to 5 positions ahead to handle skipped/misheard words
-      for (let offset = 0; offset <= 5 && idx + offset < this.normalizedScriptWords.length; offset++) {
-        if (this.match(token, this.normalizedScriptWords[idx + offset])) {
-          idx += offset + 1;
-          break;
-        }
-      }
-    }
-
-    // liveWordIndex only ever moves FORWARD
-    this.liveWordIndex = Math.max(this.liveWordIndex, Math.min(idx, this.scriptWords.length));
-  }
-
-  // ─── Confirmed word lock (final-driven) ──────────────────────────────────
-
-  private lockConfirmed(finalText: string) {
-    const tokens = this.tokenizeSpoken(finalText);
-    let idx = this.confirmedWordIndex;
-
-    for (const token of tokens) {
-      if (idx >= this.normalizedScriptWords.length) break;
-      for (let offset = 0; offset <= 5 && idx + offset < this.normalizedScriptWords.length; offset++) {
-        if (this.match(token, this.normalizedScriptWords[idx + offset])) {
-          idx += offset + 1;
-          this.wordTimestamps.push(Date.now());
-          break;
-        }
-      }
-    }
-
-    this.confirmedWordIndex = Math.min(idx, this.scriptWords.length);
-    // liveWordIndex must always be at least confirmedWordIndex
-    this.liveWordIndex = Math.max(this.liveWordIndex, this.confirmedWordIndex);
-
-    if (this.confirmedWordIndex >= this.scriptWords.length) {
-      this.finishSession();
+  private stopLiveWpm() {
+    if (this.recognition) {
+      this.recognition.onend = null;   // prevent auto-restart
+      try { this.recognition.abort(); } catch { /* ignore */ }
+      this.recognition = null;
     }
   }
 
-  // ─── Filler word detection ────────────────────────────────────────────────
+  async finishSession() {
+    this.stopSession(true);
+    this.step = 'analyzing';
 
-  private detectFillerWords(transcript: string) {
-    const lower = transcript.toLowerCase();
-    for (const filler of FILLER_WORDS) {
-      // Skip fillers that appear in the script — the user is reading them, not hesitating
-      if (this.scriptFillerWords.has(filler)) continue;
+    try {
+      const blob = await this.audioRecorder.getWavBlob();
+      if (!blob || !this.selectedScript) throw new Error('No audio recorded');
 
-      const rx = new RegExp(`(?<![\\w])${filler.replace(/\s+/g, '\\s+')}(?![\\w])`, 'gi');
-      const hits = lower.match(rx);
-      if (hits) {
-        this.fillerWordCount += hits.length;
-        this.detectedFillerWords.push(...hits.map(h => h.toLowerCase()));
-      }
+      this.results = await this.analysisApi.analyzePracticeSession(
+        blob,
+        this.selectedScript.rawText,
+        this.selectedScript.category,
+        this.selectedScript.targetDimensions
+      );
+      this.step = 'results';
+    } catch (e: any) {
+      this.analysisError = e?.message ?? 'Analysis failed. Please try again.';
+      this.step = 'results';
     }
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  /** Strip punctuation & lowercase for comparison */
-  private norm(word: string): string {
-    return word.toLowerCase().replace(/[^a-z']/g, '');
+  tryAgain() {
+    this.results        = null;
+    this.analysisError  = null;
+    this.sessionStarted = false;
+    this.step           = 'session';
   }
 
-  private tokenizeSpoken(text: string): string[] {
-    return text.split(/\s+/).map(w => this.norm(w)).filter(Boolean);
+  chooseDifferent() {
+    this.results       = null;
+    this.analysisError = null;
+    this.step          = 'script';
   }
 
-  /** Fuzzy match – handles contractions spoken without apostrophe */
-  private match(spoken: string, script: string): boolean {
-    if (!spoken || !script) return false;
-    if (spoken === script) return true;
-    // First two chars quick check (saves running the full map every time)
-    if (spoken[0] !== script[0]) {
-      // contraction mismatch allowed: "dont" vs "don't"
-      const stripped = script.replace(/'/g, '');
-      if (spoken !== stripped) return false;
-    }
-    const c: Record<string, string> = {
-      dont:"don't", cant:"can't", wont:"won't", its:"it's", youre:"you're",
-      theyre:"they're", were:"we're", ive:"i've", youve:"you've",
-      theyve:"they've", weve:"we've", hes:"he's", shes:"she's",
-      thats:"that's", whats:"what's", lets:"let's", isnt:"isn't",
-      arent:"aren't", wasnt:"wasn't", werent:"weren't", im:"i'm",
-      id:"i'd", ill:"i'll", theyd:"they'd", wed:"we'd", youd:"you'd"
-    };
-    return c[spoken] === script || c[script.replace(/'/g, '')] === spoken;
-  }
-
-  /** Scroll so the live word is always visible – uses instant to avoid lag */
-  private scrollToLive() {
-    const el = document.getElementById(`word-${this.liveWordIndex}`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  private stopSession(saveAudio: boolean) {
+    this.clearTimer();
+    this.stopLiveWpm();
+    this.isRecording = false;
+    if (saveAudio) {
+      this.audioRecorder.stopRecording();
+    } else {
+      this.audioRecorder.reset();
     }
   }
 
-  // ─── Timer & WPM ──────────────────────────────────────────────────────────
+  // ─── Timer ────────────────────────────────────────────────────────────────
 
   private startTimer() {
+    this.clearTimer();
     this.timerInterval = setInterval(() => {
-      this.ngZone.run(() => { if (!this.isPaused) this.sessionDuration++; });
+      this.ngZone.run(() => { this.sessionDuration++; });
     }, 1000);
   }
 
-  private startWpmCalculator() {
-    this.wpmInterval = setInterval(() => {
-      this.ngZone.run(() => this.calculateWpm());
-    }, 1000);
-  }
-
-  private calculateWpm() {
-    const now       = Date.now();
-    const windowMs  = 30_000;
-    this.wordTimestamps = this.wordTimestamps.filter(t => now - t < windowMs);
-    const elapsed   = (now - this.sessionStartTime - this.totalPausedTime) / 1000;
-    const windowSec = Math.min(elapsed, 30);
-    this.currentWpm = windowSec > 2 && this.wordTimestamps.length > 0
-      ? Math.round((this.wordTimestamps.length / windowSec) * 60)
-      : 0;
-  }
-
-  // ─── Finish ───────────────────────────────────────────────────────────────
-
-  private finishSession() {
-    this.stopRecognition();
-    this.clearIntervals();
-    const avgWpm        = this.confirmedWordIndex > 0 && this.sessionDuration > 0
-      ? Math.round((this.confirmedWordIndex / this.sessionDuration) * 60) : 0;
-    const completionRate = Math.round((this.confirmedWordIndex / this.scriptWords.length) * 100);
-    const paceScore      = this.calcPaceScore(avgWpm);
-    const fillerScore    = this.calcFillerScore(this.fillerWordCount, this.confirmedWordIndex);
-    const deliveryScore  = Math.round(0.50 * paceScore + 0.30 * fillerScore + 0.20 * completionRate);
-
-    this.results = {
-      duration:            this.sessionDuration,
-      wordsCompleted:      this.confirmedWordIndex,
-      totalWords:          this.scriptWords.length,
-      averageWpm:          avgWpm,
-      fillerWordCount:     this.fillerWordCount,
-      detectedFillerWords: [...new Set(this.detectedFillerWords)],
-      completionRate,
-      paceRating:          this.resolvePaceRating(avgWpm),
-      deliveryScore,
-      deliveryGrade:       this.resolveGrade(deliveryScore),
-      paceScore:           Math.round(paceScore),
-      fillerScore:         Math.round(fillerScore),
-    };
-    this.step = 'results';
-  }
-
-  /**
-   * Pace score (0–100).
-   * Ideal range 120–150 WPM scores 100. Each WPM outside a ±15-WPM deadband
-   * around 135 loses 1.5 points. Floor at 20.
-   */
-  private calcPaceScore(wpm: number): number {
-    if (wpm === 0) return 0;
-    const diff = Math.max(0, Math.abs(wpm - 135) - 15);
-    return Math.max(20, 100 - diff * 1.5);
-  }
-
-  /**
-   * Filler score (0–100).
-   * 0 fillers = 100. Every 1% filler-rate (fillers/words spoken) costs 10 points. Floor 0.
-   */
-  private calcFillerScore(fillerCount: number, wordCount: number): number {
-    if (wordCount === 0) return 100;
-    const rate = (fillerCount / wordCount) * 100;
-    return Math.max(0, 100 - rate * 10);
-  }
-
-  private resolveGrade(score: number): string {
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
-  }
-
-  private resolvePaceRating(wpm: number): string {
-    if (wpm < 90)   return 'Too Slow';
-    if (wpm < 110)  return 'Slightly Slow';
-    if (wpm <= 150) return 'Excellent';
-    if (wpm <= 175) return 'Slightly Fast';
-    return 'Too Fast';
-  }
-
-  private stopRecognition() {
-    if (this.recognition) {
-      this.recognition.onend    = null;
-      this.recognition.onerror  = null;
-      this.recognition.onresult = null;
-      try { this.recognition.stop(); } catch (_) {}
-      this.recognition = null;
-      this.isListening = false;
-    }
-  }
-
-  private clearIntervals() {
+  private clearTimer() {
     if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
-    if (this.wpmInterval)   { clearInterval(this.wpmInterval);   this.wpmInterval   = null; }
   }
 
   ngOnDestroy() {
-    this.stopRecognition();
-    this.clearIntervals();
+    this.clearTimer();
+    this.stopLiveWpm();
+    this.audioRecorder.reset();
   }
 }

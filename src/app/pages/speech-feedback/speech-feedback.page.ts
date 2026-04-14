@@ -8,7 +8,7 @@ import { AnalyzeSpeechForFeedbackOutput } from '../speech-analysis/model';
   selector: 'app-speech-feedback',
   templateUrl: './speech-feedback.page.html',
   styleUrls: ['./speech-feedback.page.scss'],
-  standalone:false
+  standalone: false
 })
 export class SpeechFeedbackPage implements OnInit {
   feedback!: AnalyzeSpeechForFeedbackOutput;
@@ -17,10 +17,8 @@ export class SpeechFeedbackPage implements OnInit {
 
   constructor(public router: Router, private sanitizer: DomSanitizer) {
     const nav = this.router.getCurrentNavigation();
-    // cast state to known shape
     const state = (nav?.extras?.state as { feedback?: AnalyzeSpeechForFeedbackOutput }) || {};
     if (!state.feedback) {
-      // if no feedback in state, go back
       this.router.navigateByUrl('/speech-analysis');
       return;
     }
@@ -35,6 +33,63 @@ export class SpeechFeedbackPage implements OnInit {
     this.router.navigateByUrl('/tabs/speech-analysis');
   }
 
+  // ── Grade helpers ─────────────────────────────────────────────────────────
+  getGradeLetter(): string {
+    const v = this.feedback.overall || 0;
+    if (v >= 4.5) return 'A';
+    if (v >= 3.5) return 'B';
+    if (v >= 2.5) return 'C';
+    if (v >= 1.5) return 'D';
+    return 'F';
+  }
+
+  getGradeLabel(): string {
+    const v = this.feedback.overall || 0;
+    if (v >= 4.5) return 'Excellent';
+    if (v >= 3.5) return 'Good';
+    if (v >= 2.5) return 'Fair';
+    if (v >= 1.5) return 'Needs Work';
+    return 'Poor';
+  }
+
+  getGradeColor(): string {
+    const v = this.feedback.overall || 0;
+    if (v >= 4.5) return '#4caf50';
+    if (v >= 3.5) return '#8bc34a';
+    if (v >= 2.5) return '#22a7f0';
+    if (v >= 1.5) return '#ff9800';
+    return '#f44336';
+  }
+
+  // ── Score breakdown ───────────────────────────────────────────────────────
+  getScoreItems(): Array<{ label: string; value: number; feedback: string; icon: string }> {
+    const f = this.feedback;
+    return [
+      { label: 'Speech Pace',       value: f.speech_pace || 0,                                    feedback: f.pace_feedback     || '', icon: 'speedometer-outline' },
+      { label: 'Pausing & Fluency', value: f.pausing_fluency || 0,                                feedback: f.pausing_feedback  || '', icon: 'pause-circle-outline' },
+      { label: 'Volume Control',    value: f.loudness_control || (f.loud_control as any) || 0,    feedback: f.volume_feedback   || '', icon: 'volume-high-outline' },
+      { label: 'Pitch Variation',   value: f.pitch_variation || 0,                                feedback: f.pitch_feedback    || '', icon: 'musical-notes-outline' },
+      { label: 'Articulation',      value: f.articulation_clarity || 0,                           feedback: f.clarity_feedback  || '', icon: 'mic-outline' },
+      { label: 'Expressiveness',    value: f.expressive_emphasis || f.expressive_emph || 0,       feedback: f.tone_feedback     || '', icon: 'color-palette-outline' },
+      { label: 'Filler Words',      value: f.filler_words || f.filler_words_score || 0,           feedback: f.filler_feedback   || '', icon: 'chatbubble-ellipses-outline' },
+    ];
+  }
+
+  getScoreBarColor(value: number): string {
+    if (value >= 4) return 'success';
+    if (value >= 3) return 'primary';
+    if (value >= 2) return 'warning';
+    return 'danger';
+  }
+
+  getScoreClass(score: number | undefined): string {
+    if (!score) return 'score-avg';
+    if (score >= 4) return 'score-good';
+    if (score >= 3) return 'score-avg';
+    return 'score-poor';
+  }
+
+  // ── Filler words ──────────────────────────────────────────────────────────
   getFillerDetails(): any {
     return this.feedback.filler_word_details ?? null;
   }
@@ -42,7 +97,6 @@ export class SpeechFeedbackPage implements OnInit {
   private buildFillerSummary(): { word: string; count: number }[] {
     const fillers = this.feedback.filler_word_details?.fillers;
     if (!fillers?.length) return [];
-
     const counts = new Map<string, number>();
     for (const f of fillers) {
       counts.set(f.word, (counts.get(f.word) || 0) + 1);
@@ -52,35 +106,12 @@ export class SpeechFeedbackPage implements OnInit {
       .sort((a, b) => b.count - a.count);
   }
 
-  getImprovementItems(): { category: string; suggestion: string }[] {
-    const text = this.feedback.areas_improvement;
-    if (!text) return [];
-
-    // Split on double newlines (from recommendations format: "Category: Suggestion")
-    const lines = text.split('\n\n').filter(line => line.trim());
-    if (lines.length > 1) {
-      return lines.map(line => {
-        const colonIdx = line.indexOf(':');
-        if (colonIdx > 0) {
-          return {
-            category: line.substring(0, colonIdx).trim(),
-            suggestion: line.substring(colonIdx + 1).trim()
-          };
-        }
-        return { category: '', suggestion: line.trim() };
-      });
-    }
-
-    // Fallback: single line, return as-is
-    return [{ category: '', suggestion: text }];
-  }
-
+  // ── Transcript ────────────────────────────────────────────────────────────
   private buildHighlightedTranscript(): SafeHtml {
     const words = this.feedback.transcript_words;
     if (words?.length) {
       return this.sanitizer.bypassSecurityTrustHtml(this.buildAnnotatedTranscript(words));
     }
-    // Fallback: plain text with filler highlights only
     const transcript = this.feedback.transcript;
     if (!transcript) return '';
     return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(transcript));
@@ -88,26 +119,20 @@ export class SpeechFeedbackPage implements OnInit {
 
   private buildAnnotatedTranscript(words: { word: string; start: number; end: number }[]): string {
     const FILLERS = new Set([
-      'um', 'uh', 'umm', 'uhh',
-      'mm', 'mmm', 'hmm', 'hm', 'mhm',
-      'like', 'you know', 'you know what i mean',
-      'basically', 'literally', 'actually',
-      'so', 'right', 'okay', 'ok',
-      'i mean', 'kind of', 'sort of'
+      'um', 'uh', 'umm', 'uhh', 'mm', 'mmm', 'hmm', 'hm', 'mhm',
+      'like', 'you know', 'basically', 'literally', 'actually',
+      'so', 'right', 'okay', 'ok', 'i mean', 'kind of', 'sort of'
     ]);
     const parts: string[] = [];
-
     for (let i = 0; i < words.length; i++) {
       const w = words[i];
       const normalized = w.word.toLowerCase().replace(/[^a-z ]/g, '');
       const escaped = this.escapeHtml(w.word);
-
       if (FILLERS.has(normalized)) {
         parts.push(`<mark class="filler-highlight">${escaped}</mark>`);
       } else {
         parts.push(escaped);
       }
-
       if (i < words.length - 1) {
         const gap = words[i + 1].start - w.end;
         if (gap >= 0.5) {
@@ -123,49 +148,16 @@ export class SpeechFeedbackPage implements OnInit {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  formatTimestamp(timestamp: number | string | undefined | null): string {
-    if (timestamp === undefined || timestamp === null) {
-      return '0.0';
-    }
-
-    // Convert to number if it's a string
-    const numValue = typeof timestamp === 'string' ? parseFloat(timestamp) : timestamp;
-
-    if (isNaN(numValue)) {
-      return '0.0';
-    }
-
-    return numValue.toFixed(1);
-  }
-
-  getDetailedScores(): Array<{key: string, value: any}> {
-    if (!this.feedback.feedback?.detailed_scores) {
-      return [];
-    }
-    const detailedScores = this.feedback.feedback.detailed_scores;
-    return Object.keys(detailedScores).map(key => ({
-      key,
-      value: detailedScores[key]
-    }));
-  }
-
   formatSecondsToTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  getScoreClass(score: number | undefined): string {
-    if (!score) return 'score-avg';
-    if (score >= 4) return 'score-good';
-    if (score >= 3) return 'score-avg';
-    return 'score-poor';
-  }
-
-  formatMetricName(key: string): string {
-    // Convert snake_case to Title Case
-    return key.split('_').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+  formatTimestamp(timestamp: number | string | undefined | null): string {
+    if (timestamp === undefined || timestamp === null) return '0.0';
+    const numValue = typeof timestamp === 'string' ? parseFloat(timestamp) : timestamp;
+    if (isNaN(numValue)) return '0.0';
+    return numValue.toFixed(1);
   }
 }

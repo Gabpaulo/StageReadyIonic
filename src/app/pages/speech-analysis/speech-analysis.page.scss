@@ -210,6 +210,51 @@
     }
   }
 
+  /* recording timer */
+  .recording-timer {
+    margin: 0 auto 10px;
+    text-align: center;
+
+    .timer-value {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--danger);
+      letter-spacing: 2px;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
+    }
+  }
+
+  /* quick tips row */
+  .tips-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .tip-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 70px;
+
+    ion-icon {
+      font-size: 1.3rem;
+      color: var(--primary);
+      filter: drop-shadow(0 0 8px var(--primary-glow));
+    }
+
+    span {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-align: center;
+    }
+  }
+
   /* status text */
   .status-text {
     font-size: 0.92rem;

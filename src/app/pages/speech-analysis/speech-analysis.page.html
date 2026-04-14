@@ -50,6 +50,11 @@
         </button>
       </div>
 
+      <!-- Timer during recording -->
+      <div class="recording-timer" *ngIf="isRecording">
+        <span class="timer-value">{{ formatRecordingTime(recordingDuration) }}</span>
+      </div>
+
       <!-- Visualizer -->
       <div class="visualizer" *ngIf="isRecording">
         <div class="vis-bar"
@@ -59,14 +64,32 @@
       </div>
 
       <p class="status-text recording" *ngIf="isRecording">
-        <span class="rec-dot"></span> Recording…
+        <span class="rec-dot"></span> Recording — tap to stop
       </p>
-      <p class="status-text" *ngIf="!isRecording && hasConfirmedSpeechType">
-        Tap the mic to start
-      </p>
-      <p class="status-text muted" *ngIf="!isRecording && !hasConfirmedSpeechType">
-        Select a speech type above to begin
-      </p>
+
+      <!-- Idle tips -->
+      <ng-container *ngIf="!isRecording">
+        <p class="status-text" *ngIf="hasConfirmedSpeechType">
+          Tap the mic to start recording
+        </p>
+        <p class="status-text muted" *ngIf="!hasConfirmedSpeechType">
+          Select a speech type above to begin
+        </p>
+        <div class="tips-row" *ngIf="hasConfirmedSpeechType">
+          <div class="tip-item">
+            <ion-icon name="volume-high-outline"></ion-icon>
+            <span>Speak clearly</span>
+          </div>
+          <div class="tip-item">
+            <ion-icon name="speedometer-outline"></ion-icon>
+            <span>120–150 WPM ideal</span>
+          </div>
+          <div class="tip-item">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>30–120 sec</span>
+          </div>
+        </div>
+      </ng-container>
     </div>
 
     <!-- ── PROCESSING ── -->

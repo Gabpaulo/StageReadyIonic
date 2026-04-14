@@ -3,6 +3,8 @@ export interface AnalyzeSpeechForFeedbackOutput {
     transcript?: string;
     category?: string;
     duration?: number;
+    wordCount?: number;
+    averagePace?: number; // WPM
 
     // Scores (1-5 scale)
     speech_pace: number;
@@ -30,11 +32,11 @@ export interface AnalyzeSpeechForFeedbackOutput {
     // Pause detection from Whisper word-level timestamps
     pause_details?: {
       pauses: Array<{
-        timestamp: number;   // when the pause starts (seconds)
-        duration: number;    // length of pause (seconds)
+        timestamp: number;
+        duration: number;
         type: 'short' | 'medium' | 'long';
-        before: string;      // last word spoken before the pause
-        after: string;       // first word spoken after the pause
+        before: string;
+        after: string;
       }>;
       total_count: number;
       average_duration: number;
@@ -44,14 +46,21 @@ export interface AnalyzeSpeechForFeedbackOutput {
       long_count: number;    // 2.0s+
     };
 
-    // Nested feedback object
+    // Pause analysis adapter (used by feedback page)
+    pause_analysis?: {
+      count: number;
+      average_duration: number;
+      longest_pause: number;
+      total_pause_time: number;
+      pauses: Array<{ start: number; end: number; duration: number }>;
+      wpm_segments: Array<{ start: number; end: number; wpm: number; label: string }>;
+    };
+
+    // Nested feedback object (legacy)
     feedback?: {
       overall_assessment?: string;
       detailed_scores?: {
-        [key: string]: {
-          score: number;
-          description: string;
-        };
+        [key: string]: { score: number; description: string; };
       };
     };
 
@@ -62,11 +71,22 @@ export interface AnalyzeSpeechForFeedbackOutput {
       suggestion: string;
     }>;
 
-    // Summary feedback strings
+    // Per-dimension feedback strings from LLM
     pace_feedback?: string;
-    tone_feedback?: string;
+    volume_feedback?: string;
+    pitch_feedback?: string;
     clarity_feedback?: string;
-    strengths?: string;
+    pausing_feedback?: string;
+    filler_feedback?: string;
+    tone_feedback?: string;
+
+    // Coach report arrays
+    overall_assessment?: string;
+    strengths?: string[];
+    improvements?: string[];
+    closing_message?: string;
+
+    // Legacy
     areas_improvement?: string;
 
     analysis?: any;

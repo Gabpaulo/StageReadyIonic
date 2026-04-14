@@ -504,6 +504,205 @@
   }
 }
 
+/* ── Weekly Focus card ── */
+.wf-card {
+  padding: 14px 16px;
+}
+
+.wf-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.wf-top-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.wf-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.wf-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0 0 6px;
+
+  strong { color: var(--text); }
+}
+
+.wf-dim-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.wf-dim-chip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ff9800;
+  background: rgba(255,152,0,0.1);
+  border: 1px solid rgba(255,152,0,0.3);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.wf-ai-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea, #9c27b0);
+  border-radius: 20px;
+  padding: 2px 7px;
+  letter-spacing: 0.3px;
+}
+
+.wf-practice-link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 2px;
+
+  &:hover { text-decoration: underline; }
+}
+
+.wf-scripts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wf-script-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: #1a2734;
+  border: 1px solid #2b3b4c;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--primary);
+    background: #1e2f42;
+  }
+}
+
+.wf-script-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.wf-script-title {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wf-script-reason {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wf-difficulty {
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+
+  &[data-level="beginner"]     { color: #4caf50; background: rgba(76,175,80,0.12);  border: 1px solid rgba(76,175,80,0.3); }
+  &[data-level="intermediate"] { color: #ff9800; background: rgba(255,152,0,0.12); border: 1px solid rgba(255,152,0,0.3); }
+  &[data-level="advanced"]     { color: #f44336; background: rgba(244,67,54,0.12); border: 1px solid rgba(244,67,54,0.3); }
+}
+
+.wf-arr {
+  font-size: 1.1rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.wf-plan-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+
+  mat-spinner { opacity: 0.7; }
+}
+
+/* ── Skill Averages card ── */
+.metrics-card {
+  padding: 14px 16px;
+}
+
+.metrics-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.metric-row {}
+
+.metric-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.metric-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.metric-score {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.metric-bar-track {
+  height: 5px;
+  background: #1a2734;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .main-grid {

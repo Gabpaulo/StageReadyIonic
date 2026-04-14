@@ -16,13 +16,13 @@
     </ion-toolbar>
   </ion-header>
 
-  <!-- Loading State -->
+  <!-- Loading -->
   <div *ngIf="loading" class="loading-container">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>Loading speech history...</p>
+    <p>Loading speech history…</p>
   </div>
 
-  <!-- Error State -->
+  <!-- Error -->
   <div *ngIf="error && !loading" class="error-state">
     <ion-icon name="alert-circle-outline"></ion-icon>
     <h3>Error</h3>
@@ -34,6 +34,7 @@
   </div>
 
   <ng-container *ngIf="!loading && !error">
+
     <!-- Summary Stats -->
     <div *ngIf="summary" class="stats-container">
       <h2 class="section-title">
@@ -81,12 +82,19 @@
       <div class="sessions-list">
         <div *ngFor="let entry of speechHistory" class="session-item" (click)="openSession(entry)">
           <div class="session-header">
-            <ion-icon name="mic-circle" class="session-icon"></ion-icon>
+            <!-- Grade badge -->
+            <div class="session-grade" [style.background]="getGradeColor(entry.feedback?.overall)">
+              {{ getGradeLetter(entry.feedback?.overall) }}
+            </div>
             <div class="session-info">
-              <div class="session-date">{{ formatDate(entry.createdAt) }}</div>
+              <div class="session-top-row">
+                <span class="session-date">{{ formatDate(entry.createdAt) }}</span>
+                <span class="type-chip" *ngIf="entry.speechType">{{ entry.speechType | titlecase }}</span>
+              </div>
               <div class="session-meta">
-                <span *ngIf="entry.wordCount">{{ entry.wordCount }} words</span>
-                <span *ngIf="entry.duration"> • {{ formatDuration(entry.duration) }}</span>
+                <span *ngIf="entry.feedback?.overall" class="score-inline">{{ entry.feedback?.overall | number:'1.1-1' }}/5</span>
+                <span *ngIf="entry.averagePace"> · {{ formatInteger(entry.averagePace) }} WPM</span>
+                <span *ngIf="entry.duration"> · {{ formatDuration(entry.duration) }}</span>
               </div>
             </div>
             <ion-icon name="chevron-forward-outline" class="session-arrow"></ion-icon>
@@ -105,15 +113,16 @@
         Start Practicing
       </ion-button>
     </div>
+
   </ng-container>
 </ion-content>
 
-<!-- Session Details Modal -->
+<!-- ════════════════ Session Details Modal ════════════════ -->
 <ion-modal
   [isOpen]="isModalOpen"
   (didDismiss)="closeModal()"
-  [initialBreakpoint]="0.75"
-  [breakpoints]="[0, 0.5, 0.75, 1]"
+  [initialBreakpoint]="0.92"
+  [breakpoints]="[0, 0.5, 0.92, 1]"
   [backdropDismiss]="true"
   [backdropBreakpoint]="0.5">
   <ng-template>
@@ -127,69 +136,55 @@
     </ion-header>
 
     <ion-content *ngIf="selectedEntry">
+
+      <!-- Loading -->
       <div *ngIf="modalLoading" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
-        <p>Loading session...</p>
+        <p>Loading session…</p>
       </div>
 
+      <!-- Error -->
       <div *ngIf="modalError && !modalLoading" class="error-state">
         <ion-text color="danger">{{ modalError }}</ion-text>
       </div>
 
       <div *ngIf="!modalLoading && !modalError" class="modal-content">
-        <!-- Session Info Card -->
-        <ion-card class="session-details-card">
-          <ion-card-header>
-            <ion-card-title>
-              <ion-icon name="information-circle-outline"></ion-icon>
-              Session Info
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="detail-item">
-              <ion-icon name="calendar-outline"></ion-icon>
-              <span class="detail-label">Date:</span>
-              <span class="detail-value">{{ formatDate(selectedEntry.createdAt) }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedEntry.duration">
-              <ion-icon name="time-outline"></ion-icon>
-              <span class="detail-label">Duration:</span>
-              <span class="detail-value">{{ formatDuration(selectedEntry.duration) }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedEntry.wordCount">
-              <ion-icon name="chatbox-ellipses-outline"></ion-icon>
-              <span class="detail-label">Words:</span>
-              <span class="detail-value">{{ selectedEntry.wordCount }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedEntry.averagePace">
-              <ion-icon name="speedometer-outline"></ion-icon>
-              <span class="detail-label">Pace:</span>
-              <span class="detail-value">{{ formatInteger(selectedEntry.averagePace) }} WPM</span>
-            </div>
-          </ion-card-content>
-        </ion-card>
 
-        <!-- Audio Playback Card -->
-        <ion-card *ngIf="(selectedEntry.audioUrl || selectedEntry.audioData)">
-          <ion-card-header>
-            <ion-card-title>
-              <ion-icon name="play-circle-outline"></ion-icon>
-              Playback
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <audio *ngIf="selectedEntry.audioUrl"
-                   [src]="selectedEntry.audioUrl"
-                   controls
-                   class="audio-player"></audio>
-            <audio *ngIf="!selectedEntry.audioUrl && selectedEntry.audioData"
-                   [src]="'data:' + (selectedEntry.audioMimeType || 'audio/webm') + ';base64,' + selectedEntry.audioData"
-                   controls
-                   class="audio-player"></audio>
-          </ion-card-content>
-        </ion-card>
+        <!-- ── Overall Grade Card ── -->
+        <div class="grade-card">
+          <div class="grade-ring" [style.borderColor]="getGradeColor(selectedEntry.feedback?.overall)">
+            <span class="grade-letter" [style.color]="getGradeColor(selectedEntry.feedback?.overall)">
+              {{ getGradeLetter(selectedEntry.feedback?.overall) }}
+            </span>
+            <span class="grade-score">{{ (selectedEntry.feedback?.overall ?? 0) | number:'1.1-1' }}/5</span>
+          </div>
+          <div class="grade-meta">
+            <div class="grade-type-row">
+              <span class="grade-type-chip" *ngIf="selectedEntry.speechType">
+                {{ selectedEntry.speechType | titlecase }}
+              </span>
+              <span class="grade-label-text" [style.color]="getGradeColor(selectedEntry.feedback?.overall)">
+                {{ getGradeLabel(selectedEntry.feedback?.overall) }}
+              </span>
+            </div>
+            <div class="grade-stats">
+              <span *ngIf="selectedEntry.duration">
+                <ion-icon name="time-outline"></ion-icon>
+                {{ formatDuration(selectedEntry.duration) }}
+              </span>
+              <span *ngIf="selectedEntry.averagePace">
+                <ion-icon name="speedometer-outline"></ion-icon>
+                {{ formatInteger(selectedEntry.averagePace) }} WPM
+              </span>
+              <span *ngIf="selectedEntry.wordCount">
+                <ion-icon name="chatbox-ellipses-outline"></ion-icon>
+                {{ selectedEntry.wordCount }} words
+              </span>
+            </div>
+          </div>
+        </div>
 
-        <!-- Transcript Card -->
+        <!-- ── Transcript ── -->
         <ion-card>
           <ion-card-header>
             <ion-card-title>
@@ -202,56 +197,163 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- Feedback Card -->
+        <!-- ── Audio Playback ── -->
+        <ion-card *ngIf="selectedEntry.audioUrl || selectedEntry.audioData">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="play-circle-outline"></ion-icon>
+              Playback
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <audio *ngIf="selectedEntry.audioUrl"
+                   [src]="selectedEntry.audioUrl"
+                   controls class="audio-player"></audio>
+            <audio *ngIf="!selectedEntry.audioUrl && selectedEntry.audioData"
+                   [src]="'data:' + (selectedEntry.audioMimeType || 'audio/webm') + ';base64,' + selectedEntry.audioData"
+                   controls class="audio-player"></audio>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- ── Score Breakdown ── -->
         <ion-card *ngIf="selectedEntry.feedback">
           <ion-card-header>
             <ion-card-title>
               <ion-icon name="analytics-outline"></ion-icon>
-              Feedback
+              Score Breakdown
             </ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <div class="feedback-item">
-              <div class="feedback-label">
-                <ion-icon name="mic-outline"></ion-icon>
-                Clarity
+            <div class="score-item" *ngFor="let item of getScoreItems(selectedEntry)">
+              <div class="score-row">
+                <div class="score-name-row">
+                  <ion-icon [name]="item.icon" class="score-icon"></ion-icon>
+                  <span class="score-name">{{ item.label }}</span>
+                </div>
+                <span class="score-val" [style.color]="getGradeColor(item.value)">{{ item.value | number:'1.1-1' }}/5</span>
               </div>
-              <div class="feedback-bar-container">
-                <ion-progress-bar
-                  [value]="getFeedbackProgressWidth(selectedEntry.feedback?.articulation_clarity || 0) / 100"
-                  [color]="getFeedbackRatingColor(selectedEntry.feedback?.articulation_clarity || 0)">
-                </ion-progress-bar>
-                <span class="feedback-value">{{ selectedEntry.feedback?.articulation_clarity || 'N/A' }}</span>
-              </div>
-            </div>
-            <div class="feedback-item">
-              <div class="feedback-label">
-                <ion-icon name="speedometer-outline"></ion-icon>
-                Pace
-              </div>
-              <div class="feedback-bar-container">
-                <ion-progress-bar
-                  [value]="getFeedbackProgressWidth(selectedEntry.feedback?.speech_pace || 0) / 100"
-                  [color]="getFeedbackRatingColor(selectedEntry.feedback?.speech_pace || 0)">
-                </ion-progress-bar>
-                <span class="feedback-value">{{ selectedEntry.feedback?.speech_pace || 'N/A' }}</span>
-              </div>
-            </div>
-            <div class="feedback-item">
-              <div class="feedback-label">
-                <ion-icon name="musical-notes-outline"></ion-icon>
-                Tone
-              </div>
-              <div class="feedback-bar-container">
-                <ion-progress-bar
-                  [value]="getFeedbackProgressWidth(selectedEntry.feedback?.pitch_variation || 0) / 100"
-                  [color]="getFeedbackRatingColor(selectedEntry.feedback?.pitch_variation || 0)">
-                </ion-progress-bar>
-                <span class="feedback-value">{{ selectedEntry.feedback?.pitch_variation || 'N/A' }}</span>
-              </div>
+              <ion-progress-bar
+                [value]="item.value / 5"
+                [color]="getScoreColor(item.value)"
+                class="score-bar">
+              </ion-progress-bar>
+              <p class="score-feedback-text" *ngIf="item.feedback">{{ item.feedback }}</p>
             </div>
           </ion-card-content>
         </ion-card>
+
+        <!-- ── Coach Report ── -->
+        <ion-card *ngIf="selectedEntry.feedback?.overall_assessment || (selectedEntry.feedback?.strengths?.length ?? 0) > 0">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="school-outline"></ion-icon>
+              Coach Report
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <!-- Overall Assessment -->
+            <p class="assessment-text" *ngIf="selectedEntry.feedback?.overall_assessment">
+              {{ selectedEntry.feedback?.overall_assessment }}
+            </p>
+
+            <!-- Strengths -->
+            <div class="report-section" *ngIf="(selectedEntry.feedback?.strengths?.length ?? 0) > 0">
+              <div class="report-section-title strengths-title">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                Strengths
+              </div>
+              <ul class="report-list">
+                <li *ngFor="let s of selectedEntry.feedback?.strengths">{{ s }}</li>
+              </ul>
+            </div>
+
+            <!-- Improvements -->
+            <div class="report-section" *ngIf="(selectedEntry.feedback?.improvements?.length ?? 0) > 0">
+              <div class="report-section-title improvements-title">
+                <ion-icon name="arrow-up-circle-outline"></ion-icon>
+                Areas to Improve
+              </div>
+              <ul class="report-list improvements-list">
+                <li *ngFor="let im of selectedEntry.feedback?.improvements">{{ im }}</li>
+              </ul>
+            </div>
+
+            <!-- Closing Message -->
+            <div class="closing-message" *ngIf="selectedEntry.feedback?.closing_message">
+              <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+              <p>{{ selectedEntry.feedback?.closing_message }}</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- ── Filler Word Details ── -->
+        <ion-card *ngIf="selectedEntry.feedback?.filler_word_details?.count">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+              Filler Words
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="filler-summary">
+              <span class="filler-stat">
+                <strong>{{ selectedEntry.feedback?.filler_word_details?.count }}</strong> occurrences
+              </span>
+              <span class="filler-stat" *ngIf="selectedEntry.wordCount">
+                (<strong>{{ ((selectedEntry.feedback?.filler_word_details?.count ?? 0) / selectedEntry.wordCount * 100) | number:'1.1-1' }}%</strong> of words)
+              </span>
+            </div>
+            <div class="filler-chips" *ngIf="selectedEntry.feedback?.filler_word_details?.fillers?.length">
+              <span class="filler-chip" *ngFor="let f of selectedEntry.feedback?.filler_word_details?.fillers?.slice(0, 15)">
+                "{{ f.word }}" <span class="filler-time">&#64; {{ f.start | number:'1.1-1' }}s</span>
+              </span>
+            </div>
+            <p class="history-tip">Replace filler words with a deliberate pause — silence projects confidence.</p>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- ── Pause Analysis ── -->
+        <ion-card *ngIf="(selectedEntry.feedback?.pause_details?.total_count ?? 0) > 0">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="pause-circle-outline"></ion-icon>
+              Pause Analysis
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="pause-stats-grid">
+              <div class="pause-stat-box">
+                <span class="pause-stat-value">{{ selectedEntry.feedback?.pause_details?.total_count }}</span>
+                <span class="pause-stat-label">Total Pauses</span>
+              </div>
+              <div class="pause-stat-box">
+                <span class="pause-stat-value">{{ selectedEntry.feedback?.pause_details?.average_duration | number:'1.1-1' }}s</span>
+                <span class="pause-stat-label">Avg Duration</span>
+              </div>
+              <div class="pause-stat-box">
+                <span class="pause-stat-value">{{ selectedEntry.feedback?.pause_details?.longest_duration | number:'1.1-1' }}s</span>
+                <span class="pause-stat-label">Longest</span>
+              </div>
+              <div class="pause-stat-box">
+                <span class="pause-stat-value">{{ selectedEntry.feedback?.pause_details?.long_count }}</span>
+                <span class="pause-stat-label">Long (&gt;2s)</span>
+              </div>
+            </div>
+            <div class="pause-type-row">
+              <span class="pause-type-chip short">
+                Short (&lt;1s): {{ selectedEntry.feedback?.pause_details?.short_count }}
+              </span>
+              <span class="pause-type-chip medium">
+                Medium (1–2s): {{ selectedEntry.feedback?.pause_details?.medium_count }}
+              </span>
+              <span class="pause-type-chip long">
+                Long (&gt;2s): {{ selectedEntry.feedback?.pause_details?.long_count }}
+              </span>
+            </div>
+            <p class="history-tip">Strategic pauses (0.5–2s) improve comprehension. Long pauses (&gt;2s) may seem hesitant.</p>
+          </ion-card-content>
+        </ion-card>
+
       </div>
     </ion-content>
   </ng-template>

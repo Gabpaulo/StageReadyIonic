@@ -472,3 +472,155 @@ ion-title {
 }
 
 .section-label { @extend %section-label; }
+
+/* ── Weekly AI Practice Focus Card ── */
+.weekly-focus-card {
+  margin: 0 1rem 1rem;
+  background: var(--surface);
+  border: 1px solid rgba(34,167,240,0.25);
+  border-left: 3px solid var(--primary);
+  border-radius: 16px;
+  padding: 1.1rem 1rem 0.75rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+
+.wf-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+
+  &-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    flex: 1;
+  }
+}
+
+.wf-icon   { font-size: 1.4rem; flex-shrink: 0; margin-top: 1px; }
+.wf-title  { font-size: 0.95rem; font-weight: 800; color: var(--text); margin: 0 0 2px; }
+.wf-sub    { font-size: 0.78rem; color: var(--muted); margin: 0; strong { color: var(--primary); } }
+
+.wf-ai-badge {
+  display: inline-block;
+  font-size: 0.65rem; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 4px; padding: 0 5px; margin-left: 4px; vertical-align: middle;
+}
+
+.wf-see-all {
+  font-size: 0.78rem; font-weight: 700; color: var(--primary);
+  text-decoration: none; white-space: nowrap; flex-shrink: 0;
+}
+
+.wf-dim-chips  { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.85rem; }
+.wf-dim-chip {
+  font-size: 0.72rem; font-weight: 700; color: #ff9800;
+  background: rgba(255,152,0,0.1); border: 1px solid rgba(255,152,0,0.35);
+  border-radius: 20px; padding: 2px 10px;
+}
+
+.wf-scripts { display: flex; flex-direction: column; border-top: 1px solid var(--border); }
+
+.wf-script-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+  text-decoration: none; cursor: pointer;
+  &:last-child { border-bottom: none; }
+  &:active { opacity: 0.7; }
+}
+
+.wf-script-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.wf-script-title  { font-size: 0.875rem; font-weight: 700; color: var(--text); }
+.wf-script-reason { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+
+.wf-difficulty {
+  font-size: 0.68rem; font-weight: 700; border-radius: 6px;
+  padding: 2px 8px; text-transform: capitalize; flex-shrink: 0;
+  &[data-level="beginner"]     { color: #4caf50; background: rgba(76,175,80,0.12);  border: 1px solid rgba(76,175,80,0.3); }
+  &[data-level="intermediate"] { color: #ff9800; background: rgba(255,152,0,0.12);  border: 1px solid rgba(255,152,0,0.3); }
+  &[data-level="advanced"]     { color: #f44336; background: rgba(244,67,54,0.12);  border: 1px solid rgba(244,67,54,0.3); }
+}
+
+.wf-arrow   { font-size: 1rem; color: var(--muted); flex-shrink: 0; }
+
+.wf-loading {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.75rem 1rem; margin: 0 1rem 1rem;
+  color: var(--muted); font-size: 0.85rem;
+  ion-spinner { color: var(--primary); --color: var(--primary); }
+}
+
+/* ── Average Skill Metrics card ─────────────────────────────────────────── */
+.metrics-card {
+  margin: 0 1rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+.metrics-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.metrics-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.metrics-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.metric-row {}
+
+.metric-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.metric-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.metric-score {
+  font-size: 0.82rem;
+  font-weight: 800;
+  min-width: 36px;
+  text-align: right;
+}
+
+.metric-bar-track {
+  height: 5px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+

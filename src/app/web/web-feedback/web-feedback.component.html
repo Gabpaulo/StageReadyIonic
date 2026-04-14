@@ -1,51 +1,22 @@
 <div class="feedback-container">
-  <div class="page-header">
-    <h1>Speech Feedback</h1>
-    <p>Here's your detailed speech analysis</p>
+
+  <!-- ── Grade Header ── -->
+  <div class="grade-header">
+    <div class="grade-ring" [style.borderColor]="getGradeColor()">
+      <span class="grade-letter" [style.color]="getGradeColor()">{{ getGradeLetter() }}</span>
+      <span class="grade-score">{{ feedback.overall | number:'1.1-1' }}/5</span>
+    </div>
+    <div class="grade-info">
+      <div class="grade-label" [style.color]="getGradeColor()">{{ getGradeLabel() }}</div>
+      <div class="grade-meta">
+        <span *ngIf="feedback.category" class="type-chip">{{ feedback.category | titlecase }}</span>
+        <span *ngIf="feedback.duration" class="meta-item">{{ feedback.duration | number:'1.0-0' }}s</span>
+        <span *ngIf="feedback.averagePace" class="meta-item">{{ feedback.averagePace | number:'1.0-0' }} WPM</span>
+      </div>
+    </div>
   </div>
 
-  <!-- Scores Overview -->
-  <mat-card class="feedback-card scores-card">
-    <mat-card-header><mat-card-title>Scores Overview</mat-card-title></mat-card-header>
-    <mat-card-content>
-      <div class="scores-grid">
-        <div class="score-item overall">
-          <div class="score-label">Overall</div>
-          <div class="score-number">{{ feedback.overall }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Pace</div>
-          <div class="score-number">{{ feedback.speech_pace }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Pausing</div>
-          <div class="score-number">{{ feedback.pausing_fluency }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Volume</div>
-          <div class="score-number">{{ feedback.loud_control }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Pitch</div>
-          <div class="score-number">{{ feedback.pitch_variation }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Clarity</div>
-          <div class="score-number">{{ feedback.articulation_clarity }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Expression</div>
-          <div class="score-number">{{ feedback.expressive_emph }}/5</div>
-        </div>
-        <div class="score-item">
-          <div class="score-label">Fillers</div>
-          <div class="score-number">{{ feedback.filler_words_score }}/5</div>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Transcript -->
+  <!-- ── Transcript ── -->
   <mat-card class="feedback-card transcript-card">
     <mat-card-header><mat-card-title>Transcription</mat-card-title></mat-card-header>
     <mat-card-content>
@@ -59,34 +30,87 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Pace / Tone / Clarity quick cards -->
-  <div class="analysis-grid">
-    <mat-card class="analysis-card">
-      <mat-card-content>
-        <h4>Pace</h4>
-        <div class="score-circle"><span>{{ feedback.speech_pace }}/5</span></div>
-        <p>{{ feedback.pace_feedback }}</p>
-      </mat-card-content>
-    </mat-card>
-    <mat-card class="analysis-card">
-      <mat-card-content>
-        <h4>Tone</h4>
-        <div class="score-circle"><span>{{ feedback.expressive_emph }}/5</span></div>
-        <p>{{ feedback.tone_feedback }}</p>
-      </mat-card-content>
-    </mat-card>
-    <mat-card class="analysis-card">
-      <mat-card-content>
-        <h4>Clarity</h4>
-        <div class="score-circle"><span>{{ feedback.articulation_clarity }}/5</span></div>
-        <p>{{ feedback.clarity_feedback }}</p>
-      </mat-card-content>
-    </mat-card>
-  </div>
+  <!-- ── Coach Assessment ── -->
+  <mat-card class="feedback-card assessment-card" *ngIf="feedback.overall_assessment">
+    <mat-card-header>
+      <mat-card-title>
+        <span class="card-title-icon">🎓</span> Coach Assessment
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="assessment-text">{{ feedback.overall_assessment }}</p>
+    </mat-card-content>
+  </mat-card>
 
-  <!-- Pause Analysis -->
+  <!-- ── Score Breakdown ── -->
+  <mat-card class="feedback-card score-breakdown-card">
+    <mat-card-header>
+      <mat-card-title>
+        <span class="card-title-icon">📊</span> Score Breakdown
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="breakdown-item" *ngFor="let item of getScoreItems()">
+        <div class="breakdown-row">
+          <div class="breakdown-label-row">
+            <span class="breakdown-label">{{ item.label }}</span>
+          </div>
+          <span class="breakdown-score" [style.color]="getGradeColor()">
+            {{ item.value | number:'1.1-1' }}/5
+          </span>
+        </div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill"
+               [style.width.%]="getScoreBarWidth(item.value)"
+               [style.background]="getScoreBarColor(item.value)">
+          </div>
+        </div>
+        <p class="breakdown-feedback" *ngIf="item.feedback">{{ item.feedback }}</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ── Strengths ── -->
+  <mat-card class="feedback-card strengths-card" *ngIf="feedback.strengths && feedback.strengths.length > 0">
+    <mat-card-header>
+      <mat-card-title>
+        <span class="card-title-icon">✅</span> Strengths
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ul class="coach-list strengths-list">
+        <li *ngFor="let s of feedback.strengths">{{ s }}</li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ── Areas to Improve ── -->
+  <mat-card class="feedback-card improvements-card" *ngIf="feedback.improvements && feedback.improvements.length > 0">
+    <mat-card-header>
+      <mat-card-title>
+        <span class="card-title-icon">📈</span> Areas to Improve
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ul class="coach-list improvements-list">
+        <li *ngFor="let im of feedback.improvements">{{ im }}</li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ── Closing Message ── -->
+  <mat-card class="feedback-card closing-card" *ngIf="feedback.closing_message">
+    <mat-card-content>
+      <div class="closing-body">
+        <span class="closing-icon">💬</span>
+        <p class="closing-text">{{ feedback.closing_message }}</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ── Pausing & Fluency ── -->
   <mat-card class="feedback-card pause-card" *ngIf="feedback.pause_details">
-    <mat-card-header><mat-card-title>Pause Analysis</mat-card-title></mat-card-header>
+    <mat-card-header><mat-card-title>Pausing &amp; Fluency</mat-card-title></mat-card-header>
     <mat-card-content>
       <ng-container *ngIf="feedback.pause_details.total_count > 0; else noPauses">
         <div class="stat-row">
@@ -123,7 +147,7 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Filler Words -->
+  <!-- ── Filler Words ── -->
   <mat-card class="feedback-card filler-words-card">
     <mat-card-header><mat-card-title>Filler Word Analysis</mat-card-title></mat-card-header>
     <mat-card-content>
@@ -138,7 +162,7 @@
         </div>
         <div class="stat-box">
           <span class="stat-value score" [ngClass]="getScoreClass(feedback.filler_words || feedback.filler_words_score)">
-            {{ feedback.filler_words || feedback.filler_words_score }}/5
+            {{ (feedback.filler_words || feedback.filler_words_score) | number:'1.1-1' }}/5
           </span>
           <span class="stat-label">Score</span>
         </div>
@@ -166,29 +190,11 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Strengths & Improvements -->
-  <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
-    <mat-card class="feedback-card improvements-card" *ngIf="feedback.areas_improvement">
-      <mat-card-header><mat-card-title>Areas to Improve</mat-card-title></mat-card-header>
-      <mat-card-content>
-        <div class="improvement-list">
-          <div *ngFor="let item of getImprovementItems()" class="improvement-item">
-            <strong *ngIf="item.category" class="improvement-category">{{ item.category }}</strong>
-            <p class="improvement-text">{{ item.suggestion }}</p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-    <mat-card class="feedback-card strengths-card" *ngIf="feedback.strengths">
-      <mat-card-header><mat-card-title>Strengths</mat-card-title></mat-card-header>
-      <mat-card-content><p>{{ feedback.strengths }}</p></mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Try Again -->
+  <!-- ── Try Again ── -->
   <div class="action-buttons">
     <button mat-raised-button color="primary" (click)="tryAgain()" class="try-again-button">
       Try Another Recording
     </button>
   </div>
+
 </div>

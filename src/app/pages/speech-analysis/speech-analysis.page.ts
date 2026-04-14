@@ -21,12 +21,16 @@ export class SpeechAnalysisPage implements OnDestroy {
   audioUrl:  string | null = null;
   isLoading = false;
   isConverting = false;
-  isProcessingRecording = false; // Shows immediately when stop is pressed
+  isProcessingRecording = false;
   speechType: 'informative' | 'motivational' | 'persuasive' = 'informative';
   pendingType: 'informative' | 'motivational' | 'persuasive' | null = 'informative';
   isTypeModalOpen = true;
   hasConfirmedSpeechType = false;
-  audioLevels: number[] = Array(15).fill(0); // Audio levels for 15 bars
+  audioLevels: number[] = Array(15).fill(0);
+
+  // Recording timer
+  recordingDuration = 0;
+  private recordingTimer: any = null;
 
   private subs: Subscription[] = [];
   private audioContext: AudioContext | null = null;
@@ -83,15 +87,24 @@ export class SpeechAnalysisPage implements OnDestroy {
   }
 
   async startRecording() {
+    this.recordingDuration = 0;
+    this.recordingTimer = setInterval(() => { this.recordingDuration++; }, 1000);
     await this.recorder.startRecording();
-    // Start audio analysis after a short delay to ensure stream is ready
     setTimeout(() => this.startAudioAnalysis(), 100);
   }
 
   stopRecording() {
-    this.isProcessingRecording = true; // Show loading immediately when stop is pressed
+    this.isProcessingRecording = true;
+    clearInterval(this.recordingTimer);
+    this.recordingTimer = null;
     this.recorder.stopRecording();
     this.stopAudioAnalysis();
+  }
+
+  formatRecordingTime(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
   private async startAudioAnalysis() {
@@ -157,6 +170,9 @@ export class SpeechAnalysisPage implements OnDestroy {
   }
 
   resetRecording() {
+    clearInterval(this.recordingTimer);
+    this.recordingTimer = null;
+    this.recordingDuration = 0;
     this.recorder.reset();
     this.audioBlob = null;
     this.audioUrl  = null;
@@ -245,5 +261,6 @@ export class SpeechAnalysisPage implements OnDestroy {
   ngOnDestroy() {
     this.subs.forEach(s => s.unsubscribe());
     this.stopAudioAnalysis();
+    clearInterval(this.recordingTimer);
   }
 }

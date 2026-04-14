@@ -15,12 +15,13 @@
        STEP 1 — CATEGORY SELECTION
   ════════════════════════════════════════════════════════════════════════ -->
   <div class="screen category-screen" *ngIf="step === 'category'">
+
     <div class="screen-hero">
       <div class="mic-icon-wrap">
         <ion-icon name="musical-notes-outline"></ion-icon>
       </div>
       <h1>Practice Mode</h1>
-      <p>Choose a speech category and follow the script — like karaoke for public speaking</p>
+      <p>Choose a script, read it aloud, and get scored on your delivery</p>
     </div>
 
     <div class="category-cards">
@@ -32,7 +33,7 @@
           <h2>Informative</h2>
           <p>Share knowledge and educate your audience with clear, structured content</p>
           <div class="card-meta">
-            <span class="tag">3 scripts</span>
+            <span class="tag">15 scripts</span>
             <span class="tag">1–2 min</span>
           </div>
         </div>
@@ -47,7 +48,7 @@
           <h2>Persuasive</h2>
           <p>Convince and influence your audience through compelling arguments</p>
           <div class="card-meta">
-            <span class="tag">3 scripts</span>
+            <span class="tag">15 scripts</span>
             <span class="tag">1–2 min</span>
           </div>
         </div>
@@ -62,7 +63,7 @@
           <h2>Motivational</h2>
           <p>Inspire and energize your audience with powerful, uplifting messages</p>
           <div class="card-meta">
-            <span class="tag">3 scripts</span>
+            <span class="tag">15 scripts</span>
             <span class="tag">1–2 min</span>
           </div>
         </div>
@@ -74,9 +75,9 @@
       <h3>How it works</h3>
       <div class="steps-list">
         <div class="how-step"><span class="step-num">1</span><span>Pick a category &amp; script</span></div>
-        <div class="how-step"><span class="step-num">2</span><span>Read the script aloud — words highlight as you speak</span></div>
-        <div class="how-step"><span class="step-num">3</span><span>Live pace tracker keeps you on rhythm</span></div>
-        <div class="how-step"><span class="step-num">4</span><span>See your results — WPM, filler words &amp; completion</span></div>
+        <div class="how-step"><span class="step-num">2</span><span>Read the script aloud — your audio is recorded</span></div>
+        <div class="how-step"><span class="step-num">3</span><span>Hit Finish when done</span></div>
+        <div class="how-step"><span class="step-num">4</span><span>AI transcribes and scores your delivery</span></div>
       </div>
     </div>
   </div>
@@ -101,6 +102,10 @@
         <div class="script-meta">
           <span><ion-icon name="time-outline"></ion-icon> ~{{ Math.round(script.estimatedDuration / 60) }} min</span>
           <span><ion-icon name="text-outline"></ion-icon> {{ script.rawText.split(' ').length }} words</span>
+          <span><ion-icon name="speedometer-outline"></ion-icon> {{ script.targetWpmRange.min }}–{{ script.targetWpmRange.max }} WPM</span>
+        </div>
+        <div class="script-dims">
+          <span class="dim-tag" *ngFor="let d of script.targetDimensions">{{ humanLabel(d) }}</span>
         </div>
       </div>
     </div>
@@ -108,90 +113,80 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════════════════
-       STEP 3 — PRACTICE SESSION (KARAOKE ROOM)
+       STEP 3 — PRACTICE SESSION
   ════════════════════════════════════════════════════════════════════════ -->
   <div class="screen session-screen" *ngIf="step === 'session'">
 
-    <!-- No browser support warning -->
-    <div class="no-support-banner" *ngIf="!speechApiSupported">
-      <ion-icon name="warning-outline"></ion-icon>
-      Live tracking requires Chrome or Safari. Reading the script is still available.
-    </div>
-
-    <!-- ── Stats Bar ── -->
+    <!-- Stats bar -->
     <div class="stats-bar">
-      <div class="stat-chip">
-        <ion-icon name="speedometer-outline"></ion-icon>
-        <span class="stat-value" [style.color]="paceColor">{{ currentWpm || '—' }}</span>
-        <span class="stat-unit">WPM</span>
-      </div>
       <div class="stat-chip">
         <ion-icon name="time-outline"></ion-icon>
         <span class="stat-value">{{ formattedTime }}</span>
       </div>
-      <div class="stat-chip" [class.has-fillers]="fillerWordCount > 0">
-        <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
-        <span class="stat-value">{{ fillerWordCount }}</span>
-        <span class="stat-unit">fillers</span>
+      <div class="stat-chip recording-chip" *ngIf="isRecording">
+        <span class="rec-dot"></span>
+        <span>Recording</span>
+      </div>
+      <!-- Live WPM chip -->
+      <div class="stat-chip live-wpm-chip" *ngIf="wpmAvailable"
+           [attr.data-status]="liveWpmStatus">
+        <ion-icon name="mic-outline"></ion-icon>
+        <span *ngIf="currentWpm > 0">{{ currentWpm }} WPM</span>
+        <span *ngIf="currentWpm === 0" class="wpm-idle">-- WPM</span>
+      </div>
+      <div class="stat-chip wpm-target">
+        <ion-icon name="speedometer-outline"></ion-icon>
+        <span>Target: {{ selectedScript?.targetWpmRange?.min }}–{{ selectedScript?.targetWpmRange?.max }}</span>
       </div>
     </div>
 
-    <!-- ── Pace Indicator ── -->
-    <div class="pace-bar-wrap">
-      <div class="pace-labels">
-        <span>Slow</span>
-        <span>Good</span>
-        <span>Fast</span>
+    <!-- Script display (static, readable) -->
+    <div class="script-display-wrap">
+      <div class="script-title-row">
+        <div class="script-title-left">
+          <span class="script-category-chip">{{ selectedScript?.category | titlecase }}</span>
+          <h2>{{ selectedScript?.title }}</h2>
+        </div>
+        <span class="difficulty-badge" [class]="selectedScript?.difficulty">{{ selectedScript?.difficulty }}</span>
       </div>
-      <div class="pace-track">
-        <div class="pace-zone slow-zone"></div>
-        <div class="pace-zone good-zone"></div>
-        <div class="pace-zone fast-zone"></div>
-        <div class="pace-needle" [style.left]="((currentWpm - 60) / 160 * 100) + '%'"></div>
-      </div>
-      <div class="pace-label-center" [style.color]="paceColor">{{ paceLabel }}</div>
-    </div>
-
-    <!-- ── Progress Bar ── -->
-    <div class="progress-wrap">
-      <div class="progress-track">
-        <div class="progress-fill" [style.width]="progressPercent + '%'" [style.background]="categoryColor"></div>
-      </div>
-      <span class="progress-pct">{{ progressPercent }}%</span>
-    </div>
-
-    <!-- ── Script / Karaoke Display ── -->
-    <div class="script-display-wrap" #scriptContainer>
-      <div class="script-display">
-        <span
-          *ngFor="let word of scriptWords; let i = index"
-          [id]="'word-' + i"
-          class="script-word"
-          [class.spoken]="i < confirmedWordIndex"
-          [class.live]="i >= confirmedWordIndex && i < liveWordIndex"
-          [class.current]="i === liveWordIndex"
-        >{{ word }} </span>
+      <div class="script-text">
+        {{ selectedScript?.rawText }}
       </div>
     </div>
 
-    <!-- ── Listening indicator ── -->
-    <div class="listening-indicator" *ngIf="isListening && !isPaused">
-      <div class="mic-pulse"></div>
-      <div class="mic-pulse delay-1"></div>
-      <div class="mic-pulse delay-2"></div>
-      <ion-icon name="mic-outline"></ion-icon>
-    </div>
-
-    <!-- ── Controls ── -->
+    <!-- Controls -->
     <div class="session-controls">
-      <ion-button class="pause-btn" [fill]="isPaused ? 'solid' : 'outline'" (click)="togglePause()">
-        <ion-icon [name]="isPaused ? 'play' : 'pause'" slot="start"></ion-icon>
-        {{ isPaused ? 'Resume' : 'Pause' }}
+      <!-- Before recording: Start button -->
+      <div class="start-recording-wrap" *ngIf="!sessionStarted">
+        <p class="start-hint">Read the script above, then tap Start Recording when you're ready.</p>
+        <ion-button class="start-btn" expand="block" color="success" (click)="beginRecording()">
+          <ion-icon name="mic-outline" slot="start"></ion-icon>
+          Start Recording
+        </ion-button>
+      </div>
+      <!-- After recording started: Finish button -->
+      <ion-button class="finish-btn" expand="block" (click)="finishSession()" color="primary"
+                  *ngIf="sessionStarted">
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        Finish &amp; Get Score
       </ion-button>
-      <ion-button class="stop-btn" fill="outline" color="danger" (click)="stopSession()">
-        <ion-icon name="stop-circle-outline" slot="start"></ion-icon>
-        Finish
-      </ion-button>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       STEP 3b — ANALYZING
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="screen analyzing-screen" *ngIf="step === 'analyzing'">
+    <div class="analyzing-content">
+      <ion-spinner name="crescent" class="analyzing-spinner"></ion-spinner>
+      <h2>Analyzing your speech…</h2>
+      <p>Transcribing audio and comparing against the script</p>
+      <div class="analyzing-steps">
+        <div class="analyzing-step">🎙 Transcribing with Whisper AI</div>
+        <div class="analyzing-step">📝 Comparing against script</div>
+        <div class="analyzing-step">📊 Scoring your dimensions</div>
+      </div>
     </div>
   </div>
 
@@ -199,113 +194,123 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        STEP 4 — RESULTS
   ════════════════════════════════════════════════════════════════════════ -->
-  <div class="screen results-screen" *ngIf="step === 'results' && results">
+  <div class="screen results-screen" *ngIf="step === 'results'">
 
-    <!-- ── Score Ring ── -->
-    <div class="score-hero">
-      <div class="score-ring-wrap">
-        <svg class="score-ring" viewBox="0 0 120 120">
-          <!-- track -->
-          <circle cx="60" cy="60" r="50" class="ring-track"/>
-          <!-- fill — dasharray: circumference = 2π×50 ≈ 314 -->
-          <circle cx="60" cy="60" r="50" class="ring-fill"
-            [style.stroke]="results.deliveryScore >= 80 ? '#4caf50' : results.deliveryScore >= 60 ? '#22a7f0' : '#ff9800'"
-            [style.stroke-dashoffset]="314 - (314 * results.deliveryScore / 100)"/>
-        </svg>
-        <div class="score-center">
-          <span class="score-num">{{ results.deliveryScore }}</span>
-          <span class="score-pct">%</span>
-          <span class="score-grade">Grade {{ results.deliveryGrade }}</span>
+    <!-- Error state -->
+    <div class="error-box" *ngIf="analysisError">
+      <ion-icon name="warning-outline"></ion-icon>
+      <p>{{ analysisError }}</p>
+      <ion-button fill="outline" (click)="tryAgain()">Try Again</ion-button>
+    </div>
+
+    <ng-container *ngIf="results && !analysisError">
+
+      <!-- ── No-speech / mismatch alert ── -->
+      <div class="zero-score-alert" *ngIf="results.noSpeechDetected">
+        <ion-icon name="mic-off-outline" class="alert-icon"></ion-icon>
+        <h3>No Speech Detected</h3>
+        <p>We couldn't detect any spoken words from your recording. Make sure your microphone is working and you are reading the script aloud.</p>
+        <p class="alert-note">All scores have been set to 1/5.</p>
+      </div>
+
+      <div class="zero-score-alert mismatch" *ngIf="results.contentMismatch">
+        <ion-icon name="warning-outline" class="alert-icon"></ion-icon>
+        <h3>Content Mismatch</h3>
+        <p>Less than 20% of what you said matched the script. Please make sure you are reading the correct script text aloud.</p>
+        <p class="alert-note">Word accuracy: {{ results.wordAccuracy | number:'1.1-1' }}% &nbsp;·&nbsp; All scores set to 1/5.</p>
+      </div>
+
+      <!-- ── Overall Score Ring ── -->
+      <div class="score-hero">
+        <div class="grade-ring" [style.borderColor]="getScoreColor(results.overall)">
+          <span class="grade-letter" [style.color]="getScoreColor(results.overall)">{{ getGradeLetter(results.overall) }}</span>
+          <span class="grade-score">{{ results.overall | number:'1.1-1' }}/5</span>
+        </div>
+        <div class="score-meta">
+          <div class="score-label" [style.color]="getScoreColor(results.overall)">
+            {{ results.overall >= 4.5 ? 'Excellent' : results.overall >= 3.5 ? 'Good' : results.overall >= 2.5 ? 'Average' : 'Needs Work' }}
+          </div>
+          <div class="score-sub">{{ selectedScript?.title }}</div>
         </div>
       </div>
-      <h1>{{ results.deliveryScore >= 85 ? 'Outstanding!' : results.deliveryScore >= 70 ? 'Good Job!' : results.deliveryScore >= 55 ? 'Keep Practising' : 'Room to Improve' }}</h1>
-      <p class="score-sub">Delivery score based on pace, filler words &amp; completion</p>
-    </div>
 
-    <!-- ── Score Breakdown ── -->
-    <div class="score-breakdown">
-      <div class="breakdown-row">
-        <span class="breakdown-label"><ion-icon name="speedometer-outline"></ion-icon> Pace</span>
-        <div class="breakdown-bar-wrap">
-          <div class="breakdown-bar" [style.width]="results.paceScore + '%'"
-               [style.background]="results.paceScore >= 80 ? '#4caf50' : results.paceScore >= 60 ? '#ff9800' : '#f44336'"></div>
+      <!-- ── Word Accuracy ── -->
+      <div class="accuracy-card">
+        <div class="accuracy-header">
+          <span class="accuracy-title">Word Accuracy</span>
+          <span class="accuracy-pct" [style.color]="getAccuracyColor(results.wordAccuracy)">
+            {{ results.wordAccuracy | number:'1.1-1' }}%
+          </span>
         </div>
-        <span class="breakdown-val">{{ results.paceScore }}%</span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label"><ion-icon name="chatbubble-ellipses-outline"></ion-icon> Fluency</span>
-        <div class="breakdown-bar-wrap">
-          <div class="breakdown-bar" [style.width]="results.fillerScore + '%'"
-               [style.background]="results.fillerScore >= 80 ? '#4caf50' : results.fillerScore >= 60 ? '#ff9800' : '#f44336'"></div>
+        <div class="accuracy-bar-track">
+          <div class="accuracy-bar-fill"
+               [style.width.%]="results.wordAccuracy"
+               [style.background]="getAccuracyColor(results.wordAccuracy)">
+          </div>
         </div>
-        <span class="breakdown-val">{{ results.fillerScore }}%</span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-label"><ion-icon name="checkmark-circle-outline"></ion-icon> Completion</span>
-        <div class="breakdown-bar-wrap">
-          <div class="breakdown-bar" [style.width]="results.completionRate + '%'"
-               [style.background]="results.completionRate >= 80 ? '#4caf50' : results.completionRate >= 60 ? '#ff9800' : '#f44336'"></div>
-        </div>
-        <span class="breakdown-val">{{ results.completionRate }}%</span>
-      </div>
-    </div>
-
-    <!-- ── Stats Row ── -->
-    <div class="results-grid">
-      <div class="result-card">
-        <div class="result-icon"><ion-icon name="analytics-outline"></ion-icon></div>
-        <div class="result-val">{{ results.averageWpm }}</div>
-        <div class="result-label">Avg WPM</div>
-        <div class="result-sub" [style.color]="results.paceScore >= 80 ? '#4caf50' : '#ff9800'">
-          {{ results.paceRating }}
+        <div class="accuracy-detail">
+          {{ results.matchedWords }} / {{ results.totalScriptWords }} script words matched ·
+          {{ results.fillerCount }} filler word{{ results.fillerCount !== 1 ? 's' : '' }} detected ·
+          {{ results.actualWpm }} WPM
         </div>
       </div>
-      <div class="result-card">
-        <div class="result-icon"><ion-icon name="text-outline"></ion-icon></div>
-        <div class="result-val">{{ results.wordsCompleted }}<span class="result-total">/{{ results.totalWords }}</span></div>
-        <div class="result-label">Words</div>
-      </div>
-      <div class="result-card">
-        <div class="result-icon"><ion-icon name="time-outline"></ion-icon></div>
-        <div class="result-val">{{ Math.floor(results.duration / 60) }}:{{ (results.duration % 60).toString().padStart(2,'0') }}</div>
-        <div class="result-label">Duration</div>
-      </div>
-      <div class="result-card" [class.warning]="results.fillerWordCount > 5">
-        <div class="result-icon"><ion-icon name="chatbubble-ellipses-outline"></ion-icon></div>
-        <div class="result-val">{{ results.fillerWordCount }}</div>
-        <div class="result-label">Filler Words</div>
-        <div class="result-sub" *ngIf="results.fillerWordCount === 0" style="color:#4caf50">Clean!</div>
-        <div class="result-sub" *ngIf="results.fillerWordCount > 0" style="color:#ff9800">Reduce these</div>
-      </div>
-    </div>
 
-    <!-- Filler word breakdown -->
-    <div class="filler-breakdown" *ngIf="results.detectedFillerWords.length > 0">
-      <h3>Detected filler words</h3>
-      <div class="filler-chips">
-        <span class="filler-chip" *ngFor="let fw of results.detectedFillerWords">"{{ fw }}"</span>
+      <!-- ── Dimension Scores (script's target dims only) ── -->
+      <div class="dims-card">
+        <div class="dims-title">Score Breakdown</div>
+        <div class="dim-item" *ngFor="let item of targetDimScores">
+          <div class="dim-row">
+            <span class="dim-label">{{ item.label }}</span>
+            <span class="dim-score" [style.color]="getScoreColor(item.score)">{{ item.score | number:'1.1-1' }}/5</span>
+          </div>
+          <ion-progress-bar [value]="item.score / 5" [color]="getScoreBarColor(item.score)"></ion-progress-bar>
+        </div>
       </div>
-    </div>
 
-    <!-- Tip -->
-    <div class="pace-tip-box">
-      <ion-icon name="bulb-outline"></ion-icon>
-      <p *ngIf="results.paceRating === 'Excellent' && results.fillerWordCount === 0">Perfect delivery! You nailed the pace and spoke cleanly.</p>
-      <p *ngIf="results.paceRating === 'Excellent' && results.fillerWordCount > 0">Great pace! Work on cutting filler words like "um" and "uh" to push your score higher.</p>
-      <p *ngIf="results.paceRating === 'Too Slow' || results.paceRating === 'Slightly Slow'">Try to speak a bit faster — aim for 120–150 WPM to sound more confident and engaging.</p>
-      <p *ngIf="results.paceRating === 'Too Fast' || results.paceRating === 'Slightly Fast'">Slow down a touch. Pausing between key sentences gives your audience time to absorb your message.</p>
-    </div>
+      <!-- ── Missed Words ── -->
+      <div class="missed-card" *ngIf="(results?.missedWords?.length ?? 0) > 0">
+        <div class="missed-header">
+          <ion-icon name="close-circle-outline" class="missed-icon"></ion-icon>
+          <span class="missed-title">Words Not Said</span>
+          <span class="missed-count">{{ results?.missedWords?.length }} unique</span>
+        </div>
+        <div class="missed-chips">
+          <span class="missed-chip" *ngFor="let w of results?.missedWords">{{ w }}</span>
+        </div>
+      </div>
 
-    <div class="results-actions">
-      <ion-button class="try-again-btn" expand="block" (click)="tryAgain()">
-        <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        Try Again
-      </ion-button>
-      <ion-button expand="block" fill="outline" (click)="chooseDifferent()">
-        <ion-icon name="list-outline" slot="start"></ion-icon>
-        Different Script
-      </ion-button>
-    </div>
+      <!-- ── Filler Words Detected ── -->
+      <div class="filler-words-card" *ngIf="results.fillerCount > 0">
+        <div class="filler-header">
+          <ion-icon name="chatbubble-ellipses-outline" class="filler-icon"></ion-icon>
+          <span class="filler-title">Filler Words</span>
+          <span class="filler-badge">{{ results.fillerCount }} detected</span>
+        </div>
+        <div class="filler-chips">
+          <span class="filler-chip" *ngFor="let f of results.detectedFillers">"{{ f }}"</span>
+        </div>
+        <p class="filler-tip">Replace filler words with a brief pause — silence sounds more confident.</p>
+      </div>
+
+      <!-- ── Transcript ── -->
+      <div class="transcript-card">
+        <div class="transcript-title">What You Said</div>
+        <p class="transcript-text">{{ results.transcript }}</p>
+      </div>
+
+      <!-- ── Actions ── -->
+      <div class="results-actions">
+        <ion-button expand="block" (click)="tryAgain()">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Try Again
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="chooseDifferent()">
+          <ion-icon name="list-outline" slot="start"></ion-icon>
+          Different Script
+        </ion-button>
+      </div>
+
+    </ng-container>
   </div>
 
 </ion-content>

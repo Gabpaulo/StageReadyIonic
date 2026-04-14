@@ -10,6 +10,8 @@ export class AudioRecorderService {
   private hasRequestedPermission = false;
   private wavBlob: Blob | null = null;
   private isConverting = false;
+  /** True from the moment stop() is called until onstop fires — bridges the async gap */
+  private isStopping = false;
 
   /** Emits true/false as recording starts/stops */
   public isRecording$ = new BehaviorSubject<boolean>(false);
@@ -100,27 +102,26 @@ export class AudioRecorderService {
 
       this.mediaRecorder.onstop = async () => {
         console.log('MediaRecorder stopped. Chunks:', this.audioChunks.length);
+        // onstop fired — the async gap is now closed
+        this.isStopping = false;
         this.isRecording$.next(false);
         this.wavReady$.next(false);
         this.wavBlob = null;
 
         const webmBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-
-        // Immediately emit WebM blob for fast preview
         this.audioBlob$.next(webmBlob);
-        console.log('WebM blob emitted for preview, size:', webmBlob.size);
+        console.log('WebM blob size:', webmBlob.size);
 
         this.stopStream();
 
-        // Convert to WAV in background for submission
+        // Convert to WAV — wavReady$ signals completion
         this.isConverting = true;
         try {
           this.wavBlob = await this.convertToWav(webmBlob);
-          console.log('WAV conversion complete, size:', this.wavBlob.size);
+          console.log('WAV ready, size:', this.wavBlob.size);
           this.wavReady$.next(true);
         } catch (error) {
-          console.error('Error converting to WAV:', error);
-          // Use WebM as fallback for submission
+          console.error('WAV conversion failed, using WebM:', error);
           this.wavBlob = webmBlob;
           this.wavReady$.next(true);
         } finally {
@@ -193,18 +194,15 @@ export class AudioRecorderService {
       };
 
       this.mediaRecorder.onstop = async () => {
+        this.isStopping = false;
         this.isRecording$.next(false);
         this.wavReady$.next(false);
         this.wavBlob = null;
 
         const webmBlob = new Blob(this.audioChunks, { type: mimeType });
-
-        // Immediately emit for fast preview
         this.audioBlob$.next(webmBlob);
-
         this.stopStream();
 
-        // Convert to WAV in background
         this.isConverting = true;
         try {
           this.wavBlob = await this.convertToWav(webmBlob);
@@ -246,45 +244,55 @@ export class AudioRecorderService {
     return 'audio/webm';
   }
 
-  /** Stop capture and emit blob */
+  /** Stop capture — sets isStopping so getWavBlob() knows to wait */
   stopRecording() {
     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
       console.log('Stopping MediaRecorder.');
+      this.isStopping = true;    // bridge the async gap until onstop fires
+      this.wavReady$.next(false); // reset ready signal before new stop
       this.mediaRecorder.stop();
-      // isRecording$.next(false) is handled in onstop
     }
   }
 
   /** Reset state & release mic */
   reset() {
+    this.isStopping  = false;
+    this.isConverting = false;
+    this.wavBlob     = null;
+    this.audioChunks = [];
     this.audioBlob$.next(null);
     this.isRecording$.next(false);
     this.wavReady$.next(false);
-    this.wavBlob = null;
-    this.isConverting = false;
     this.stopStream();
   }
 
-  /** Get the WAV blob for submission (waits for conversion if needed) */
+  /**
+   * Get the WAV blob for submission.
+   * Waits correctly even if called immediately after stopRecording(),
+   * before onstop has had a chance to fire (isStopping) or before
+   * WAV conversion has completed (isConverting).
+   */
   async getWavBlob(): Promise<Blob | null> {
-    // If WAV is already ready, return it
-    if (this.wavBlob) {
+    // Already ready — nothing to wait for
+    if (this.wavBlob && !this.isStopping && !this.isConverting) {
       return this.wavBlob;
     }
 
-    // If still converting, wait for it
-    if (this.isConverting) {
-      return new Promise((resolve) => {
+    // Still in the async gap between stop() and onstop, OR still converting
+    if (this.isStopping || this.isConverting) {
+      console.log('getWavBlob: waiting for stop/conversion to complete…');
+      return new Promise<Blob | null>(resolve => {
         const sub = this.wavReady$.subscribe(ready => {
           if (ready) {
             sub.unsubscribe();
+            console.log('getWavBlob: resolved, size:', this.wavBlob?.size);
             resolve(this.wavBlob);
           }
         });
       });
     }
 
-    // Fallback to the current audioBlob
+    // Fallback (e.g. stopRecording was never called, use raw blob)
     return this.audioBlob$.value;
   }
 

@@ -332,7 +332,30 @@ export class FirebaseService {
         filler_words: feedback?.filler_words || 0,
         overall: feedback?.overall || 0
       },
-      feedbackDetails: feedback?.feedback || {},
+      feedbackDetails: {
+        overall_assessment:  feedback?.overall_assessment  || '',
+        closing_message:     feedback?.closing_message     || '',
+        strengths:           Array.isArray(feedback?.strengths)    ? feedback.strengths    : [],
+        improvements:        Array.isArray(feedback?.improvements) ? feedback.improvements : [],
+        pace_feedback:       feedback?.pace_feedback       || '',
+        volume_feedback:     feedback?.volume_feedback     || '',
+        pitch_feedback:      feedback?.pitch_feedback      || '',
+        clarity_feedback:    feedback?.clarity_feedback    || '',
+        pausing_feedback:    feedback?.pausing_feedback    || '',
+        filler_feedback:     feedback?.filler_feedback     || '',
+        tone_feedback:       feedback?.tone_feedback       || '',
+        filler_word_details: feedback?.filler_word_details || null,
+        pause_details: feedback?.pause_details
+          ? {
+              total_count:      feedback.pause_details.total_count      ?? 0,
+              average_duration: feedback.pause_details.average_duration ?? 0,
+              longest_duration: feedback.pause_details.longest_duration ?? 0,
+              short_count:      feedback.pause_details.short_count      ?? 0,
+              medium_count:     feedback.pause_details.medium_count     ?? 0,
+              long_count:       feedback.pause_details.long_count       ?? 0,
+            }
+          : null,
+      },
       recommendations: feedback?.recommendations || [],
       createdAt: new Date(),
       duration: duration,
@@ -374,21 +397,36 @@ export class FirebaseService {
 
       // Map scores object to flat feedback structure
       if (data['scores']) {
+        const fd = data['feedbackDetails'] || {};
         entry.feedback = {
-          speech_pace: data['scores'].speech_pace || 0,
-          pausing_fluency: data['scores'].pausing_fluency || 0,
-          loud_control: data['scores'].loudness_control || 0,
-          pitch_variation: data['scores'].pitch_variation || 0,
+          // Scores
+          speech_pace:          data['scores'].speech_pace          || 0,
+          pausing_fluency:      data['scores'].pausing_fluency      || 0,
+          loud_control:         data['scores'].loudness_control     || 0,
+          pitch_variation:      data['scores'].pitch_variation      || 0,
           articulation_clarity: data['scores'].articulation_clarity || 0,
-          expressive_emph: data['scores'].expressive_emphasis || 0,
-          filler_words_score: data['scores'].filler_words || 0,
-          overall: data['scores'].overall || 0,
-          pace_feedback: data['feedbackDetails']?.pace_feedback || '',
-          tone_feedback: data['feedbackDetails']?.tone_feedback || '',
-          clarity_feedback: data['feedbackDetails']?.clarity_feedback || '',
-          strengths: data['feedbackDetails']?.strengths || '',
-          areas_improvement: data['feedbackDetails']?.areas_improvement || '',
-          filler_words: data['feedbackDetails']?.filler_words || []
+          expressive_emph:      data['scores'].expressive_emphasis  || 0,
+          filler_words_score:   data['scores'].filler_words         || 0,
+          overall:              data['scores'].overall              || 0,
+
+          // Per-dimension feedback
+          pace_feedback:        fd.pace_feedback     || '',
+          volume_feedback:      fd.volume_feedback   || '',
+          pitch_feedback:       fd.pitch_feedback    || '',
+          clarity_feedback:     fd.clarity_feedback  || '',
+          pausing_feedback:     fd.pausing_feedback  || '',
+          filler_feedback:      fd.filler_feedback   || '',
+          tone_feedback:        fd.tone_feedback     || '',
+
+          // Coach report
+          overall_assessment:   fd.overall_assessment || '',
+          strengths:            Array.isArray(fd.strengths)    ? fd.strengths    : [],
+          improvements:         Array.isArray(fd.improvements) ? fd.improvements : [],
+          closing_message:      fd.closing_message   || '',
+
+          // Optional detail arrays
+          filler_word_details:  fd.filler_word_details || null,
+          pause_details:        fd.pause_details       || null,
         };
       }
 

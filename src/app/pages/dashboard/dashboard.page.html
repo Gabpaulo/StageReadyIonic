@@ -75,6 +75,62 @@
       </div>
     </div>
 
+    <!-- ── Weekly AI Practice Focus ── -->
+    <div class="weekly-focus-card" *ngIf="weeklyPlan && !planLoading">
+      <div class="wf-header">
+        <div class="wf-header-left">
+          <span class="wf-icon">🎯</span>
+          <div>
+            <h3 class="wf-title">This Week's Focus</h3>
+            <p class="wf-sub">Based on {{ weeklyPlan.sessionCount }} sessions · Target: <strong>{{ weeklyPlan.wpmGoal }} WPM</strong>
+              <span class="wf-ai-badge" *ngIf="weeklyPlan.modelReady">AI</span>
+            </p>
+          </div>
+        </div>
+        <a class="wf-see-all" [routerLink]="['/ionic/practice-mode']">Practice →</a>
+      </div>
+      <div class="wf-dim-chips">
+        <span class="wf-dim-chip" *ngFor="let d of weeklyPlan.highImpactDimensions">
+          ⚠ {{ humanLabel(d) }}
+        </span>
+      </div>
+      <div class="wf-scripts">
+        <div class="wf-script-row" *ngFor="let rec of weeklyPlan.recommendedScripts"
+             (click)="navigateToScript(rec)">
+          <div class="wf-script-info">
+            <span class="wf-script-title">{{ rec.script.title }}</span>
+            <span class="wf-script-reason">{{ rec.reason }}</span>
+          </div>
+          <span class="wf-difficulty" [attr.data-level]="rec.script.difficulty">{{ rec.script.difficulty }}</span>
+          <ion-icon name="chevron-forward-outline" class="wf-arrow"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="wf-loading" *ngIf="planLoading">
+      <ion-spinner name="dots"></ion-spinner>
+      <span>Building your plan…</span>
+    </div>
+
+    <!-- ── Average Skill Metrics ── -->
+    <div class="metrics-card" *ngIf="weeklyPlan">
+      <div class="metrics-header">
+        <span class="metrics-title">Your Skill Averages</span>
+        <span class="metrics-sub">Last {{ weeklyPlan.sessionCount }} sessions</span>
+      </div>
+      <div class="metrics-list">
+        <div class="metric-row" *ngFor="let m of getMetricItems()">
+          <div class="metric-label-row">
+            <span class="metric-name">{{ m.label }}</span>
+            <span class="metric-score" [style.color]="getScoreColor(m.value)">{{ m.value | number:'1.1-1' }}/5</span>
+          </div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill" [style.width.%]="(m.value / 5) * 100" [style.background]="getScoreColor(m.value)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Today's Tip -->
     <div class="card tip-card">
       <div class="tip-top">

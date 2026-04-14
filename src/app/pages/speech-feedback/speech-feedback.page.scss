@@ -71,7 +71,133 @@
   p { color: var(--muted); line-height: 1.6; margin: 0; }
 }
 
-/* ── Scores grid ──────────────────────────────────────────────────────────── */
+/* ── Grade header ─────────────────────────────────────────────────────────── */
+.grade-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 18px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+
+.grade-ring {
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  border-radius: 50%;
+  border: 4px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  flex-shrink: 0;
+
+  .grade-letter { font-size: 2rem; font-weight: 900; line-height: 1; }
+  .grade-score  { font-size: .62rem; font-weight: 700; color: var(--muted); margin-top: 1px; }
+}
+
+.grade-info {
+  flex: 1;
+  .grade-label { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+}
+
+.grade-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  .type-chip {
+    font-size: .72rem; font-weight: 700; color: var(--accent);
+    background: rgba(0,188,212,.12); border: 1px solid rgba(0,188,212,.35);
+    border-radius: 20px; padding: 2px 10px;
+    text-transform: uppercase; letter-spacing: .4px;
+  }
+
+  .meta-item {
+    font-size: .82rem; color: var(--muted); font-weight: 500;
+  }
+}
+
+/* ── Score breakdown ──────────────────────────────────────────────────────── */
+.score-breakdown-card { }
+
+.breakdown-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  &:last-child { border-bottom: none; }
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.breakdown-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .breakdown-icon {
+    font-size: 18px;
+    color: var(--primary);
+    filter: drop-shadow(0 0 6px var(--primary-glow));
+    flex-shrink: 0;
+  }
+
+  .breakdown-label { font-size: .92rem; font-weight: 600; color: var(--text); }
+}
+
+.breakdown-score {
+  font-size: .88rem; font-weight: 800; min-width: 40px; text-align: right;
+}
+
+.breakdown-bar {
+  height: 6px; border-radius: 3px;
+  --background: var(--surface-2);
+  margin-bottom: 6px;
+}
+
+.breakdown-feedback {
+  font-size: .82rem; color: var(--muted); line-height: 1.5; margin: 0;
+}
+
+/* ── Coach lists ──────────────────────────────────────────────────────────── */
+.coach-list {
+  margin: 0; padding: 0 0 0 4px; list-style: none;
+
+  li {
+    font-size: .88rem; color: var(--text); line-height: 1.5;
+    padding: 7px 0 7px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    position: relative;
+    &::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    &:last-child { border-bottom: none; }
+  }
+  &.strengths-list    li::before { background: var(--success); }
+  &.improvements-list li::before { background: var(--primary); }
+}
+
+/* ── Closing message ──────────────────────────────────────────────────────── */
+.closing-card { background: rgba(156,39,176,.07); border-color: rgba(156,39,176,.25); }
+.closing-body {
+  display: flex; gap: 12px; align-items: flex-start;
+  .closing-icon { font-size: 20px; color: var(--secondary); flex-shrink: 0; margin-top: 2px; }
+  .closing-text { font-size: .9rem; color: var(--text); line-height: 1.6; margin: 0; font-style: italic; }
+}
+
+/* ── Scores grid (legacy, kept for fallback) ──────────────────────────────── */
 .scores-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));

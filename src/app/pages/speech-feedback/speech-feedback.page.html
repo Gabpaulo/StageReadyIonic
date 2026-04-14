@@ -7,61 +7,26 @@
 
 <ion-content class="custom-content">
 
-  <!-- Category and Duration -->
-  <div class="feedback-card category-card" *ngIf="feedback.category || feedback.duration">
-    <div class="card-header">
-      <ion-icon name="pricetag" class="card-icon"></ion-icon>
-      <h3>{{ feedback.category | titlecase }} Speech</h3>
+  <!-- ── Grade Header ── -->
+  <div class="grade-header">
+    <div class="grade-ring" [style.borderColor]="getGradeColor()">
+      <span class="grade-letter" [style.color]="getGradeColor()">{{ getGradeLetter() }}</span>
+      <span class="grade-score">{{ feedback.overall | number:'1.1-1' }}/5</span>
     </div>
-    <p *ngIf="feedback.duration">Duration: {{ feedback.duration | number:'1.1-1' }}s</p>
-  </div>
-
-  <!-- Scores Overview -->
-  <div class="feedback-card scores-card">
-    <div class="card-header">
-      <ion-icon name="stats-chart" class="card-icon"></ion-icon>
-      <h3>Scores Overview</h3>
-    </div>
-    <div class="scores-grid">
-      <div class="score-item overall">
-        <div class="score-label">Overall</div>
-        <div class="score-number">{{ feedback.overall }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Pace</div>
-        <div class="score-number">{{ feedback.speech_pace }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Pausing</div>
-        <div class="score-number">{{ feedback.pausing_fluency }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Volume</div>
-        <div class="score-number">{{ feedback.loudness_control || feedback.loud_control }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Pitch</div>
-        <div class="score-number">{{ feedback.pitch_variation }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Clarity</div>
-        <div class="score-number">{{ feedback.articulation_clarity }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Expression</div>
-        <div class="score-number">{{ feedback.expressive_emphasis || feedback.expressive_emph }}/5</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Fillers</div>
-        <div class="score-number">{{ feedback.filler_words || feedback.filler_words_score }}/5</div>
+    <div class="grade-info">
+      <div class="grade-label" [style.color]="getGradeColor()">{{ getGradeLabel() }}</div>
+      <div class="grade-meta">
+        <span *ngIf="feedback.category" class="type-chip">{{ feedback.category | titlecase }}</span>
+        <span *ngIf="feedback.duration" class="meta-item">{{ feedback.duration | number:'1.0-0' }}s</span>
+        <span *ngIf="feedback.averagePace" class="meta-item">{{ feedback.averagePace | number:'1.0-0' }} WPM</span>
       </div>
     </div>
   </div>
 
-  <!-- Transcript (with filler + pause highlights) -->
+  <!-- ── Transcript ── -->
   <div class="feedback-card transcript-card" *ngIf="feedback.transcript">
     <div class="card-header">
-      <ion-icon name="document-text" class="card-icon"></ion-icon>
+      <ion-icon name="document-text-outline" class="card-icon"></ion-icon>
       <h3>Transcription</h3>
     </div>
     <div class="legend">
@@ -73,11 +38,76 @@
     <div class="transcript-content" [innerHTML]="highlightedTranscript"></div>
   </div>
 
-  <!-- Pause Analysis -->
+  <!-- ── Overall Assessment ── -->
+  <div class="feedback-card assessment-card" *ngIf="feedback.overall_assessment">
+    <div class="card-header">
+      <ion-icon name="school-outline" class="card-icon secondary"></ion-icon>
+      <h3>Coach Assessment</h3>
+    </div>
+    <p class="assessment-text">{{ feedback.overall_assessment }}</p>
+  </div>
+
+  <!-- ── Score Breakdown (all 7 dimensions with per-label feedback) ── -->
+  <div class="feedback-card score-breakdown-card">
+    <div class="card-header">
+      <ion-icon name="analytics-outline" class="card-icon"></ion-icon>
+      <h3>Score Breakdown</h3>
+    </div>
+
+    <div class="breakdown-item" *ngFor="let item of getScoreItems()">
+      <div class="breakdown-row">
+        <div class="breakdown-label-row">
+          <ion-icon [name]="item.icon" class="breakdown-icon"></ion-icon>
+          <span class="breakdown-label">{{ item.label }}</span>
+        </div>
+        <span class="breakdown-score" [style.color]="getGradeColor()">
+          {{ item.value | number:'1.1-1' }}/5
+        </span>
+      </div>
+      <ion-progress-bar
+        [value]="item.value / 5"
+        [color]="getScoreBarColor(item.value)"
+        class="breakdown-bar">
+      </ion-progress-bar>
+      <p class="breakdown-feedback" *ngIf="item.feedback">{{ item.feedback }}</p>
+    </div>
+  </div>
+
+  <!-- ── Strengths ── -->
+  <div class="feedback-card" *ngIf="feedback.strengths && feedback.strengths.length > 0">
+    <div class="card-header">
+      <ion-icon name="checkmark-circle-outline" class="card-icon success"></ion-icon>
+      <h3>Strengths</h3>
+    </div>
+    <ul class="coach-list strengths-list">
+      <li *ngFor="let s of feedback.strengths">{{ s }}</li>
+    </ul>
+  </div>
+
+  <!-- ── Areas to Improve ── -->
+  <div class="feedback-card" *ngIf="feedback.improvements && feedback.improvements.length > 0">
+    <div class="card-header">
+      <ion-icon name="arrow-up-circle-outline" class="card-icon accent"></ion-icon>
+      <h3>Areas to Improve</h3>
+    </div>
+    <ul class="coach-list improvements-list">
+      <li *ngFor="let im of feedback.improvements">{{ im }}</li>
+    </ul>
+  </div>
+
+  <!-- ── Closing Message ── -->
+  <div class="feedback-card closing-card" *ngIf="feedback.closing_message">
+    <div class="closing-body">
+      <ion-icon name="chatbubble-ellipses-outline" class="closing-icon"></ion-icon>
+      <p class="closing-text">{{ feedback.closing_message }}</p>
+    </div>
+  </div>
+
+  <!-- ── Pausing & Fluency ── -->
   <div class="feedback-card pause-card" *ngIf="feedback.pause_details">
     <div class="card-header">
       <ion-icon name="timer-outline" class="card-icon accent"></ion-icon>
-      <h3>Pause Analysis</h3>
+      <h3>Pausing &amp; Fluency</h3>
     </div>
     <ng-container *ngIf="feedback.pause_details.total_count > 0; else noPauses">
       <div class="stat-row">
@@ -113,10 +143,10 @@
     </ng-template>
   </div>
 
-  <!-- Filler Words -->
+  <!-- ── Filler Words ── -->
   <div class="feedback-card filler-words-card" *ngIf="getFillerDetails() as fd">
     <div class="card-header">
-      <ion-icon name="chatbubble-ellipses" class="card-icon warning"></ion-icon>
+      <ion-icon name="chatbubble-ellipses-outline" class="card-icon warning"></ion-icon>
       <h3>Filler Word Analysis</h3>
     </div>
     <div class="stat-row">
@@ -130,7 +160,7 @@
       </div>
       <div class="stat-box">
         <span class="stat-value score" [ngClass]="getScoreClass(feedback.filler_words || feedback.filler_words_score)">
-          {{ feedback.filler_words || feedback.filler_words_score }}/5
+          {{ (feedback.filler_words || feedback.filler_words_score) | number:'1.1-1' }}/5
         </span>
         <span class="stat-label">Score</span>
       </div>
@@ -157,70 +187,8 @@
     </ng-container>
   </div>
 
-  <!-- Overall Assessment -->
-  <div class="feedback-card assessment-card" *ngIf="feedback.feedback?.overall_assessment">
-    <div class="card-header">
-      <ion-icon name="analytics" class="card-icon secondary"></ion-icon>
-      <h3>Overall Assessment</h3>
-    </div>
-    <p class="assessment-text">{{ feedback.feedback!.overall_assessment }}</p>
-  </div>
-
-  <!-- Recommendations -->
-  <div class="feedback-card recommendations-card" *ngIf="feedback.recommendations && feedback.recommendations.length > 0">
-    <div class="card-header">
-      <ion-icon name="bulb" class="card-icon success"></ion-icon>
-      <h3>Recommendations</h3>
-    </div>
-    <div class="recommendations-list">
-      <div class="recommendation-item" *ngFor="let rec of feedback.recommendations">
-        <div class="rec-category">{{ rec.category }}</div>
-        <div class="rec-issue">{{ rec.issue }}</div>
-        <div class="rec-suggestion">{{ rec.suggestion }}</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Detailed Scores -->
-  <div class="feedback-card detailed-feedback-card" *ngIf="feedback.feedback?.detailed_scores">
-    <div class="card-header">
-      <ion-icon name="list" class="card-icon secondary"></ion-icon>
-      <h3>Detailed Scores</h3>
-    </div>
-    <div class="detail-item" *ngFor="let item of getDetailedScores()">
-      <div class="detail-header">
-        <span class="detail-label">{{ formatMetricName(item.key) }}</span>
-        <span class="detail-score" [ngClass]="getScoreClass(item.value.score)">{{ item.value.score }}/5</span>
-      </div>
-      <p class="detail-desc">{{ item.value.description }}</p>
-    </div>
-  </div>
-
-  <!-- Strengths & Improvements -->
-  <div class="feedback-details" *ngIf="feedback.strengths || feedback.areas_improvement">
-    <div class="feedback-card" *ngIf="feedback.areas_improvement">
-      <div class="card-header">
-        <ion-icon name="trending-up" class="card-icon accent"></ion-icon>
-        <h3>Areas to Improve</h3>
-      </div>
-      <div class="improvement-list">
-        <div *ngFor="let item of getImprovementItems()" class="improvement-item">
-          <strong class="improvement-category" *ngIf="item.category">{{ item.category }}</strong>
-          <p class="improvement-text">{{ item.suggestion }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="feedback-card" *ngIf="feedback.strengths">
-      <div class="card-header">
-        <ion-icon name="checkmark-circle" class="card-icon success"></ion-icon>
-        <h3>Strengths</h3>
-      </div>
-      <p>{{ feedback.strengths }}</p>
-    </div>
-  </div>
-
   <ion-button class="try-again-button" expand="block" (click)="tryAgain()">
-    <ion-icon name="refresh" slot="start"></ion-icon>
+    <ion-icon name="refresh-outline" slot="start"></ion-icon>
     Try Another Recording
   </ion-button>
 
