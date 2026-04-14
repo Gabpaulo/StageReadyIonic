@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { AnalyzeSpeechForFeedbackOutput } from '../pages/speech-analysis/model';
 
 interface WhisperWord {
@@ -38,7 +37,6 @@ interface PauseStats {
 })
 export class SpeechAnalysisApiService {
 
-  private readonly GROQ_API = 'https://api.groq.com/openai/v1';
   private readonly WHISPER_MODEL = 'whisper-large-v3-turbo';
   private readonly LLM_MODEL = 'llama-3.3-70b-versatile';
 
@@ -68,9 +66,8 @@ export class SpeechAnalysisApiService {
     // Primes Whisper to keep filler words instead of silently removing them
     formData.append('prompt', 'Um, uh, like, you know, basically, so, right, okay, hmm, mm.');
 
-    const response = await fetch(`${this.GROQ_API}/audio/transcriptions`, {
+    const response = await fetch('/api/transcribe', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${environment.groqApiKey}` },
       body: formData
     });
 
@@ -95,12 +92,9 @@ export class SpeechAnalysisApiService {
 
     const prompt = this.buildPrompt(transcription.text, category, wpm, duration, pauseStats);
 
-    const response = await fetch(`${this.GROQ_API}/chat/completions`, {
+    const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${environment.groqApiKey}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: this.LLM_MODEL,
         messages: [
@@ -657,9 +651,9 @@ Return ONLY JSON:
 {"loudness_control":<1.0-5.0>,"pitch_variation":<1.0-5.0>,"expressive_emphasis":<1.0-5.0>}`;
 
     try {
-      const response = await fetch(`${this.GROQ_API}/chat/completions`, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${environment.groqApiKey}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: this.LLM_MODEL,
           messages: [

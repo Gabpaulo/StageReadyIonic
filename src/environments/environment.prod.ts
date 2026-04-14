@@ -1,6 +1,5 @@
 export const environment = {
   production: true,
-  groqApiKey: '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',
   firebaseConfig: {
     apiKey: "AIzaSyA-gBJBJRTvJNlnMQXRoW-tBj1NI10_qZE",
     authDomain: "stagereadydb.firebaseapp.com",
