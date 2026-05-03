@@ -51,8 +51,9 @@ export class SpeechAnalysisApiService {
     category: string
   ): Promise<AnalyzeSpeechForFeedbackOutput> {
     const transcription = await this.transcribeAudio(audioBlob);
-    const pauseStats = this.detectPauses(transcription);
-    const analysis = await this.analyzeTranscript(transcription, category, pauseStats);
+    const pauseStats    = this.detectPauses(transcription);
+    const fillerData    = this.extractFillers(transcription);
+    const analysis      = await this.analyzeTranscript(transcription, category, pauseStats, fillerData.count);
     return this.mapToFeedbackOutput(analysis, transcription, category, pauseStats);
   }
 
@@ -81,49 +82,51 @@ export class SpeechAnalysisApiService {
     return response.json();
   }
 
-  // ── Step 2: LLaMA analysis ────────────────────────────────────────────────
+  // ── Step 2: RAG analysis ──────────────────────────────────────────────────
 
   private async analyzeTranscript(
     transcription: WhisperResponse,
     category: string,
-    pauseStats: PauseStats
+    pauseStats: PauseStats,
+    fillerCount: number
   ): Promise<any> {
     const wordCount = transcription.text.trim().split(/\s+/).length;
-    const duration = transcription.duration ?? 0;
-    const wpm = duration > 0 ? Math.round((wordCount / duration) * 60) : 0;
+    const duration  = transcription.duration ?? 0;
+    const wpm       = duration > 0 ? Math.round((wordCount / duration) * 60) : 0;
 
-    const prompt = this.buildPrompt(transcription.text, category, wpm, duration, pauseStats);
+    // Approximate acoustic features from Whisper data for Corpus 1 similarity search
+    const totalPauseTime = pauseStats.pauses.reduce((s, p) => s + p.duration, 0);
+    const userMetrics = {
+      syllables_per_sec:  duration > 0 ? parseFloat(((wordCount * 1.5) / duration).toFixed(3)) : 0,
+      pause_ratio:        duration > 0 ? parseFloat((totalPauseTime / duration).toFixed(3)) : 0,
+      loud_mean:          0,
+      loud_std:           0,
+      pitch_std:          0,
+      spectral_centroid:  0,
+      spectral_flux:      0,
+    };
 
-    const response = await fetch(`${this.API_BASE}/api/chat`, {
+    const response = await fetch(`${this.API_BASE}/api/analyze-rag`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: this.LLM_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional speech coach. Always respond with valid JSON only — no markdown, no code fences.'
-          },
-          { role: 'user', content: prompt }
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.2
+        transcript:   transcription.text,
+        category,
+        wpm,
+        pause_stats:  pauseStats,
+        filler_count: fillerCount,
+        user_metrics: userMetrics,
       })
     });
 
     if (!response.ok) {
       const err = await response.text();
-      throw new Error(`LLM analysis failed (${response.status}): ${err}`);
+      throw new Error(`RAG analysis failed (${response.status}): ${err}`);
     }
 
     const data = await response.json();
-    const rawText: string = data.choices?.[0]?.message?.content ?? '{}';
-
-    try {
-      return JSON.parse(rawText);
-    } catch {
-      throw new Error('LLM returned invalid JSON. Please try again.');
-    }
+    // /api/analyze-rag returns { feedback: {...}, rag_metadata: {...} }
+    return data.feedback;
   }
 
   // ── Category weights (must sum to 1.0 per category) ──────────────────────
