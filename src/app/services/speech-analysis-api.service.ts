@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { AnalyzeSpeechForFeedbackOutput } from '../pages/speech-analysis/model';
+import { environment } from '../../../environments/environment';
 
 interface WhisperWord {
   word: string;
@@ -39,6 +40,7 @@ export class SpeechAnalysisApiService {
 
   private readonly WHISPER_MODEL = 'whisper-large-v3-turbo';
   private readonly LLM_MODEL = 'llama-3.3-70b-versatile';
+  private readonly API_BASE = environment.apiUrl;
 
   analyzeSpeech(audioBlob: Blob, category: string): Observable<AnalyzeSpeechForFeedbackOutput> {
     return from(this.analyzeWithGroq(audioBlob, category));
@@ -66,7 +68,7 @@ export class SpeechAnalysisApiService {
     // Primes Whisper to keep filler words instead of silently removing them
     formData.append('prompt', 'Um, uh, like, you know, basically, so, right, okay, hmm, mm.');
 
-    const response = await fetch('/api/transcribe', {
+    const response = await fetch(`${this.API_BASE}/api/transcribe`, {
       method: 'POST',
       body: formData
     });
@@ -92,7 +94,7 @@ export class SpeechAnalysisApiService {
 
     const prompt = this.buildPrompt(transcription.text, category, wpm, duration, pauseStats);
 
-    const response = await fetch('/api/chat', {
+    const response = await fetch(`${this.API_BASE}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -651,7 +653,7 @@ Return ONLY JSON:
 {"loudness_control":<1.0-5.0>,"pitch_variation":<1.0-5.0>,"expressive_emphasis":<1.0-5.0>}`;
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch(`${this.API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

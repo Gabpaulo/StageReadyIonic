@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  apiUrl: 'http://localhost:8000',
   firebaseConfig: {
     apiKey: "AIzaSyA-gBJBJRTvJNlnMQXRoW-tBj1NI10_qZE",
     authDomain: "stagereadydb.firebaseapp.com",

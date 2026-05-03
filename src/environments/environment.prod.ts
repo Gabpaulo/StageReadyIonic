@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  apiUrl: 'https://stageready-backend-meey.onrender.com',
   firebaseConfig: {
     apiKey: "AIzaSyA-gBJBJRTvJNlnMQXRoW-tBj1NI10_qZE",
     authDomain: "stagereadydb.firebaseapp.com",
