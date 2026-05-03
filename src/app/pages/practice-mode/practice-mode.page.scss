@@ -588,6 +588,11 @@
 
   &.comparison-open {
     border-color: rgba(34,167,240,0.35);
+    margin-left:  -1.25rem;
+    margin-right: -1.25rem;
+    border-left:  none;
+    border-right: none;
+    border-radius: 0;
   }
 
   .transcript-text { font-size: 0.9rem; color: var(--text); line-height: 1.7; margin: 0; white-space: pre-wrap; }
@@ -1274,7 +1279,7 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 480px) {
+@media (max-width: 400px) {
   .comparison-wrap {
     grid-template-columns: 1fr;
     gap: 0;
@@ -1282,6 +1287,7 @@
   .comparison-divider {
     height: 1px;
     width: 100%;
+    margin: 0.5rem 0;
   }
 }
 

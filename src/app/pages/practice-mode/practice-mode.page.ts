@@ -226,29 +226,34 @@ export class PracticeModePage implements OnInit, OnDestroy {
 
   showComparison = false;
 
+  /** Strips to lowercase letters only — used for all comparison normalisation */
+  private normWord = (w: string) => w.toLowerCase().replace(/[^a-z]/g, '');
+
   /** Script split into words, each flagged if it was missed by the speaker */
   get scriptWords(): { word: string; missed: boolean }[] {
     if (!this.selectedScript || !this.results) return [];
-    const missedSet = new Set(this.results.missedWords.map(w => w.toLowerCase()));
-    const norm = (w: string) => w.toLowerCase().replace(/[^a-z']/g, '');
+    const missedSet = new Set(this.results.missedWords.map(this.normWord));
     return this.selectedScript.rawText.trim().split(/\s+/).filter(Boolean).map(word => ({
       word,
-      missed: missedSet.has(norm(word))
+      missed: missedSet.has(this.normWord(word))
     }));
   }
 
-  /** Transcript split into words — flagged as filler or as not appearing in the script */
+  /** Transcript split into words — filler only if the word is NOT in the script */
   get transcriptWords(): { word: string; isFiller: boolean; isExtra: boolean }[] {
     if (!this.results || !this.selectedScript) return [];
-    const norm      = (w: string) => w.toLowerCase().replace(/[^a-z']/g, '');
-    const fillerSet = new Set(this.results.detectedFillers.map(f => f.toLowerCase()));
+    const fillerSet = new Set(this.results.detectedFillers.map(this.normWord));
     const scriptSet = new Set(
-      this.selectedScript.rawText.trim().split(/\s+/).filter(Boolean).map(norm)
+      this.selectedScript.rawText.trim().split(/\s+/).filter(Boolean).map(this.normWord)
     );
     return this.results.transcript.trim().split(/\s+/).filter(Boolean).map(word => {
-      const n = norm(word);
-      const isFiller = fillerSet.has(n);
-      return { word, isFiller, isExtra: !isFiller && !scriptSet.has(n) };
+      const n        = this.normWord(word);
+      const inScript = scriptSet.has(n);
+      return {
+        word,
+        isFiller: !inScript && fillerSet.has(n),   // only filler if not part of the script
+        isExtra:  !inScript && !fillerSet.has(n)   // said something not in script at all
+      };
     });
   }
 
