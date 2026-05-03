@@ -389,9 +389,68 @@
       </div>
 
       <!-- ── Transcript ── -->
-      <div class="transcript-card">
-        <div class="transcript-title">What You Said</div>
-        <p class="transcript-text">{{ results.transcript }}</p>
+      <div class="transcript-card" [class.comparison-open]="showComparison">
+
+        <!-- Card header with Compare toggle -->
+        <div class="transcript-header">
+          <div class="transcript-title">What You Said</div>
+          <button class="compare-btn" (click)="showComparison = !showComparison">
+            <ion-icon [name]="showComparison ? 'contract-outline' : 'git-compare-outline'"></ion-icon>
+            {{ showComparison ? 'Close' : 'Compare' }}
+          </button>
+        </div>
+
+        <!-- Plain view -->
+        <p class="transcript-text" *ngIf="!showComparison">{{ results.transcript }}</p>
+
+        <!-- Side-by-side comparison -->
+        <div class="comparison-wrap" *ngIf="showComparison">
+
+          <!-- Left: Original Script -->
+          <div class="comparison-col">
+            <div class="col-label">
+              <ion-icon name="document-text-outline"></ion-icon>
+              Original Script
+            </div>
+            <div class="comparison-text">
+              <span
+                *ngFor="let w of scriptWords"
+                class="cmp-word"
+                [class.missed]="w.missed">{{ w.word }}&nbsp;</span>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="comparison-divider"></div>
+
+          <!-- Right: What They Said -->
+          <div class="comparison-col">
+            <div class="col-label">
+              <ion-icon name="mic-outline"></ion-icon>
+              What You Said
+            </div>
+            <div class="comparison-text">
+              <span
+                *ngFor="let w of transcriptWords"
+                class="cmp-word"
+                [class.filler]="w.isFiller">{{ w.word }}&nbsp;</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Legend -->
+        <div class="comparison-legend" *ngIf="showComparison">
+          <span class="legend-item">
+            <span class="legend-dot missed-dot"></span>
+            Missed word
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot filler-dot"></span>
+            Filler word
+          </span>
+        </div>
+
       </div>
 
       <!-- ── Actions ── -->

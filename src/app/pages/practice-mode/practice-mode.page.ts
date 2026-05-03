@@ -222,6 +222,32 @@ export class PracticeModePage implements OnInit, OnDestroy {
     return Math.max(0, 5 - (this.weeklyPlan?.sessionCount ?? 0));
   }
 
+  // ── Transcript comparison ──────────────────────────────────────────────────
+
+  showComparison = false;
+
+  /** Script split into words, each flagged if it was missed by the speaker */
+  get scriptWords(): { word: string; missed: boolean }[] {
+    if (!this.selectedScript || !this.results) return [];
+    const missedSet = new Set(this.results.missedWords.map(w => w.toLowerCase()));
+    const norm = (w: string) => w.toLowerCase().replace(/[^a-z']/g, '');
+    return this.selectedScript.rawText.trim().split(/\s+/).filter(Boolean).map(word => ({
+      word,
+      missed: missedSet.has(norm(word))
+    }));
+  }
+
+  /** Transcript split into words, each flagged if it's a filler word */
+  get transcriptWords(): { word: string; isFiller: boolean }[] {
+    if (!this.results) return [];
+    const fillerSet = new Set(this.results.detectedFillers.map(f => f.toLowerCase()));
+    const norm = (w: string) => w.toLowerCase().replace(/[^a-z]/g, '');
+    return this.results.transcript.trim().split(/\s+/).filter(Boolean).map(word => ({
+      word,
+      isFiller: fillerSet.has(norm(word))
+    }));
+  }
+
   // ─── Navigation ───────────────────────────────────────────────────────────
 
   selectCategory(cat: Category) {
@@ -404,16 +430,18 @@ export class PracticeModePage implements OnInit, OnDestroy {
   }
 
   tryAgain() {
-    this.results        = null;
-    this.analysisError  = null;
-    this.sessionStarted = false;
-    this.step           = 'session';
+    this.results         = null;
+    this.analysisError   = null;
+    this.sessionStarted  = false;
+    this.showComparison  = false;
+    this.step            = 'session';
   }
 
   chooseDifferent() {
-    this.results       = null;
-    this.analysisError = null;
-    this.step          = 'script';
+    this.results        = null;
+    this.analysisError  = null;
+    this.showComparison = false;
+    this.step           = 'script';
   }
 
   private stopSession(saveAudio: boolean) {
