@@ -1,259 +1,70 @@
 <div class="knowledge-base-container">
-
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-content">
       <ion-icon name="library-outline" class="header-icon"></ion-icon>
       <div>
         <h1>Knowledge Base</h1>
-        <p>Open-source resources and speech quizzes to sharpen your public speaking skills.</p>
+        <p>Open-source resources to help you become a better speaker. Click any card to visit the resource.</p>
       </div>
-    </div>
-
-    <!-- View Toggle -->
-    <div class="view-toggle">
-      <button
-        class="toggle-btn"
-        [class.active]="activeView === 'resources'"
-        (click)="switchView('resources')">
-        <ion-icon name="library-outline"></ion-icon>
-        Resources
-      </button>
-      <button
-        class="toggle-btn"
-        [class.active]="activeView === 'quiz'"
-        (click)="switchView('quiz')">
-        <ion-icon name="game-controller-outline"></ion-icon>
-        Quiz Game
-      </button>
     </div>
   </div>
 
-  <!-- ══════════════ RESOURCES VIEW ══════════════ -->
-  <ng-container *ngIf="activeView === 'resources'">
+  <!-- Category Filter -->
+  <div class="category-filter">
+    <button
+      *ngFor="let cat of categories"
+      class="filter-chip"
+      [class.active]="selectedCategory === cat"
+      (click)="filterByCategory(cat)">
+      {{ cat }}
+    </button>
+  </div>
 
-    <!-- Category Filter -->
-    <div class="category-filter">
-      <button
-        *ngFor="let cat of categories"
-        class="filter-chip"
-        [class.active]="selectedCategory === cat"
-        (click)="filterByCategory(cat)">
-        {{ cat }}
-      </button>
-    </div>
+  <!-- Error Banner -->
+  <div *ngIf="error" class="error-banner">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <span>{{ error }}</span>
+  </div>
 
-    <!-- Error Banner -->
-    <div *ngIf="error" class="error-banner">
-      <ion-icon name="cloud-offline-outline"></ion-icon>
-      <span>{{ error }}</span>
-    </div>
-
-    <!-- Loading Skeleton -->
-    <div *ngIf="loading" class="resources-grid">
-      <div *ngFor="let i of [1,2,3,4,5,6]" class="resource-card skeleton">
-        <div class="skeleton-icon"></div>
-        <div class="skeleton-content">
-          <div class="skeleton-line title"></div>
-          <div class="skeleton-line badge"></div>
-          <div class="skeleton-line desc"></div>
-          <div class="skeleton-line desc short"></div>
-        </div>
+  <!-- Loading Skeleton -->
+  <div *ngIf="loading" class="resources-grid">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="resource-card skeleton">
+      <div class="skeleton-icon"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-line title"></div>
+        <div class="skeleton-line badge"></div>
+        <div class="skeleton-line desc"></div>
+        <div class="skeleton-line desc short"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Resource Cards Grid -->
-    <div *ngIf="!loading" class="resources-grid">
-      <div
-        *ngFor="let resource of filteredResources"
-        class="resource-card"
-        (click)="openResource(resource.url)">
-        <div class="card-icon-wrapper">
-          <ion-icon [name]="resource.icon" class="card-icon"></ion-icon>
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">{{ resource.title }}</h3>
-          <span class="card-category">{{ resource.category }}</span>
-          <p class="card-description">{{ resource.description }}</p>
-          <div class="card-link">
-            <ion-icon name="open-outline"></ion-icon>
-            <span>Visit Resource</span>
-          </div>
+  <!-- Resource Cards Grid -->
+  <div *ngIf="!loading" class="resources-grid">
+    <div
+      *ngFor="let resource of filteredResources"
+      class="resource-card"
+      (click)="openResource(resource.url)">
+      <div class="card-icon-wrapper">
+        <ion-icon [name]="resource.icon" class="card-icon"></ion-icon>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">{{ resource.title }}</h3>
+        <span class="card-category">{{ resource.category }}</span>
+        <p class="card-description">{{ resource.description }}</p>
+        <div class="card-link">
+          <ion-icon name="open-outline"></ion-icon>
+          <span>Visit Resource</span>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Empty State -->
-    <div *ngIf="!loading && filteredResources.length === 0" class="empty-state">
-      <ion-icon name="search-outline" class="empty-icon"></ion-icon>
-      <p>No resources found for this category.</p>
-      <button class="show-all-btn" (click)="filterByCategory('All')">Show All</button>
-    </div>
-
-  </ng-container>
-
-  <!-- ══════════════ QUIZ VIEW ══════════════ -->
-  <ng-container *ngIf="activeView === 'quiz'">
-
-    <!-- Quiz Category Picker -->
-    <ng-container *ngIf="!selectedQuizCategoryId">
-      <div class="quiz-intro">
-        <ion-icon name="game-controller-outline" class="quiz-intro-icon"></ion-icon>
-        <div>
-          <h2>Speech Knowledge Quiz</h2>
-          <p>Choose a category and test what you know. Each quiz has 10 questions with instant feedback and explanations after each answer.</p>
-        </div>
-      </div>
-
-      <div class="quiz-categories-grid">
-        <div
-          *ngFor="let cat of quizCategories"
-          class="quiz-cat-card"
-          [style.--cat-color]="cat.color"
-          [style.--cat-glow]="cat.glowColor"
-          (click)="selectQuizCategory(cat.id)">
-          <div class="qcat-icon-wrap">
-            <ion-icon [name]="cat.icon"></ion-icon>
-          </div>
-          <div class="qcat-body">
-            <h3>{{ cat.label }} Speeches</h3>
-            <p>{{ cat.description }}</p>
-            <div class="qcat-footer">
-              <span class="qcat-count">
-                <ion-icon name="help-circle-outline"></ion-icon>
-                {{ cat.questions.length }} questions
-              </span>
-              <span class="qcat-start">
-                Start Quiz
-                <ion-icon name="arrow-forward-outline"></ion-icon>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- Active Quiz -->
-    <ng-container *ngIf="selectedQuizCategoryId && !quizComplete && currentQuestion">
-      <div class="quiz-panel" [style.--cat-color]="currentCategory?.color" [style.--cat-glow]="currentCategory?.glowColor">
-
-        <!-- Quiz Toolbar -->
-        <div class="quiz-toolbar">
-          <button class="quiz-back-btn" (click)="resetQuiz()">
-            <ion-icon name="arrow-back-outline"></ion-icon>
-            All Categories
-          </button>
-          <div class="quiz-toolbar-right">
-            <span class="quiz-label">{{ currentCategory?.label }}</span>
-            <span class="quiz-score-pill">
-              <ion-icon name="star-outline"></ion-icon>
-              {{ quizScore }} / {{ currentCategory?.questions?.length }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Progress -->
-        <div class="quiz-progress-wrap">
-          <div class="quiz-progress-bar">
-            <div class="quiz-progress-fill" [style.width.%]="progressPercent"></div>
-          </div>
-          <span class="quiz-progress-text">Question {{ currentQuestionIndex + 1 }} of {{ currentCategory?.questions?.length }}</span>
-        </div>
-
-        <!-- Question + Options Layout -->
-        <div class="quiz-content">
-
-          <!-- Question -->
-          <div class="question-panel">
-            <p class="question-num-label">Question {{ currentQuestionIndex + 1 }}</p>
-            <h2 class="question-text">{{ currentQuestion.question }}</h2>
-
-            <!-- Explanation (shown after answering) -->
-            <div *ngIf="answered" class="explanation-box">
-              <ion-icon name="bulb-outline"></ion-icon>
-              <p>{{ currentQuestion.explanation }}</p>
-            </div>
-          </div>
-
-          <!-- Options -->
-          <div class="options-panel">
-            <button
-              *ngFor="let option of currentQuestion.options; let i = index"
-              class="option-btn"
-              [class]="getOptionClass(i)"
-              (click)="selectOption(i)">
-              <span class="opt-letter">{{ ['A','B','C','D'][i] }}</span>
-              <span class="opt-text">{{ option }}</span>
-              <ion-icon
-                *ngIf="answered && i === currentQuestion.correctIndex"
-                name="checkmark-circle"
-                class="opt-result correct-icon">
-              </ion-icon>
-              <ion-icon
-                *ngIf="answered && selectedOptionIndex === i && i !== currentQuestion.correctIndex"
-                name="close-circle"
-                class="opt-result wrong-icon">
-              </ion-icon>
-            </button>
-
-            <!-- Next Button -->
-            <button *ngIf="answered" class="next-btn" (click)="nextQuestion()">
-              {{ currentQuestionIndex < (currentCategory?.questions?.length ?? 0) - 1 ? 'Next Question' : 'See Results' }}
-              <ion-icon name="arrow-forward-outline"></ion-icon>
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- Results Screen -->
-    <ng-container *ngIf="quizComplete && currentCategory">
-      <div class="results-panel" [style.--cat-color]="currentCategory.color" [style.--cat-glow]="currentCategory.glowColor">
-
-        <div class="results-icon-wrap">
-          <ion-icon [name]="scorePercent === 100 ? 'trophy' : scorePercent >= 60 ? 'ribbon' : 'school-outline'"></ion-icon>
-        </div>
-
-        <h2 class="results-title">{{ scoreLabel }}</h2>
-        <p class="results-category">{{ currentCategory.label }} Speech Quiz</p>
-
-        <div class="results-score-display">
-          <span class="score-big">{{ quizScore }}</span>
-          <span class="score-slash">/</span>
-          <span class="score-total">{{ currentCategory.questions.length }}</span>
-        </div>
-
-        <div class="results-bar-wrap">
-          <div class="results-bar-fill" [style.width.%]="scorePercent" [style.background]="currentCategory.color"></div>
-        </div>
-        <p class="results-pct">{{ scorePercent }}% correct</p>
-
-        <!-- Score breakdown -->
-        <div class="score-breakdown">
-          <div class="breakdown-item correct-count">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-            <span>{{ quizScore }} correct</span>
-          </div>
-          <div class="breakdown-item wrong-count">
-            <ion-icon name="close-circle-outline"></ion-icon>
-            <span>{{ (currentCategory.questions.length - quizScore) }} incorrect</span>
-          </div>
-        </div>
-
-        <div class="results-actions">
-          <button class="action-btn primary" (click)="restartCategory()">
-            <ion-icon name="refresh-outline"></ion-icon>
-            Try Again
-          </button>
-          <button class="action-btn secondary" (click)="resetQuiz()">
-            <ion-icon name="grid-outline"></ion-icon>
-            All Categories
-          </button>
-        </div>
-      </div>
-    </ng-container>
-
-  </ng-container>
-
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredResources.length === 0" class="empty-state">
+    <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+    <p>No resources found for this category.</p>
+    <button class="show-all-btn" (click)="filterByCategory('All')">Show All</button>
+  </div>
 </div>
