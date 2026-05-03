@@ -8,3 +8,7 @@ register();  // This enables <swiper-container> and <swiper-slide>
 platformBrowserDynamic()
   .bootstrapModule(AppModule)
   .catch(err => console.log(err));
+
+
+
+  //fix

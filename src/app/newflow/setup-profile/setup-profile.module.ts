@@ -18,3 +18,7 @@ import { SetupProfilePage } from './setup-profile.page';
   declarations: [SetupProfilePage]
 })
 export class SetupProfilePageModule {}
+
+
+
+//fix
