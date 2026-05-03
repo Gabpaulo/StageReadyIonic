@@ -24,6 +24,82 @@
       <p>Choose a script, read it aloud, and get scored on your delivery</p>
     </div>
 
+    <!-- ── Adaptive Plan Loading ── -->
+    <div class="plan-loading" *ngIf="planLoading">
+      <ion-spinner name="dots" style="width:20px;height:20px;--color:var(--primary)"></ion-spinner>
+      <span>Building your personalized plan…</span>
+    </div>
+
+    <!-- ── Plan Empty (no sessions yet) ── -->
+    <div class="plan-empty" *ngIf="!planLoading && !weeklyPlan">
+      <ion-icon name="analytics-outline" class="plan-empty-icon"></ion-icon>
+      <span>Complete your first session to unlock AI-powered script recommendations.</span>
+    </div>
+
+    <!-- ── Adaptive Weekly Plan ── -->
+    <div class="adaptive-plan" *ngIf="!planLoading && weeklyPlan">
+      <div class="plan-header">
+        <span class="plan-icon">🎯</span>
+        <div class="plan-header-text">
+          <h3>
+            Your Weekly Plan
+            <span class="model-badge" *ngIf="weeklyPlan.modelReady">AI</span>
+            <span class="model-badge fallback-badge" *ngIf="!weeklyPlan.modelReady">Avg</span>
+          </h3>
+          <p *ngIf="weeklyPlan.modelReady">Personalized via AI regression on your speech history.</p>
+          <p *ngIf="!weeklyPlan.modelReady">Based on your averages — more sessions unlock the AI model.</p>
+        </div>
+        <div class="session-count-chip">
+          <ion-icon name="flame-outline"></ion-icon>
+          <span>{{ weeklyPlan.sessionCount }}</span>
+        </div>
+      </div>
+
+      <!-- Unlock progress (when AI model not ready) -->
+      <div class="unlock-bar-wrap" *ngIf="!weeklyPlan.modelReady">
+        <div class="unlock-bar-fill" [style.width.%]="Math.min(100, (weeklyPlan.sessionCount / 5) * 100)"></div>
+      </div>
+      <span class="unlock-label" *ngIf="!weeklyPlan.modelReady && sessionsToUnlock > 0">
+        {{ sessionsToUnlock }} more session{{ sessionsToUnlock !== 1 ? 's' : '' }} to unlock AI model
+      </span>
+
+      <!-- Focus areas -->
+      <div class="plan-section-label">Focus Areas</div>
+      <div class="dim-chips">
+        <span class="dim-chip" *ngFor="let d of weeklyPlan.highImpactDimensions">{{ humanLabel(d) }}</span>
+      </div>
+
+      <!-- WPM goal + difficulty -->
+      <div class="plan-stats-row">
+        <div class="plan-stat">
+          <ion-icon name="speedometer-outline"></ion-icon>
+          <span class="plan-stat-val">{{ weeklyPlan.wpmGoal }} WPM</span>
+          <span class="plan-stat-sub">Goal</span>
+        </div>
+        <div class="plan-stat">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+          <span class="plan-stat-val">{{ weeklyPlan.targetDifficulty | titlecase }}</span>
+          <span class="plan-stat-sub">Difficulty</span>
+        </div>
+      </div>
+
+      <!-- Recommended scripts -->
+      <div class="plan-section-label">Recommended Scripts</div>
+      <div class="plan-scripts">
+        <div
+          *ngFor="let rec of weeklyPlan.recommendedScripts"
+          class="plan-script-card"
+          (click)="startFromRecommendation(rec)">
+          <div class="plan-script-info">
+            <span class="plan-script-title">{{ rec.script.title }}</span>
+            <span class="plan-script-reason">{{ rec.reason }}</span>
+          </div>
+          <span class="plan-difficulty" [attr.data-level]="rec.script.difficulty">{{ rec.script.difficulty }}</span>
+          <ion-icon name="chevron-forward-outline" class="plan-arrow"></ion-icon>
+        </div>
+      </div>
+    </div>
+
     <div class="category-cards">
       <div class="category-card informative" (click)="selectCategory('informative')">
         <div class="card-icon-wrap" style="background: rgba(34,167,240,0.15); border-color: rgba(34,167,240,0.4)">
@@ -93,11 +169,20 @@
     </div>
 
     <div class="script-list">
-      <div class="script-card" *ngFor="let script of filteredScripts" (click)="selectScript(script)">
+      <div
+        class="script-card"
+        *ngFor="let script of filteredScripts"
+        (click)="selectScript(script)"
+        [class.recommended]="isRecommended(script)">
+        <div class="recommended-ribbon" *ngIf="isRecommended(script)">
+          <ion-icon name="star-outline"></ion-icon>
+          Recommended for you
+        </div>
         <div class="script-card-header">
           <h2>{{ script.title }}</h2>
           <span class="difficulty-badge" [class]="script.difficulty">{{ script.difficulty }}</span>
         </div>
+        <p class="script-rec-reason" *ngIf="isRecommended(script)">{{ getRecommendedReason(script) }}</p>
         <p class="script-preview">{{ script.rawText.slice(0, 120) }}…</p>
         <div class="script-meta">
           <span><ion-icon name="time-outline"></ion-icon> ~{{ Math.round(script.estimatedDuration / 60) }} min</span>
@@ -255,13 +340,24 @@
         </div>
       </div>
 
-      <!-- ── Dimension Scores (script's target dims only) ── -->
+      <!-- ── Dimension Scores (all 7, target dims highlighted) ── -->
       <div class="dims-card">
         <div class="dims-title">Score Breakdown</div>
-        <div class="dim-item" *ngFor="let item of targetDimScores">
+        <div class="dim-item" *ngFor="let item of allDimScores" [class.target-dim]="item.isTarget">
           <div class="dim-row">
-            <span class="dim-label">{{ item.label }}</span>
-            <span class="dim-score" [style.color]="getScoreColor(item.score)">{{ item.score | number:'1.1-1' }}/5</span>
+            <div class="dim-label-wrap">
+              <span class="dim-label">{{ item.label }}</span>
+              <span class="target-tag" *ngIf="item.isTarget">Target</span>
+            </div>
+            <div class="dim-score-wrap">
+              <span class="dim-delta positive" *ngIf="item.delta !== null && item.delta > 0">
+                <ion-icon name="arrow-up-outline"></ion-icon>+{{ item.delta | number:'1.2-2' }}
+              </span>
+              <span class="dim-delta negative" *ngIf="item.delta !== null && item.delta < 0">
+                <ion-icon name="arrow-down-outline"></ion-icon>{{ item.delta | number:'1.2-2' }}
+              </span>
+              <span class="dim-score" [style.color]="getScoreColor(item.score)">{{ item.score | number:'1.1-1' }}/5</span>
+            </div>
           </div>
           <ion-progress-bar [value]="item.score / 5" [color]="getScoreBarColor(item.score)"></ion-progress-bar>
         </div>
@@ -308,6 +404,24 @@
           <ion-icon name="list-outline" slot="start"></ion-icon>
           Different Script
         </ion-button>
+      </div>
+
+      <!-- ── Next Recommended Script ── -->
+      <div class="next-rec-card" *ngIf="nextRecommendedScript">
+        <div class="next-rec-header">
+          <ion-icon name="sparkles-outline"></ion-icon>
+          <span>Up next in your plan</span>
+        </div>
+        <div class="next-rec-body">
+          <div class="next-rec-info">
+            <span class="next-rec-title">{{ nextRecommendedScript.script.title }}</span>
+            <span class="next-rec-reason">{{ nextRecommendedScript.reason }}</span>
+          </div>
+          <ion-button size="small" (click)="goToNextRecommended()">
+            <ion-icon name="play-outline" slot="start"></ion-icon>
+            Start
+          </ion-button>
+        </div>
       </div>
 
     </ng-container>

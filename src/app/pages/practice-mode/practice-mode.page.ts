@@ -173,6 +173,55 @@ export class PracticeModePage implements OnInit, OnDestroy {
     }));
   }
 
+  readonly ALL_DIM_KEYS: string[] = [
+    'speech_pace', 'pausing_fluency', 'loud_control',
+    'pitch_variation', 'articulation_clarity', 'expressive_emph', 'filler_words_score'
+  ];
+
+  /** All 7 dimensions with target flag and delta vs plan baseline */
+  get allDimScores(): { dim: string; label: string; score: number; isTarget: boolean; delta: number | null }[] {
+    if (!this.results || !this.selectedScript) return [];
+    const targetSet = new Set<string>(this.selectedScript.targetDimensions as string[]);
+    const pre = (this.weeklyPlan?.avgScores ?? {}) as Record<string, number>;
+    return this.ALL_DIM_KEYS.map(dim => {
+      const score = this.results!.dimensionScores[dim] ?? 3;
+      const prev  = pre[dim];
+      return {
+        dim,
+        label:    this.humanLabel(dim),
+        score,
+        isTarget: targetSet.has(dim),
+        delta:    (prev != null && prev > 0) ? parseFloat((score - prev).toFixed(2)) : null
+      };
+    });
+  }
+
+  isRecommended(script: PracticeScript): boolean {
+    return !!this.weeklyPlan?.recommendedScripts?.some(r => r.script.id === script.id);
+  }
+
+  getRecommendedReason(script: PracticeScript): string {
+    return this.weeklyPlan?.recommendedScripts?.find(r => r.script.id === script.id)?.reason ?? '';
+  }
+
+  get nextRecommendedScript(): RecommendedScript | null {
+    if (!this.weeklyPlan?.recommendedScripts?.length) return null;
+    return this.weeklyPlan.recommendedScripts.find(r => r.script.id !== this.selectedScript?.id) ?? null;
+  }
+
+  goToNextRecommended() {
+    const next = this.nextRecommendedScript;
+    if (next) {
+      this.results       = null;
+      this.analysisError = null;
+      this.startFromRecommendation(next);
+    }
+  }
+
+  get sessionsToUnlock(): number {
+    return Math.max(0, 5 - (this.weeklyPlan?.sessionCount ?? 0));
+  }
+
   // ─── Navigation ───────────────────────────────────────────────────────────
 
   selectCategory(cat: Category) {
