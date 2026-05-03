@@ -237,15 +237,19 @@ export class PracticeModePage implements OnInit, OnDestroy {
     }));
   }
 
-  /** Transcript split into words, each flagged if it's a filler word */
-  get transcriptWords(): { word: string; isFiller: boolean }[] {
-    if (!this.results) return [];
+  /** Transcript split into words — flagged as filler or as not appearing in the script */
+  get transcriptWords(): { word: string; isFiller: boolean; isExtra: boolean }[] {
+    if (!this.results || !this.selectedScript) return [];
+    const norm      = (w: string) => w.toLowerCase().replace(/[^a-z']/g, '');
     const fillerSet = new Set(this.results.detectedFillers.map(f => f.toLowerCase()));
-    const norm = (w: string) => w.toLowerCase().replace(/[^a-z]/g, '');
-    return this.results.transcript.trim().split(/\s+/).filter(Boolean).map(word => ({
-      word,
-      isFiller: fillerSet.has(norm(word))
-    }));
+    const scriptSet = new Set(
+      this.selectedScript.rawText.trim().split(/\s+/).filter(Boolean).map(norm)
+    );
+    return this.results.transcript.trim().split(/\s+/).filter(Boolean).map(word => {
+      const n = norm(word);
+      const isFiller = fillerSet.has(n);
+      return { word, isFiller, isExtra: !isFiller && !scriptSet.has(n) };
+    });
   }
 
   // ─── Navigation ───────────────────────────────────────────────────────────

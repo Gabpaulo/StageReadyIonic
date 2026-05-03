@@ -393,11 +393,11 @@
 
         <!-- Card header with Compare toggle -->
         <div class="transcript-header">
-          <div class="transcript-title">What You Said</div>
           <button class="compare-btn" (click)="showComparison = !showComparison">
             <ion-icon [name]="showComparison ? 'contract-outline' : 'git-compare-outline'"></ion-icon>
             {{ showComparison ? 'Close' : 'Compare' }}
           </button>
+          <div class="transcript-title">What You Said</div>
         </div>
 
         <!-- Plain view -->
@@ -433,7 +433,8 @@
               <span
                 *ngFor="let w of transcriptWords"
                 class="cmp-word"
-                [class.filler]="w.isFiller">{{ w.word }}&nbsp;</span>
+                [class.filler]="w.isFiller"
+                [class.extra]="w.isExtra">{{ w.word }}&nbsp;</span>
             </div>
           </div>
 
@@ -444,6 +445,10 @@
           <span class="legend-item">
             <span class="legend-dot missed-dot"></span>
             Missed word
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot extra-dot"></span>
+            Not in script
           </span>
           <span class="legend-item">
             <span class="legend-dot filler-dot"></span>

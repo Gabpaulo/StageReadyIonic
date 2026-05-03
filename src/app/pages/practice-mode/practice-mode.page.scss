@@ -596,7 +596,7 @@
 .transcript-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.6rem;
   margin-bottom: 0.6rem;
 }
 
@@ -682,6 +682,13 @@
     padding: 1px 2px;
     font-style: italic;
   }
+
+  &.extra {
+    color: var(--primary);
+    background: rgba(34,167,240,0.13);
+    border-radius: 3px;
+    padding: 1px 2px;
+  }
 }
 
 /* Legend */
@@ -709,6 +716,7 @@
 }
 
 .missed-dot { background: rgba(244,67,54,0.5); }
+.extra-dot  { background: rgba(34,167,240,0.5); }
 .filler-dot { background: rgba(255,152,0,0.5); }
 
 /* Results action buttons */
