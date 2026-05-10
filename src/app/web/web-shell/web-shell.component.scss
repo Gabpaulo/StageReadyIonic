@@ -242,3 +242,13 @@ ion-menu {
     --width: 200px;
   }
 }
+
+@media (max-width: 480px) {
+  .content-wrapper {
+    padding: 12px;
+  }
+
+  .main-toolbar .app-title {
+    font-size: 1rem;
+  }
+}

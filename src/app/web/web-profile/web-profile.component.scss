@@ -645,3 +645,46 @@
     }
   }
 }
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 12px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+
+    h1 {
+      font-size: 1.5rem;
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    p { font-size: 0.9rem; }
+  }
+
+  .profile-info {
+    .profile-avatar-section .profile-avatar {
+      width: 100px;
+      height: 100px;
+    }
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+
+    .action-btn {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+}

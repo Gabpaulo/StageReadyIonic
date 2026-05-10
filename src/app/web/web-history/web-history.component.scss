@@ -618,7 +618,6 @@ mat-dialog-content {
 }
 
 /* ── Responsive design ─────────────────────────────────────────────────── */
-// Responsive design
 @media (max-width: 768px) {
   .history-container {
     padding: 16px;
@@ -664,15 +663,68 @@ mat-dialog-content {
   
   .empty-state {
     padding: 40px 16px;
-    
+
     .empty-image {
       width: 100px;
       height: 100px;
     }
-    
+
     h3 {
       font-size: 1.3rem;
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .history-container {
+    padding: 12px;
+  }
+
+  .page-header {
+    h1 {
+      font-size: 1.5rem;
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    p { font-size: 0.9rem; }
+  }
+
+  .summary-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+
+    .stat-item {
+      padding: 12px 8px;
+
+      .stat-value { font-size: 1.3rem; }
+    }
+  }
+
+  .history-card {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .entry-scores {
+    display: none;
+  }
+
+  .ta-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ta-trend-badge {
+    align-self: flex-start;
+  }
+
+  .dim-label-cell {
+    width: 80px;
   }
 }
 

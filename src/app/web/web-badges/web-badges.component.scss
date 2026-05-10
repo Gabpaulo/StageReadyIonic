@@ -377,14 +377,46 @@
   
   .empty-state {
     padding: 40px 16px;
-    
+
     .empty-image {
       width: 100px;
       height: 100px;
     }
-    
+
     h3 {
       font-size: 1.3rem;
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .badges-container {
+    padding: 12px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+
+    h1 {
+      font-size: 1.5rem;
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    p { font-size: 0.9rem; }
+  }
+
+  .badges-grid {
+    gap: 12px;
+  }
+
+  .badge-card .badge-content {
+    padding: 12px;
+
+    .badge-name { font-size: 1rem; }
   }
 }

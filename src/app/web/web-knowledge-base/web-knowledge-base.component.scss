@@ -854,3 +854,49 @@
   .results-panel { padding: 32px 20px; }
   .results-panel .results-score-display .score-big { font-size: 4rem; }
 }
+
+@media (max-width: 480px) {
+  .knowledge-base-container {
+    padding: 12px;
+  }
+
+  .page-header .header-content {
+    gap: 12px;
+
+    .header-icon { font-size: 2rem; }
+    h1           { font-size: 1.3rem; }
+    p            { font-size: 0.88rem; }
+  }
+
+  .view-toggle .toggle-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    gap: 5px;
+  }
+
+  .category-filter .filter-chip {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+  }
+
+  .resource-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .quiz-toolbar {
+    padding: 12px 14px;
+  }
+
+  .quiz-content {
+    padding: 14px;
+  }
+
+  .results-panel {
+    padding: 24px 14px;
+
+    .results-title { font-size: 1.5rem; }
+    .results-score-display .score-big { font-size: 3rem; }
+    .score-slash, .score-total        { font-size: 1.8rem; }
+  }
+}

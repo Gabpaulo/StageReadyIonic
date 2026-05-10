@@ -348,3 +348,39 @@ ion-button.toggle-btn {
     }
   }
 }
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 12px;
+  }
+
+  .login-header {
+    margin-bottom: 24px;
+
+    .app-logo {
+      width: 80px;
+      height: 80px;
+    }
+
+    .login-title {
+      font-size: 1.8rem;
+    }
+
+    .login-subtitle {
+      font-size: 0.9rem;
+    }
+  }
+
+  ion-card.login-card {
+    padding: 24px 16px;
+    border-radius: 16px;
+
+    ion-card-header ion-card-title {
+      font-size: 1.2rem;
+    }
+
+    ion-card-content {
+      padding: 12px;
+    }
+  }
+}
