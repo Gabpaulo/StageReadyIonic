@@ -173,6 +173,90 @@ export class PracticeModePage implements OnInit, OnDestroy {
     }));
   }
 
+  readonly ALL_DIM_KEYS: string[] = [
+    'speech_pace', 'pausing_fluency', 'loud_control',
+    'pitch_variation', 'articulation_clarity', 'expressive_emph', 'filler_words_score'
+  ];
+
+  /** All 7 dimensions with target flag and delta vs plan baseline */
+  get allDimScores(): { dim: string; label: string; score: number; isTarget: boolean; delta: number | null }[] {
+    if (!this.results || !this.selectedScript) return [];
+    const targetSet = new Set<string>(this.selectedScript.targetDimensions as string[]);
+    const pre = (this.weeklyPlan?.avgScores ?? {}) as Record<string, number>;
+    return this.ALL_DIM_KEYS.map(dim => {
+      const score = this.results!.dimensionScores[dim] ?? 3;
+      const prev  = pre[dim];
+      return {
+        dim,
+        label:    this.humanLabel(dim),
+        score,
+        isTarget: targetSet.has(dim),
+        delta:    (prev != null && prev > 0) ? parseFloat((score - prev).toFixed(2)) : null
+      };
+    });
+  }
+
+  isRecommended(script: PracticeScript): boolean {
+    return !!this.weeklyPlan?.recommendedScripts?.some(r => r.script.id === script.id);
+  }
+
+  getRecommendedReason(script: PracticeScript): string {
+    return this.weeklyPlan?.recommendedScripts?.find(r => r.script.id === script.id)?.reason ?? '';
+  }
+
+  get nextRecommendedScript(): RecommendedScript | null {
+    if (!this.weeklyPlan?.recommendedScripts?.length) return null;
+    return this.weeklyPlan.recommendedScripts.find(r => r.script.id !== this.selectedScript?.id) ?? null;
+  }
+
+  goToNextRecommended() {
+    const next = this.nextRecommendedScript;
+    if (next) {
+      this.results       = null;
+      this.analysisError = null;
+      this.startFromRecommendation(next);
+    }
+  }
+
+  get sessionsToUnlock(): number {
+    return Math.max(0, 5 - (this.weeklyPlan?.sessionCount ?? 0));
+  }
+
+  // ── Transcript comparison ──────────────────────────────────────────────────
+
+  showComparison = false;
+
+  /** Strips to lowercase letters only — used for all comparison normalisation */
+  private normWord = (w: string) => w.toLowerCase().replace(/[^a-z]/g, '');
+
+  /** Script split into words, each flagged if it was missed by the speaker */
+  get scriptWords(): { word: string; missed: boolean }[] {
+    if (!this.selectedScript || !this.results) return [];
+    const missedSet = new Set(this.results.missedWords.map(this.normWord));
+    return this.selectedScript.rawText.trim().split(/\s+/).filter(Boolean).map(word => ({
+      word,
+      missed: missedSet.has(this.normWord(word))
+    }));
+  }
+
+  /** Transcript split into words — filler only if the word is NOT in the script */
+  get transcriptWords(): { word: string; isFiller: boolean; isExtra: boolean }[] {
+    if (!this.results || !this.selectedScript) return [];
+    const fillerSet = new Set(this.results.detectedFillers.map(this.normWord));
+    const scriptSet = new Set(
+      this.selectedScript.rawText.trim().split(/\s+/).filter(Boolean).map(this.normWord)
+    );
+    return this.results.transcript.trim().split(/\s+/).filter(Boolean).map(word => {
+      const n        = this.normWord(word);
+      const inScript = scriptSet.has(n);
+      return {
+        word,
+        isFiller: !inScript && fillerSet.has(n),   // only filler if not part of the script
+        isExtra:  !inScript && !fillerSet.has(n)   // said something not in script at all
+      };
+    });
+  }
+
   // ─── Navigation ───────────────────────────────────────────────────────────
 
   selectCategory(cat: Category) {
@@ -355,16 +439,18 @@ export class PracticeModePage implements OnInit, OnDestroy {
   }
 
   tryAgain() {
-    this.results        = null;
-    this.analysisError  = null;
-    this.sessionStarted = false;
-    this.step           = 'session';
+    this.results         = null;
+    this.analysisError   = null;
+    this.sessionStarted  = false;
+    this.showComparison  = false;
+    this.step            = 'session';
   }
 
   chooseDifferent() {
-    this.results       = null;
-    this.analysisError = null;
-    this.step          = 'script';
+    this.results        = null;
+    this.analysisError  = null;
+    this.showComparison = false;
+    this.step           = 'script';
   }
 
   private stopSession(saveAudio: boolean) {

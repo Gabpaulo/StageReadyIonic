@@ -584,9 +584,145 @@
   border-radius: 14px;
   padding: 1rem 1.1rem;
   margin-bottom: 1rem;
-  .transcript-title { font-size: 0.82rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
-  .transcript-text  { font-size: 0.9rem; color: var(--text); line-height: 1.7; margin: 0; white-space: pre-wrap; }
+  transition: border-color 0.2s;
+
+  &.comparison-open {
+    border-color: rgba(34,167,240,0.35);
+    margin-left:  -1.25rem;
+    margin-right: -1.25rem;
+    border-left:  none;
+    border-right: none;
+    border-radius: 0;
+  }
+
+  .transcript-text { font-size: 0.9rem; color: var(--text); line-height: 1.7; margin: 0; white-space: pre-wrap; }
 }
+
+.transcript-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.transcript-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.compare-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(34,167,240,0.1);
+  border: 1px solid rgba(34,167,240,0.3);
+  border-radius: 8px;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  ion-icon { font-size: 0.9rem; }
+  &:hover  { background: rgba(34,167,240,0.2); }
+  &:active { transform: scale(0.97); }
+}
+
+/* Comparison layout */
+.comparison-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.comparison-divider {
+  background: var(--border);
+  border-radius: 1px;
+  align-self: stretch;
+}
+
+.comparison-col {
+  min-width: 0;
+
+  .col-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+    ion-icon { font-size: 0.85rem; }
+  }
+}
+
+.comparison-text {
+  font-size: 0.88rem;
+  line-height: 2;
+  color: var(--text);
+}
+
+.cmp-word {
+  display: inline;
+
+  &.missed {
+    color: var(--danger);
+    background: rgba(244,67,54,0.14);
+    border-radius: 3px;
+    padding: 1px 2px;
+    text-decoration: line-through;
+    text-decoration-color: rgba(244,67,54,0.6);
+  }
+
+  &.filler {
+    color: var(--warning);
+    background: rgba(255,152,0,0.14);
+    border-radius: 3px;
+    padding: 1px 2px;
+    font-style: italic;
+  }
+
+  &.extra {
+    color: var(--primary);
+    background: rgba(34,167,240,0.13);
+    border-radius: 3px;
+    padding: 1px 2px;
+  }
+}
+
+/* Legend */
+.comparison-legend {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.missed-dot { background: rgba(244,67,54,0.5); }
+.extra-dot  { background: rgba(34,167,240,0.5); }
+.filler-dot { background: rgba(255,152,0,0.5); }
 
 /* Results action buttons */
 .results-actions {
@@ -922,7 +1058,239 @@
   line-height: 1.5;
 }
 
+/* ── Plan section label ── */
+.plan-section-label {
+  font-size: .7rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin: 12px 0 6px;
+}
+
+/* ── Plan stats row (WPM + Difficulty) ── */
+.plan-stats-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.plan-stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: .78rem;
+  color: var(--muted);
+
+  ion-icon { font-size: .9rem; color: var(--primary); flex-shrink: 0; }
+  .plan-stat-val { font-weight: 800; color: var(--text); flex: 1; }
+  .plan-stat-sub { font-size: .63rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+}
+
+/* ── Session count chip in plan header ── */
+.session-count-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,107,53,.12);
+  border: 1px solid rgba(255,107,53,.3);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #ff6b35;
+  flex-shrink: 0;
+  ion-icon { font-size: .85rem; }
+}
+
+/* ── Fallback badge variant ── */
+.fallback-badge {
+  color: var(--warning) !important;
+  background: rgba(255,152,0,.15) !important;
+  border-color: rgba(255,152,0,.35) !important;
+}
+
+/* ── Unlock progress bar ── */
+.unlock-bar-wrap {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin: 10px 0 4px;
+  overflow: hidden;
+
+  .unlock-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #667eea);
+    border-radius: 3px;
+    transition: width .6s ease;
+  }
+}
+
+.unlock-label {
+  display: block;
+  font-size: .72rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ── Recommended script card highlight ── */
+.script-card.recommended {
+  border-color: rgba(102,126,234,.5);
+  box-shadow: 0 4px 20px rgba(102,126,234,.12);
+}
+
+.recommended-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .7rem;
+  font-weight: 700;
+  color: #667eea;
+  background: rgba(102,126,234,.1);
+  border: 1px solid rgba(102,126,234,.25);
+  border-radius: 6px;
+  padding: 2px 8px;
+  margin-bottom: 8px;
+  width: fit-content;
+  ion-icon { font-size: .75rem; }
+}
+
+.script-rec-reason {
+  font-size: .78rem;
+  color: #667eea;
+  font-style: italic;
+  margin: -0.2rem 0 0.5rem;
+  line-height: 1.4;
+}
+
+/* ── Target dim highlight in results breakdown ── */
+.dim-item.target-dim {
+  background: rgba(102,126,234,.05);
+  border-radius: 8px;
+  padding: 0.55rem 0.5rem;
+  margin: 0 -0.5rem;
+}
+
+.dim-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.target-tag {
+  font-size: .62rem;
+  font-weight: 800;
+  color: #667eea;
+  background: rgba(102,126,234,.12);
+  border: 1px solid rgba(102,126,234,.3);
+  border-radius: 20px;
+  padding: 1px 6px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.dim-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dim-delta {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: .72rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 1px 6px;
+
+  ion-icon { font-size: .7rem; }
+
+  &.positive {
+    color: var(--success);
+    background: rgba(76,175,80,.1);
+    border: 1px solid rgba(76,175,80,.25);
+  }
+
+  &.negative {
+    color: var(--danger);
+    background: rgba(244,67,54,.08);
+    border: 1px solid rgba(244,67,54,.2);
+  }
+}
+
+/* ── Next Recommended Card (bottom of results) ── */
+.next-rec-card {
+  background: var(--surface);
+  border: 1px solid rgba(102,126,234,.4);
+  border-left: 3px solid #667eea;
+  border-radius: 14px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+.next-rec-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  font-weight: 800;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 0.6rem;
+  ion-icon { font-size: .9rem; }
+}
+
+.next-rec-body {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.next-rec-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.next-rec-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.next-rec-reason {
+  font-size: .78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ── Responsive ── */
+@media (max-width: 400px) {
+  .comparison-wrap {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .comparison-divider {
+    height: 1px;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+}
+
 @media (max-width: 400px) {
   .script-text { font-size: 0.95rem; }
   .stat-chip   { padding: 0.4rem 0.65rem; font-size: 0.78rem; }
