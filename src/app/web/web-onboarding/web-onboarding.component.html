@@ -1,0 +1,201 @@
+<div class="onboarding-page">
+
+  <!-- Background -->
+  <div class="stage-bg"></div>
+
+  <div class="onboarding-card">
+
+    <!-- Progress bar (hidden on welcome screen) -->
+    <div class="progress-wrap" *ngIf="currentStep > 0">
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progressPercent"></div>
+      </div>
+      <span class="progress-label">Step {{ currentStep }} of {{ TOTAL_STEPS - 1 }}</span>
+    </div>
+
+    <!-- ─────────────────────────────────── -->
+    <!-- STEP 0: Welcome                    -->
+    <!-- ─────────────────────────────────── -->
+    <div class="step fade-in" *ngIf="currentStep === 0">
+      <div class="hero-icon">
+        <mat-icon>mic</mat-icon>
+      </div>
+      <h1 class="hero-title">Welcome to <span class="brand">StageReady</span></h1>
+      <p class="hero-sub">Your AI-powered speech coach. Analyze your delivery, track your growth, and become a confident speaker.</p>
+
+      <div class="feature-list">
+        <div class="feature-row">
+          <div class="feature-dot" style="background:#22a7f0"></div>
+          <span>Real-time voice analysis across 7 speech dimensions</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-dot" style="background:#9c27b0"></div>
+          <span>RAG-powered feedback from expert coaching sources</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-dot" style="background:#00bcd4"></div>
+          <span>Practice scripts with word-accuracy scoring</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-dot" style="background:#4caf50"></div>
+          <span>Badges, streaks, and gamified progress tracking</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" (click)="nextStep()">
+        Get Started
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+
+    <!-- ─────────────────────────────────── -->
+    <!-- STEP 1: Profile                    -->
+    <!-- ─────────────────────────────────── -->
+    <div class="step fade-in" *ngIf="currentStep === 1">
+      <h2 class="step-title">Tell us about yourself</h2>
+      <p class="step-sub">This helps personalize your coaching experience.</p>
+
+      <div class="form-body">
+        <div class="form-row-two">
+          <div class="form-group">
+            <label>First Name <span class="req">*</span></label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="formData.firstName"
+              placeholder="e.g. Maria"
+              autocomplete="given-name"
+            />
+          </div>
+          <div class="form-group">
+            <label>Last Name <span class="req">*</span></label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="formData.lastName"
+              placeholder="e.g. Santos"
+              autocomplete="family-name"
+            />
+          </div>
+        </div>
+
+        <div class="form-row-two">
+          <div class="form-group">
+            <label>Age <span class="opt">(optional)</span></label>
+            <input
+              type="number"
+              class="form-input"
+              [(ngModel)]="formData.age"
+              placeholder="e.g. 21"
+              min="10"
+              max="120"
+            />
+          </div>
+          <div class="form-group">
+            <label>Gender <span class="opt">(optional)</span></label>
+            <select class="form-input" [(ngModel)]="formData.gender">
+              <option value="">Prefer not to say</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="non-binary">Non-binary</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" (click)="prevStep()">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+        <button class="btn-primary" [disabled]="!canProceedStep1()" (click)="nextStep()">
+          Continue <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────── -->
+    <!-- STEP 2: Goals & Interests          -->
+    <!-- ─────────────────────────────────── -->
+    <div class="step fade-in" *ngIf="currentStep === 2">
+      <h2 class="step-title">Your speaking goals</h2>
+      <p class="step-sub">Select the areas you want to improve — we'll tailor your coaching.</p>
+
+      <label class="field-label">I want to improve my…</label>
+      <div class="interest-chips">
+        <button
+          *ngFor="let interest of INTEREST_OPTIONS"
+          class="interest-chip"
+          [class.selected]="isInterestSelected(interest)"
+          (click)="toggleInterest(interest)"
+          type="button"
+        >
+          {{ interest }}
+        </button>
+      </div>
+
+      <label class="field-label mt-24">Preferred speech type</label>
+      <div class="type-cards">
+        <div
+          *ngFor="let type of SPEECH_TYPES"
+          class="type-card"
+          [class.selected]="formData.defaultSpeechType === type.value"
+          (click)="formData.defaultSpeechType = type.value"
+        >
+          <mat-icon class="type-icon">{{ type.icon }}</mat-icon>
+          <span class="type-label">{{ type.label }}</span>
+          <span class="type-desc">{{ type.desc }}</span>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" (click)="prevStep()">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+        <button class="btn-primary" (click)="nextStep()">
+          Continue <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────── -->
+    <!-- STEP 3: All Set                    -->
+    <!-- ─────────────────────────────────── -->
+    <div class="step fade-in" *ngIf="currentStep === 3">
+      <div class="hero-icon success">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <h2 class="hero-title">You're all set<span *ngIf="formData.firstName">, {{ formData.firstName }}</span>!</h2>
+      <p class="hero-sub">Your profile is ready. Record your first speech and get instant AI coaching feedback.</p>
+
+      <div class="summary-card">
+        <div class="summary-row" *ngIf="formData.interests.length > 0">
+          <mat-icon>interests</mat-icon>
+          <div class="summary-text">
+            <span class="summary-label">Your interests</span>
+            <span class="summary-val">{{ formData.interests.join(' · ') }}</span>
+          </div>
+        </div>
+        <div class="summary-row">
+          <mat-icon>record_voice_over</mat-icon>
+          <div class="summary-text">
+            <span class="summary-label">Default speech type</span>
+            <span class="summary-val">{{ formData.defaultSpeechType | titlecase }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" (click)="prevStep()">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+        <button class="btn-primary btn-finish" [disabled]="isSaving" (click)="completeOnboarding()">
+          <mat-icon *ngIf="!isSaving">mic</mat-icon>
+          <mat-spinner *ngIf="isSaving" [diameter]="18"></mat-spinner>
+          {{ isSaving ? 'Setting up…' : 'Start Practicing' }}
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /onboarding-card -->
+</div>

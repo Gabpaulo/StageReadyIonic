@@ -30,20 +30,16 @@ export class WebLoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Get returnUrl from query parameters
     this.route.queryParams.subscribe(params => {
       if (params['returnUrl'] && params['returnUrl'].startsWith('/web')) {
         this.returnUrl = params['returnUrl'];
       }
     });
 
-    // Redirect authenticated users to dashboard or returnUrl
-    this.firebaseService.auth.onAuthStateChanged(user => {
+    // If the user is already signed in, send them to the right place
+    this.firebaseService.auth.onAuthStateChanged(async user => {
       if (user) {
-        const currentUrl = this.router.url;
-        if (currentUrl.includes('web-login')) {
-          this.router.navigate([this.returnUrl]);
-        }
+        await this.redirect(user.uid);
       }
     });
   }
@@ -62,20 +58,8 @@ export class WebLoginComponent implements OnInit {
         this.email,
         this.password
       );
-      const user = userCred.user;
-      this.presentToast(`Login successful! Welcome, ${user.email}`);
-
-      // Check if user needs onboarding
-      if (!this.onboardingService.hasCompletedOnboarding()) {
-        this.router.navigate(['/onboarding'], { queryParams: { returnTo: 'web' } });
-      } else if (!(await this.firebaseService.userProfileExists(user.uid))) {
-        this.router.navigate(['/setup-profile'], {
-          queryParams: { returnUrl: this.returnUrl }
-        });
-      } else {
-        this.router.navigate([this.returnUrl]);
-      }
-
+      this.presentToast(`Welcome back, ${userCred.user.email}`);
+      await this.redirect(userCred.user.uid);
     } catch (error: any) {
       this.presentToast(`Login failed: ${error.message}`, 'danger');
     }
@@ -86,16 +70,14 @@ export class WebLoginComponent implements OnInit {
       this.presentToast('Passwords do not match.', 'warning');
       return;
     }
-
     try {
       const userCred = await createUserWithEmailAndPassword(
         this.firebaseService.auth,
         this.email,
         this.password
       );
-      const user = userCred.user;
-      this.presentToast('Registration successful');
-      this.toggleRegister();
+      this.presentToast('Registration successful! Let\'s set up your profile.');
+      await this.redirect(userCred.user.uid);
     } catch (error: any) {
       this.presentToast(`Registration failed: ${error.message}`, 'danger');
     }
@@ -104,42 +86,35 @@ export class WebLoginComponent implements OnInit {
   async signInWithGoogle() {
     try {
       const userCred = await this.firebaseService.signInWithGoogle();
-      const user = userCred.user;
-
-      this.presentToast(`Login successful! Welcome, ${user.displayName || user.email}`);
-
-      // Check if user needs onboarding
-      if (!this.onboardingService.hasCompletedOnboarding()) {
-        this.router.navigate(['/onboarding'], { queryParams: { returnTo: 'web' } });
-      } else {
-        // Check if user profile exists in Firestore
-        const profileExists = await this.firebaseService.userProfileExists(user.uid);
-
-        if (!profileExists) {
-          // New user - create minimal profile and redirect to setup
-          await this.firebaseService.createUserProfile(user.uid, {
-            email: user.email,
-            displayName: user.displayName || '',
-          });
-          this.router.navigate(['/setup-profile'], {
-            queryParams: { returnUrl: this.returnUrl }
-          });
-        } else {
-          // Existing user - go to dashboard
-          this.router.navigate([this.returnUrl]);
-        }
-      }
-
+      this.presentToast(`Welcome, ${userCred.user.displayName || userCred.user.email}`);
+      await this.redirect(userCred.user.uid);
     } catch (error: any) {
       this.presentToast(`Google login failed: ${error.message}`, 'danger');
     }
   }
 
+  /**
+   * Single post-login routing decision:
+   * - New user (no profile or onboardingComplete not set) → /web/onboarding
+   * - Returning user → returnUrl (defaults to /web/dashboard)
+   */
+  private async redirect(uid: string) {
+    // Clear cache so we always read fresh state from Firestore after login
+    this.onboardingService.clearCache();
+    const complete = await this.onboardingService.isComplete(uid);
+
+    if (!complete) {
+      this.router.navigate(['/web/onboarding'], { replaceUrl: true });
+    } else {
+      this.router.navigate([this.returnUrl], { replaceUrl: true });
+    }
+  }
+
   async presentToast(message: string, color: string = 'success') {
     const toast = await this.toastController.create({
-      message: message,
+      message,
       duration: 2000,
-      color: color
+      color
     });
     toast.present();
   }
