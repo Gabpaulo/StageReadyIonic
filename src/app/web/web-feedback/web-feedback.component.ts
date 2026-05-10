@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { AnalyzeSpeechForFeedbackOutput } from '../../pages/speech-analysis/model';
+import { AnalyzeSpeechForFeedbackOutput } from '../../models/speech-analysis.model';
 
 @Component({
   selector: 'app-web-feedback',

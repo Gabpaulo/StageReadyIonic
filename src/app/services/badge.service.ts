@@ -5,7 +5,7 @@ import { BadgeNotificationService } from './badge-notification.service';
 import { GamificationService } from './gamification.service';
 import { Badge, UserBadgeProgress, BadgeCategory, BadgeRarity } from '../models/badge.model';
 import { BADGE_DEFINITIONS, BADGE_CRITERIA } from '../data/badges.data';
-import { AnalyzeSpeechForFeedbackOutput } from '../pages/speech-analysis/model';
+import { AnalyzeSpeechForFeedbackOutput } from '../models/speech-analysis.model';
 
 @Injectable({
   providedIn: 'root'

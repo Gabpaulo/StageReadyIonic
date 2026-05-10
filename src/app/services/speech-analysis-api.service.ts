@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
-import { AnalyzeSpeechForFeedbackOutput } from '../pages/speech-analysis/model';
+import { AnalyzeSpeechForFeedbackOutput } from '../models/speech-analysis.model';
 import { environment } from '../../environments/environment';
 
 interface WhisperWord {

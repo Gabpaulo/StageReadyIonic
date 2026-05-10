@@ -1,5 +1,6 @@
 // Shared styles for all pages in the StageReady app
 // This file provides a unified design system across all pages
+@use 'sass:color';
 
 // ===== COLOR PALETTE =====
 $primary-color: #29ABE2;
@@ -83,7 +84,7 @@ $shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 @mixin gradient-background {
-  background: radial-gradient(60% 60% at 50% 10%, lighten($background-color, 5%) 0%, $background-color 60%, darken($background-color, 5%) 100%);
+  background: radial-gradient(60% 60% at 50% 10%, color.adjust($background-color, $lightness: 5%) 0%, $background-color 60%, color.adjust($background-color, $lightness: -5%) 100%);
 }
 
 // ===== ANIMATIONS =====

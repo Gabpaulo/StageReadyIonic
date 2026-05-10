@@ -9,7 +9,7 @@ import { FirebaseService } from '../../services/firebase.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { SpeechTypeDialogComponent } from './speech-type-dialog/speech-type-dialog.component';
-import { AnalyzeSpeechForFeedbackOutput } from '../../pages/speech-analysis/model';
+import { AnalyzeSpeechForFeedbackOutput } from '../../models/speech-analysis.model';
 
 @Component({
   selector: 'app-web-analysis',
