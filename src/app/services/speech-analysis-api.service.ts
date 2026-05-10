@@ -13,6 +13,13 @@ interface WhisperResponse {
   text: string;
   duration?: number;
   words?: WhisperWord[];
+  acoustic_features?: {
+    loud_mean: number;
+    loud_std: number;
+    pitch_std: number;
+    spectral_centroid: number;
+    spectral_flux: number;
+  };
 }
 
 interface PauseDetail {
@@ -39,7 +46,6 @@ interface PauseStats {
 export class SpeechAnalysisApiService {
 
   private readonly WHISPER_MODEL = 'whisper-large-v3-turbo';
-  private readonly LLM_MODEL = 'llama-3.3-70b-versatile';
   private readonly API_BASE = environment.apiUrl;
 
   analyzeSpeech(audioBlob: Blob, category: string): Observable<AnalyzeSpeechForFeedbackOutput> {
@@ -53,8 +59,10 @@ export class SpeechAnalysisApiService {
     const transcription = await this.transcribeAudio(audioBlob);
     const pauseStats    = this.detectPauses(transcription);
     const fillerData    = this.extractFillers(transcription);
-    const analysis      = await this.analyzeTranscript(transcription, category, pauseStats, fillerData.count);
-    return this.mapToFeedbackOutput(analysis, transcription, category, pauseStats);
+    const { feedback, rag_metadata } = await this.analyzeTranscript(
+      transcription, category, pauseStats, fillerData.count
+    );
+    return this.mapToFeedbackOutput(feedback, transcription, category, pauseStats, rag_metadata);
   }
 
   // ── Step 1: Whisper transcription ─────────────────────────────────────────
@@ -66,7 +74,6 @@ export class SpeechAnalysisApiService {
     formData.append('model', this.WHISPER_MODEL);
     formData.append('response_format', 'verbose_json');
     formData.append('timestamp_granularities[]', 'word');
-    // Primes Whisper to keep filler words instead of silently removing them
     formData.append('prompt', 'Um, uh, like, you know, basically, so, right, okay, hmm, mm.');
 
     const response = await fetch(`${this.API_BASE}/api/transcribe`, {
@@ -79,6 +86,7 @@ export class SpeechAnalysisApiService {
       throw new Error(`Whisper transcription failed (${response.status}): ${err}`);
     }
 
+    // Response now includes acoustic_features extracted by the backend
     return response.json();
   }
 
@@ -89,21 +97,24 @@ export class SpeechAnalysisApiService {
     category: string,
     pauseStats: PauseStats,
     fillerCount: number
-  ): Promise<any> {
+  ): Promise<{ feedback: any; rag_metadata: any }> {
     const wordCount = transcription.text.trim().split(/\s+/).length;
     const duration  = transcription.duration ?? 0;
     const wpm       = duration > 0 ? Math.round((wordCount / duration) * 60) : 0;
 
-    // Approximate acoustic features from Whisper data for Corpus 1 similarity search
+    // Use real acoustic features returned by the backend from the audio file.
+    // Falls back to approximated values if the backend didn't return them.
+    const af = transcription.acoustic_features;
     const totalPauseTime = pauseStats.pauses.reduce((s, p) => s + p.duration, 0);
+
     const userMetrics = {
       syllables_per_sec:  duration > 0 ? parseFloat(((wordCount * 1.5) / duration).toFixed(3)) : 0,
       pause_ratio:        duration > 0 ? parseFloat((totalPauseTime / duration).toFixed(3)) : 0,
-      loud_mean:          0,
-      loud_std:           0,
-      pitch_std:          0,
-      spectral_centroid:  0,
-      spectral_flux:      0,
+      loud_mean:          af?.loud_mean          ?? 0,
+      loud_std:           af?.loud_std           ?? 0,
+      pitch_std:          af?.pitch_std          ?? 0,
+      spectral_centroid:  af?.spectral_centroid  ?? 0,
+      spectral_flux:      af?.spectral_flux      ?? 0,
     };
 
     const response = await fetch(`${this.API_BASE}/api/analyze-rag`, {
@@ -125,8 +136,8 @@ export class SpeechAnalysisApiService {
     }
 
     const data = await response.json();
-    // /api/analyze-rag returns { feedback: {...}, rag_metadata: {...} }
-    return data.feedback;
+    // Return both the LLM feedback AND the retrieval metadata
+    return { feedback: data.feedback, rag_metadata: data.rag_metadata };
   }
 
   // ── Category weights (must sum to 1.0 per category) ──────────────────────
@@ -162,12 +173,12 @@ export class SpeechAnalysisApiService {
     r: any,
     transcription: WhisperResponse,
     category: string,
-    pauseStats: PauseStats
+    pauseStats: PauseStats,
+    rag_metadata?: any
   ): AnalyzeSpeechForFeedbackOutput {
     const ds = r.feedback?.detailed_scores ?? {};
     const fillerData = this.extractFillers(transcription);
 
-    // Per-dimension feedback — prefer top-level fields, fall back to detailed_scores
     const pace_feedback     = r.pace_feedback     || ds.speech_pace?.description          || '';
     const volume_feedback   = r.volume_feedback   || ds.loudness_control?.description     || '';
     const pitch_feedback    = r.pitch_feedback    || ds.pitch_variation?.description      || '';
@@ -243,7 +254,10 @@ export class SpeechAnalysisApiService {
         detailed_scores: r.feedback?.detailed_scores ?? {}
       },
       recommendations: r.recommendations ?? [],
-      analysis: r
+      analysis: r,
+
+      // RAG retrieval metadata — corpus references that informed this feedback
+      rag_metadata: rag_metadata ?? null,
     };
   }
 
@@ -288,11 +302,10 @@ export class SpeechAnalysisApiService {
     };
   }
 
-  // Pull filler words from Whisper word-level timestamps
   private extractFillers(transcription: WhisperResponse): { count: number; word_count: number; fillers: { word: string; start: number; end: number }[] } {
     const FILLERS = new Set([
-      'um', 'uh', 'umm', 'uhh',          // core hesitation sounds
-      'mm', 'mmm', 'hmm', 'hm', 'mhm',  // Whisper alternate spellings
+      'um', 'uh', 'umm', 'uhh',
+      'mm', 'mmm', 'hmm', 'hm', 'mhm',
       'like', 'you know', 'you know what i mean',
       'basically', 'literally', 'actually',
       'so', 'right', 'okay', 'ok',
@@ -308,128 +321,6 @@ export class SpeechAnalysisApiService {
     return { count: fillers.length, word_count, fillers };
   }
 
-  private extractStrengths(r: any): string {
-    const scores: Record<string, number> = {
-      'Speech Pace': r.speech_pace,
-      'Pausing & Fluency': r.pausing_fluency,
-      'Volume Control': r.loudness_control,
-      'Pitch Variation': r.pitch_variation,
-      'Articulation': r.articulation_clarity,
-      'Expression': r.expressive_emphasis,
-      'Filler Words': r.filler_words
-    };
-    const good = Object.entries(scores)
-      .filter(([, v]) => v != null && v >= 4)
-      .map(([k]) => k);
-
-    if (good.length === 0) {
-      return r.feedback?.overall_assessment ?? 'Continue practicing to improve your skills';
-    }
-    return `Strong performance in: ${good.join(', ')}`;
-  }
-
-  private extractImprovements(r: any): string {
-    if (r.recommendations?.length) {
-      return (r.recommendations as any[])
-        .map((rec: any) => `${rec.category}: ${rec.suggestion}`)
-        .join('\n\n');
-    }
-    const scores: Record<string, number> = {
-      'Speech Pace': r.speech_pace,
-      'Pausing & Fluency': r.pausing_fluency,
-      'Volume Control': r.loudness_control,
-      'Pitch Variation': r.pitch_variation,
-      'Articulation': r.articulation_clarity,
-      'Expression': r.expressive_emphasis,
-      'Filler Words': r.filler_words
-    };
-    const weak = Object.entries(scores)
-      .filter(([, v]) => v != null && v <= 3)
-      .map(([k]) => k);
-
-    if (weak.length === 0) return 'Great job! Keep up the excellent work';
-    return `Focus on improving: ${weak.join(', ')}`;
-  }
-
-  private buildPrompt(transcript: string, category: string, wpm: number, duration: number, pauseStats: PauseStats): string {
-    const opening = transcript.slice(0, 200).replace(/"/g, "'");
-    const paceLabel = wpm < 100 ? 'very slow' : wpm < 120 ? 'slightly slow' : wpm <= 155 ? 'ideal' : wpm <= 175 ? 'slightly fast' : 'too fast';
-
-    return `You are a professional speech coach reviewing a student's ${category} speech. Your feedback must be specific to THIS transcript — never generic.
-
-FULL TRANSCRIPT:
-"${transcript}"
-
-OPENING: "${opening}..."
-
-METRICS:
-- Duration: ${duration.toFixed(1)}s
-- WPM: ${wpm} (${paceLabel} — ideal 120–155 WPM)
-- Pauses ≥0.5s: ${pauseStats.total_count} total (short: ${pauseStats.short_count}, medium: ${pauseStats.medium_count}, long: ${pauseStats.long_count})
-- Average pause: ${pauseStats.average_duration}s | Longest: ${pauseStats.longest_duration}s
-
-SCORING RULES (use one decimal place — e.g. 3.7, 4.2 — never round to whole numbers):
-Scale: 1.0=Poor, 2.0=Below Average, 3.0=Average, 4.0=Good, 5.0=Excellent. Use in-between values to reflect nuance.
-- speech_pace: based on WPM=${wpm} vs ideal 120–155 for ${category}
-- pausing_fluency: are the ${pauseStats.total_count} pauses strategic or hesitant?
-- loudness_control: infer from sentence energy, exclamations, emphasis in transcript
-- pitch_variation: infer from punctuation variety, questions, emotional range
-- articulation_clarity: sentence completeness, clarity of ideas, word choice
-- expressive_emphasis: how engaging/energetic is this as a ${category} speech?
-- filler_words: 5.0=none, 4.0–4.9=1–2, 3.0–3.9=3–5, 2.0–2.9=6–10, 1.0–1.9=10+ fillers detected
-
-STRICT RULES — EVERY field below must reference the actual transcript:
-1. overall_assessment: 2–3 sentences. MUST quote an exact phrase from the transcript. Reference one specific metric.
-2. strengths: 3 items. Each MUST reference something specific (a phrase they said, a metric achieved). NO generic praise.
-3. improvements: 3 items. Each MUST name a specific technique and reference their actual data (WPM, filler count, pause data).
-4. All *_feedback fields MUST quote or reference the actual transcript content.
-
-Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 3.7 not 4):
-{
-  "speech_pace": <1.0-5.0>,
-  "pausing_fluency": <1.0-5.0>,
-  "loudness_control": <1.0-5.0>,
-  "pitch_variation": <1.0-5.0>,
-  "articulation_clarity": <1.0-5.0>,
-  "expressive_emphasis": <1.0-5.0>,
-  "filler_words": <1.0-5.0>,
-  "overall_assessment": "<2-3 sentences quoting an actual phrase from the transcript and mentioning one metric>",
-  "strengths": [
-    "<Specific strength with transcript quote or metric evidence>",
-    "<Second specific strength>",
-    "<Third specific strength>"
-  ],
-  "improvements": [
-    "<Actionable fix #1 referencing actual data — e.g. 'Your ${wpm} WPM pace...'>",
-    "<Actionable fix #2>",
-    "<Actionable fix #3>"
-  ],
-  "closing_message": "<One sentence referencing something specific from this speech and what to focus on next>",
-  "pace_feedback": "<Reference their exact WPM of ${wpm}. What it felt like as a listener. What to change.>",
-  "volume_feedback": "<Infer energy from transcript. Quote a line. Advice on volume/emphasis.>",
-  "pitch_feedback": "<Reference punctuation and emotional range. Quote an example line. Give technique.>",
-  "clarity_feedback": "<Reference specific word choice or sentence from transcript. Quote it. Advice.>",
-  "pausing_feedback": "<Mention their ${pauseStats.total_count} pauses, avg ${pauseStats.average_duration}s. Strategic or hesitant? Advice.>",
-  "filler_feedback": "<Name the filler words detected. Give the replace-with-silence technique.>",
-  "tone_feedback": "<Reference energy level for a ${category} speech. Quote a high or low energy phrase.>",
-  "feedback": {
-    "overall_assessment": "<same as overall_assessment above>",
-    "detailed_scores": {
-      "speech_pace":          { "score": <1.0-5.0>, "description": "<same as pace_feedback>" },
-      "pausing_fluency":      { "score": <1.0-5.0>, "description": "<same as pausing_feedback>" },
-      "loudness_control":     { "score": <1.0-5.0>, "description": "<same as volume_feedback>" },
-      "pitch_variation":      { "score": <1.0-5.0>, "description": "<same as pitch_feedback>" },
-      "articulation_clarity": { "score": <1.0-5.0>, "description": "<same as clarity_feedback>" },
-      "expressive_emphasis":  { "score": <1.0-5.0>, "description": "<same as tone_feedback>" },
-      "filler_words":         { "score": <1.0-5.0>, "description": "<same as filler_feedback>" }
-    }
-  },
-  "recommendations": [
-    { "category": "<metric name>", "issue": "<specific problem>", "suggestion": "<actionable advice>" }
-  ]
-}`;
-  }
-
   // ── Practice Mode Analysis ─────────────────────────────────────────────────
 
   async analyzePracticeSession(
@@ -443,59 +334,114 @@ Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 
     const rawText   = transcription.text?.trim() ?? '';
     const wordCount = rawText.length > 0 ? rawText.split(/\s+/).filter(Boolean).length : 0;
 
-    // ── Guard 1: No speech detected ─────────────────────────────────────────
     if (wordCount < 5 || rawText.length < 10) {
       return this.buildZeroResult(rawText, scriptText, targetDimensions, 'no_speech');
     }
 
     const pauseStats = this.detectPauses(transcription);
     const fillerData = this.extractFillers(transcription);
+    const duration   = transcription.duration ?? 0;
+    const actualWpm  = duration > 0 ? Math.round((wordCount / duration) * 60) : 0;
+    const accuracy   = this.computeWordAccuracy(rawText, scriptText);
 
-    const duration  = transcription.duration ?? 0;
-    const actualWpm = duration > 0 ? Math.round((wordCount / duration) * 60) : 0;
-
-    // Word accuracy: compare transcript vs script
-    const accuracy = this.computeWordAccuracy(rawText, scriptText);
-
-    // ── Guard 2: Complete content mismatch ───────────────────────────────────
     if (accuracy.matchPct < 20) {
       return this.buildZeroResult(rawText, scriptText, targetDimensions, 'mismatch', accuracy);
     }
 
-    // Algorithmic dimension scores
-    const algorithmicScores = this.computeAlgorithmicScores(
-      accuracy.matchPct, actualWpm, fillerData.count, wordCount,
-      pauseStats, duration, scriptText
-    );
+    // Use real acoustic features from the backend
+    const af = transcription.acoustic_features;
+    const totalPauseTime = pauseStats.pauses.reduce((s, p) => s + p.duration, 0);
+    const userMetrics = {
+      syllables_per_sec:  duration > 0 ? parseFloat(((wordCount * 1.5) / duration).toFixed(3)) : 0,
+      pause_ratio:        duration > 0 ? parseFloat((totalPauseTime / duration).toFixed(3)) : 0,
+      loud_mean:          af?.loud_mean          ?? 0,
+      loud_std:           af?.loud_std           ?? 0,
+      pitch_std:          af?.pitch_std          ?? 0,
+      spectral_centroid:  af?.spectral_centroid  ?? 0,
+      spectral_flux:      af?.spectral_flux      ?? 0,
+    };
 
-    // LLM scores for expressive / pitch / volume dimensions
-    const llmScores = await this.scorePracticeDimensions(
-      transcription.text, scriptText, category, actualWpm, pauseStats
-    );
+    // Full RAG pipeline with the reference script so the LLM can compare
+    // transcript vs intended script and calibrate against the corpus
+    let ragScores: Record<string, number> = {};
+    let ragMetadata: any = null;
 
-    // Merge: prefer algorithmic where available, fill with LLM
-    const merged: Record<string, number> = { ...llmScores, ...algorithmicScores };
+    try {
+      const response = await fetch(`${this.API_BASE}/api/analyze-rag`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript:       transcription.text,
+          category,
+          wpm:              actualWpm,
+          pause_stats:      pauseStats,
+          filler_count:     fillerData.count,
+          user_metrics:     userMetrics,
+          reference_script: scriptText,
+        })
+      });
 
-    // Overall = weighted average of targetDimensions only
-    const dimValues = targetDimensions.map(d => merged[d] ?? 3).filter(v => !isNaN(v));
+      if (response.ok) {
+        const data = await response.json();
+        const f    = data.feedback || {};
+        ragMetadata = data.rag_metadata;
+        ragScores = {
+          speech_pace:          f.speech_pace          ?? 3,
+          pausing_fluency:      f.pausing_fluency      ?? 3,
+          loud_control:         f.loudness_control     ?? 3,
+          pitch_variation:      f.pitch_variation      ?? 3,
+          articulation_clarity: f.articulation_clarity ?? 3,
+          expressive_emph:      f.expressive_emphasis  ?? 3,
+          filler_words_score:   f.filler_words         ?? 3,
+          filler_words:         f.filler_words         ?? 3,
+        };
+      }
+    } catch {
+      // Neutral fallback if RAG is unreachable
+      const n = 3.0;
+      ragScores = {
+        speech_pace: n, pausing_fluency: n, loud_control: n,
+        pitch_variation: n, articulation_clarity: n,
+        expressive_emph: n, filler_words_score: n, filler_words: n
+      };
+    }
+
+    // Override articulation_clarity with script-specific word accuracy.
+    // The RAG LLM evaluates general transcript clarity; only the word-accuracy
+    // computation can measure how precisely the speaker reproduced the script.
+    ragScores['articulation_clarity'] = this.wordAccuracyToScore(accuracy.matchPct);
+
+    // Overall = weighted average of the session's target dimensions
+    const dimValues = targetDimensions.map(d => ragScores[d] ?? 3).filter(v => !isNaN(v));
     const overall   = dimValues.length
       ? parseFloat((dimValues.reduce((a, b) => a + b, 0) / dimValues.length).toFixed(1))
       : 3.0;
 
     return {
-      transcript:      transcription.text,
+      transcript:       transcription.text,
       duration,
       actualWpm,
-      wordAccuracy:    accuracy.matchPct,
-      matchedWords:    accuracy.matched,
+      wordAccuracy:     accuracy.matchPct,
+      matchedWords:     accuracy.matched,
       totalScriptWords: accuracy.total,
-      missedWords:     accuracy.missedWords,
-      fillerCount:     fillerData.count,
-      detectedFillers: fillerData.fillers.map(f => f.word),
-      dimensionScores: merged,
+      missedWords:      accuracy.missedWords,
+      fillerCount:      fillerData.count,
+      detectedFillers:  fillerData.fillers.map(f => f.word),
+      dimensionScores:  ragScores,
       overall,
-      pauseStats
+      pauseStats,
+      ragMetadata,
     };
+  }
+
+  // Convert word-accuracy % to a 1–5 score
+  private wordAccuracyToScore(matchPct: number): number {
+    const score = matchPct >= 95 ? 5.0
+      : matchPct >= 85 ? 4.0 + (matchPct - 85) / 10
+      : matchPct >= 70 ? 3.0 + (matchPct - 70) / 15
+      : matchPct >= 55 ? 2.0 + (matchPct - 55) / 15
+      : 1.0 + matchPct / 55;
+    return parseFloat(Math.max(1, Math.min(5, score)).toFixed(1));
   }
 
   // ── Zero-score result for no-speech / mismatch ───────────────────────────
@@ -503,7 +449,7 @@ Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 
   private buildZeroResult(
     transcript: string,
     scriptText: string,
-    targetDimensions: string[],
+    _targetDimensions: string[],
     reason: 'no_speech' | 'mismatch',
     accuracy?: { matchPct: number; matched: number; total: number; missedWords: string[] }
   ): PracticeAnalysisResult {
@@ -522,19 +468,20 @@ Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 
 
     return {
       transcript,
-      duration:          0,
-      actualWpm:         0,
-      wordAccuracy:      accuracy?.matchPct ?? 0,
-      matchedWords:      accuracy?.matched  ?? 0,
+      duration:         0,
+      actualWpm:        0,
+      wordAccuracy:     accuracy?.matchPct ?? 0,
+      matchedWords:     accuracy?.matched  ?? 0,
       totalScriptWords,
-      missedWords:       accuracy?.missedWords ?? [],
-      fillerCount:       0,
-      detectedFillers:   [],
-      dimensionScores:   zeroDims,
-      overall:           1.0,
-      pauseStats:        emptyPauseStats,
-      noSpeechDetected:  reason === 'no_speech',
-      contentMismatch:   reason === 'mismatch'
+      missedWords:      accuracy?.missedWords ?? [],
+      fillerCount:      0,
+      detectedFillers:  [],
+      dimensionScores:  zeroDims,
+      overall:          1.0,
+      pauseStats:       emptyPauseStats,
+      noSpeechDetected: reason === 'no_speech',
+      contentMismatch:  reason === 'mismatch',
+      ragMetadata:      null,
     };
   }
 
@@ -546,7 +493,6 @@ Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 
     const spokenWords  = norm(transcript).split(/\s+/).filter(Boolean);
     const total = scriptWords.length;
 
-    // Greedy sequential match with ±4 word lookahead
     let si = 0;
     let matched = 0;
     const matchedIndices = new Set<number>();
@@ -563,7 +509,6 @@ Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 
       }
     }
 
-    // Collect unique missed words — skip ultra-common stop words to reduce noise
     const STOP = new Set(['the','a','an','and','or','of','to','in','is','it','that','with','as',
                           'for','on','are','was','be','this','but','by','at','from','they','we']);
     const seenMissed = new Set<string>();
@@ -579,7 +524,7 @@ Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 
       matchPct: total > 0 ? parseFloat(((matched / total) * 100).toFixed(1)) : 0,
       matched,
       total,
-      missedWords: missedWords.slice(0, 30)   // cap at 30 unique words
+      missedWords: missedWords.slice(0, 30)
     };
   }
 
@@ -593,109 +538,26 @@ Return ONLY this JSON (all scores must be decimals with one decimal place, e.g. 
     return contractions[a] === b || contractions[b] === a
         || a.replace(/'/g,'') === b || b.replace(/'/g,'') === a;
   }
-
-  private computeAlgorithmicScores(
-    matchPct: number, wpm: number, fillerCount: number, wordCount: number,
-    pauseStats: PauseStats, duration: number, _script: string
-  ): Record<string, number> {
-    const scores: Record<string, number> = {};
-
-    // articulation_clarity: based on word accuracy
-    scores['articulation_clarity'] = matchPct >= 95 ? 5.0
-      : matchPct >= 85 ? 4.0 + (matchPct - 85) / 10
-      : matchPct >= 70 ? 3.0 + (matchPct - 70) / 15
-      : matchPct >= 55 ? 2.0 + (matchPct - 55) / 15
-      : 1.0 + matchPct / 55;
-    scores['articulation_clarity'] = parseFloat(Math.max(1, Math.min(5, scores['articulation_clarity'])).toFixed(1));
-
-    // speech_pace: WPM vs ideal 120-150
-    if (wpm > 0) {
-      const diff = Math.max(0, Math.abs(wpm - 135) - 15);
-      const raw  = 5.0 - diff * 0.08;
-      scores['speech_pace'] = parseFloat(Math.max(1, Math.min(5, raw)).toFixed(1));
-    }
-
-    // filler_words_score: filler rate
-    if (wordCount > 0) {
-      const rate = (fillerCount / wordCount) * 100;
-      scores['filler_words_score'] = parseFloat(Math.max(1, 5 - rate * 0.5).toFixed(1));
-      scores['filler_words'] = scores['filler_words_score'];
-    }
-
-    // pausing_fluency: based on pause count & duration relative to speech length
-    if (duration > 0) {
-      const pauseRatio = pauseStats.pauses.reduce((s, p) => s + p.duration, 0) / duration;
-      const longPauses = pauseStats.long_count;
-      const raw = 5.0 - longPauses * 0.4 - pauseRatio * 3;
-      scores['pausing_fluency'] = parseFloat(Math.max(1, Math.min(5, raw)).toFixed(1));
-    }
-
-    return scores;
-  }
-
-  private async scorePracticeDimensions(
-    transcript: string, script: string, category: string,
-    wpm: number, pauseStats: PauseStats
-  ): Promise<Record<string, number>> {
-    const prompt = `You are a speech coach. A student read the following REFERENCE SCRIPT aloud for a ${category} speech.
-
-REFERENCE SCRIPT:
-"${script.slice(0, 800)}"
-
-WHAT THEY ACTUALLY SAID (Whisper transcript):
-"${transcript.slice(0, 800)}"
-
-WPM: ${wpm}. Pauses ≥0.5s: ${pauseStats.total_count}.
-
-Score ONLY these 3 dimensions (one decimal, 1.0–5.0):
-- loudness_control: infer energy from their word choices vs the script's intent
-- pitch_variation: infer from how well they matched the emotional arc of the script
-- expressive_emphasis: how engaging and dynamic does this sound for a ${category} speech?
-
-Return ONLY JSON:
-{"loudness_control":<1.0-5.0>,"pitch_variation":<1.0-5.0>,"expressive_emphasis":<1.0-5.0>}`;
-
-    try {
-      const response = await fetch(`${this.API_BASE}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: this.LLM_MODEL,
-          messages: [
-            { role: 'system', content: 'You are a speech coach. Respond with valid JSON only.' },
-            { role: 'user',   content: prompt }
-          ],
-          response_format: { type: 'json_object' },
-          temperature: 0.2
-        })
-      });
-      if (!response.ok) throw new Error('LLM failed');
-      const data = await response.json();
-      const r = JSON.parse(data.choices?.[0]?.message?.content ?? '{}');
-      return {
-        loud_control:    parseFloat((r.loudness_control ?? 3).toFixed(1)),
-        pitch_variation: parseFloat((r.pitch_variation  ?? 3).toFixed(1)),
-        expressive_emph: parseFloat((r.expressive_emphasis ?? 3).toFixed(1))
-      };
-    } catch {
-      return { loud_control: 3.0, pitch_variation: 3.0, expressive_emph: 3.0 };
-    }
-  }
 }
 
 export interface PracticeAnalysisResult {
   transcript:        string;
   duration:          number;
   actualWpm:         number;
-  wordAccuracy:      number;   // 0-100 %
+  wordAccuracy:      number;
   matchedWords:      number;
   totalScriptWords:  number;
-  missedWords:       string[]; // unique script words not detected in speech
+  missedWords:       string[];
   fillerCount:       number;
   detectedFillers:   string[];
   dimensionScores:   Record<string, number>;
-  overall:           number;   // 1.0-5.0 average of targetDimensions
+  overall:           number;
   pauseStats:        any;
-  noSpeechDetected?: boolean;  // transcript was blank / too short
-  contentMismatch?:  boolean;  // word accuracy < 20% — wrong content spoken
+  ragMetadata:       {
+    corpus1_retrieved: any[];
+    corpus2_retrieved: any[];
+    weak_dimensions:   string[];
+  } | null;
+  noSpeechDetected?: boolean;
+  contentMismatch?:  boolean;
 }

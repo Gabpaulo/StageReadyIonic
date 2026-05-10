@@ -1,3 +1,19 @@
+export interface RagMetadata {
+  corpus1_retrieved: {
+    file: string;
+    source: string;
+    similarity: number;
+    scores: Record<string, number>;
+    strengths: string;
+    areas_improvement: string;
+  }[];
+  corpus2_retrieved: {
+    content: string;
+    source: string;
+  }[];
+  weak_dimensions: string[];
+}
+
 export interface AnalyzeSpeechForFeedbackOutput {
   transcript: string;
   category: string;
@@ -49,4 +65,6 @@ export interface AnalyzeSpeechForFeedbackOutput {
   };
   recommendations: { category: string; issue: string; suggestion: string }[];
   analysis: any;
+
+  rag_metadata: RagMetadata | null;
 }
