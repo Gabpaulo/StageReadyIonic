@@ -1,9 +1,6 @@
 import { Component } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { PlatformRoutingService } from './services/platform-routing.service';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -17,26 +14,11 @@ export class AppComponent {
 
   constructor(
     private toastController: ToastController,
-    private swUpdate: SwUpdate,
-    private platformRoutingService: PlatformRoutingService,
-    private router: Router
+    private swUpdate: SwUpdate
   ) {
     this.setupInstallPromptListener();
     this.setupNetworkStatusToasts();
     this.setupServiceWorkerUpdateNotifications();
-    this.setupPlatformRouting();
-  }
-
-  private setupPlatformRouting() {
-    // Initialize platform routing on first load
-    this.platformRoutingService.initializePlatformRouting();
-
-    // Monitor navigation to ensure correct platform routes
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      // You can add additional logic here if needed
-    });
   }
 
   installApp = async () => {
