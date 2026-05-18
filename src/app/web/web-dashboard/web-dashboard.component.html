@@ -84,37 +84,84 @@
         </a>
       </div>
 
-      <!-- ── Weekly AI Practice Focus ── -->
-      <ng-container *ngIf="weeklyPlan && !planLoading">
-        <div class="section-head" style="margin-top:20px">This Week's Focus</div>
-        <div class="card wf-card">
-          <div class="wf-top-row">
-            <div class="wf-top-left">
-              <span class="wf-icon">🎯</span>
-              <div>
-                <p class="wf-sub">{{ weeklyPlan.sessionCount }} sessions · Target: <strong>{{ weeklyPlan.wpmGoal }} WPM</strong></p>
-                <div class="wf-dim-chips">
-                  <span class="wf-dim-chip" *ngFor="let d of weeklyPlan.highImpactDimensions">⚠ {{ humanLabel(d) }}</span>
-                  <span class="wf-ai-badge" *ngIf="weeklyPlan.modelReady">AI</span>
-                </div>
-              </div>
-            </div>
-            <a class="wf-practice-link" routerLink="/web/practice-mode">Practice →</a>
+      <!-- ── Practice Recommendations ── -->
+      <div class="section-head" style="margin-top:20px">Practice Recommendations</div>
+
+      <!-- Loading -->
+      <div class="pr-loading" *ngIf="planLoading">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Building your recommendations…</span>
+      </div>
+
+      <!-- Empty state -->
+      <div class="pr-empty" *ngIf="!planLoading && !weeklyPlan">
+        <span class="pr-empty-icon">📊</span>
+        <span>Complete your first session to unlock AI-powered recommendations.</span>
+      </div>
+
+      <!-- Full recommendations card -->
+      <div class="pr-card" *ngIf="!planLoading && weeklyPlan">
+
+        <div class="pr-header">
+          <span class="pr-icon">🎯</span>
+          <div class="pr-header-text">
+            <h3>
+              Practice Recommendations
+              <span class="pr-badge ai-badge" *ngIf="weeklyPlan.modelReady">AI</span>
+              <span class="pr-badge avg-badge" *ngIf="!weeklyPlan.modelReady">Avg</span>
+            </h3>
+            <p *ngIf="weeklyPlan.modelReady">Personalized via AI regression on your speech history.</p>
+            <p *ngIf="!weeklyPlan.modelReady">Based on your averages — more sessions unlock the AI model.</p>
           </div>
-          <div class="wf-scripts">
-            <div class="wf-script-row" *ngFor="let rec of weeklyPlan.recommendedScripts"
-                 (click)="navigateToScript(rec)" style="cursor:pointer">
-              <div class="wf-script-info">
-                <span class="wf-script-title">{{ rec.script.title }}</span>
-                <span class="wf-script-reason">{{ rec.reason }}</span>
-              </div>
-              <span class="wf-difficulty" [attr.data-level]="rec.script.difficulty">{{ rec.script.difficulty }}</span>
-              <span class="wf-arr">›</span>
-            </div>
+          <div class="pr-session-chip">
+            <span>🔥</span>
+            <span>{{ weeklyPlan.sessionCount }}</span>
           </div>
         </div>
 
-        <!-- Avg Skill Metrics -->
+        <!-- Unlock progress bar -->
+        <div class="pr-unlock-wrap" *ngIf="!weeklyPlan.modelReady">
+          <div class="pr-unlock-fill" [style.width.%]="Math.min(100, (weeklyPlan.sessionCount / 5) * 100)"></div>
+        </div>
+        <span class="pr-unlock-label" *ngIf="!weeklyPlan.modelReady && sessionsToUnlock > 0">
+          {{ sessionsToUnlock }} more session{{ sessionsToUnlock !== 1 ? 's' : '' }} to unlock AI model
+        </span>
+
+        <!-- Focus Areas -->
+        <div class="pr-section-label">Focus Areas</div>
+        <div class="pr-dim-chips">
+          <span class="pr-dim-chip" *ngFor="let d of weeklyPlan.highImpactDimensions">{{ humanLabel(d) }}</span>
+        </div>
+
+        <!-- WPM + Difficulty -->
+        <div class="pr-stats-row">
+          <div class="pr-stat">
+            <span class="pr-stat-val">{{ weeklyPlan.wpmGoal }} WPM</span>
+            <span class="pr-stat-sub">Goal</span>
+          </div>
+          <div class="pr-stat">
+            <span class="pr-stat-val">{{ weeklyPlan.targetDifficulty | titlecase }}</span>
+            <span class="pr-stat-sub">Difficulty</span>
+          </div>
+        </div>
+
+        <!-- Recommended Scripts -->
+        <div class="pr-section-label">Recommended Scripts</div>
+        <div class="pr-scripts">
+          <div class="pr-script-row" *ngFor="let rec of weeklyPlan.recommendedScripts"
+               (click)="navigateToScript(rec)">
+            <div class="pr-script-info">
+              <span class="pr-script-title">{{ rec.script.title }}</span>
+              <span class="pr-script-reason">{{ rec.reason }}</span>
+            </div>
+            <span class="wf-difficulty" [attr.data-level]="rec.script.difficulty">{{ rec.script.difficulty }}</span>
+            <span class="pr-arr">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skill Averages -->
+      <ng-container *ngIf="weeklyPlan && !planLoading">
         <div class="section-head" style="margin-top:16px">Skill Averages</div>
         <div class="card metrics-card">
           <p class="metrics-sub">Based on last {{ weeklyPlan.sessionCount }} sessions</p>
@@ -131,11 +178,6 @@
           </div>
         </div>
       </ng-container>
-
-      <div class="wf-plan-loading" *ngIf="planLoading">
-        <mat-spinner diameter="24"></mat-spinner>
-        <span>Building your plan…</span>
-      </div>
 
       <!-- Upcoming Badge -->
       <ng-container *ngIf="upcomingBadge">
