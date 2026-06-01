@@ -360,6 +360,21 @@
     justify-content: space-between;
   }
 
+  .history-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .entry-info {
+    min-width: 0;
+  }
+
+  .entry-top,
+  .entry-meta,
+  .entry-scores {
+    flex-wrap: wrap;
+  }
+
   .dim-row {
     flex-wrap: wrap;
     align-items: center;
@@ -372,6 +387,29 @@
 
   .history-card {
     flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .entry-info {
+    min-width: 0;
+  }
+
+  .entry-top,
+  .entry-meta,
+  .entry-scores,
+  .ta-header,
+  .dim-row {
+    flex-wrap: wrap;
+  }
+
+  .ta-trend-badge,
+  .dim-label,
+  .entry-meta,
+  .score-chip,
+  .dim-bar-cell,
+  .entry-chevron {
+    white-space: normal;
   }
 
   .entry-chevron {

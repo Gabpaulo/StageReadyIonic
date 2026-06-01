@@ -500,6 +500,41 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .wf-script-title,
+  .wf-script-reason,
+  .badge-prog-lbl,
+  .metric-label-row,
+  .pr-script-info,
+  .action-body,
+  .pr-badge,
+  .badge-next-info,
+  .tip-text,
+  .challenge-text,
+  .quote-text,
+  .recent-item h4,
+  .recent-item p {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .badge-next-row,
+  .pr-header,
+  .pr-stats-row,
+  .badge-prog-top,
+  .challenge-top,
+  .tip-top,
+  .wf-top-row {
+    flex-wrap: wrap;
+  }
+
+  .recent-grid,
+  .main-grid,
+  .stats-row,
+  .wf-dim-chips {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* ── Badge Progress Card ── */

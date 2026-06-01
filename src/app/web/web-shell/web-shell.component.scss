@@ -202,9 +202,11 @@ ion-menu {
 .main-content {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   background: transparent;
   flex: 1;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .main-toolbar {
