@@ -197,21 +197,6 @@ ion-menu {
     padding: 2px 6px;
     margin-right: 8px;
   }
-
-  .menu-context {
-    padding: 14px 16px 10px;
-    color: rgba(232, 241, 249, 0.9);
-    font-size: 0.92rem;
-    line-height: 1.5;
-    margin-bottom: 4px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-
-  .menu-context-note {
-    margin: 6px 0 0;
-    color: rgba(232, 241, 249, 0.65);
-    font-size: 0.78rem;
-  }
 }
 
 .main-content {
@@ -224,8 +209,77 @@ ion-menu {
   overflow-x: hidden;
 }
 
-.mobile-info-banner {
+.mobile-bottom-nav {
   display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    --background: rgba(11, 16, 22, 0.95);
+    --color: #e8f1f9;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 -16px 35px rgba(0, 0, 0, 0.25);
+  }
+
+  .mobile-bottom-nav .bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 8px 10px;
+    overflow-x: hidden;
+    align-items: center;
+  }
+
+  .bottom-nav-button {
+    flex: 1;
+    min-width: 0;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    --color: rgba(232, 241, 249, 0.88);
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --ripple-color: rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .bottom-nav-button ion-icon {
+    font-size: 1.35rem;
+    margin-bottom: 2px;
+  }
+
+  .bottom-nav-button span {
+    display: block;
+    margin: 0;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .bottom-nav-button.active {
+    --color: #ffffff;
+    background: linear-gradient(135deg, rgba(34, 167, 240, 0.22), rgba(27, 143, 211, 0.14));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .bottom-nav-button.active ion-icon {
+    color: #ffffff;
+  }
+
+  .content-wrapper {
+    padding-bottom: 96px;
+  }
 }
 
 .main-toolbar {
@@ -262,23 +316,6 @@ ion-menu {
 
 
 // Responsive design
-@media (max-width: 768px) {
-  .mobile-info-banner {
-    display: block;
-    margin-bottom: 16px;
-    padding: 14px 16px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    color: #e8f1f9;
-    line-height: 1.5;
-  }
-
-  .content-wrapper {
-    padding-bottom: 24px;
-  }
-}
-
 @media (max-width: 480px) {
   .content-wrapper {
     padding: 12px;

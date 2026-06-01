@@ -12,10 +12,6 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <div class="menu-context">
-        <p>Quick access to your practice dashboard, speech history, badges, and AI-powered feedback.</p>
-        <p class="menu-context-note">On mobile, tap the top menu icon to open navigation and switch sections easily.</p>
-      </div>
       <ion-list class="nav-list">
         <ion-menu-toggle auto-hide="false">
           <ion-item routerLink="/web/dashboard" routerLinkActive="active" detail="false" class="nav-item">
@@ -104,10 +100,34 @@
     </ion-header>
     
     <div class="content-wrapper">
-      <div class="mobile-info-banner">
-        <strong>Mobile UI tip:</strong> Tap the menu icon to jump between sections, and use this view for fast on-the-go practice.
-      </div>
       <router-outlet></router-outlet>
     </div>
+
+    <ion-footer class="mobile-bottom-nav">
+      <ion-toolbar>
+        <div class="bottom-nav">
+          <ion-button fill="clear" size="small" routerLink="/web/dashboard" routerLinkActive="active" class="bottom-nav-button">
+            <ion-icon name="home-outline"></ion-icon>
+            <span>Home</span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/history" routerLinkActive="active" class="bottom-nav-button">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>History</span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/practice-mode" routerLinkActive="active" class="bottom-nav-button">
+            <ion-icon name="musical-notes-outline"></ion-icon>
+            <span>Practice</span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/analysis" routerLinkActive="active" class="bottom-nav-button">
+            <ion-icon name="mic-outline"></ion-icon>
+            <span>Analysis</span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/profile" routerLinkActive="active" class="bottom-nav-button">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>Profile</span>
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
   </div>
 </ion-split-pane>

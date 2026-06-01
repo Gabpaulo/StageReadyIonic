@@ -6,6 +6,21 @@
     <p>Track your achievements and unlock new badges by practicing your speaking skills</p>
   </div>
 
+  <div class="badge-summary" *ngIf="(badges$ | async) as badges">
+    <div class="summary-card">
+      <span class="summary-title">Unlocked</span>
+      <strong>{{ getUnlockedCount(badges) }}</strong>
+    </div>
+    <div class="summary-card">
+      <span class="summary-title">Total</span>
+      <strong>{{ badges.length }}</strong>
+    </div>
+    <div class="summary-card">
+      <span class="summary-title">In progress</span>
+      <strong>{{ getInProgressCount(badges) }}</strong>
+    </div>
+  </div>
+
   <div class="badges-grid" *ngIf="(badges$ | async) as badges">
     <div class="badge-card" *ngFor="let badge of badges" [class.unlocked]="badge.isUnlocked">
       <div class="badge-image-container">
@@ -16,7 +31,12 @@
         </div>
       </div>
       <div class="badge-content">
-        <h3 class="badge-name">{{ badge.name }}</h3>
+        <div class="badge-headline">
+          <h3 class="badge-name">{{ badge.name }}</h3>
+          <span class="badge-state" [class.unlocked]="badge.isUnlocked" [class.locked]="!badge.isUnlocked">
+            {{ badge.isUnlocked ? 'Unlocked' : 'Locked' }}
+          </span>
+        </div>
         <p class="badge-description">{{ badge.description }}</p>
         <div class="badge-category">
           <span class="category-tag" [class]="badge.category.toLowerCase()">
@@ -41,7 +61,7 @@
   </div>
 
   <div class="empty-state" *ngIf="!(badges$ | async)?.length">
-    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" 
+    <img src="/assets/icon/logo.svg" 
          alt="No badges yet" class="empty-image">
     <h3>No badges yet</h3>
     <p>Start practicing your speeches to unlock your first badge!</p>
