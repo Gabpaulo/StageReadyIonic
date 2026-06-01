@@ -12,6 +12,10 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      <div class="menu-context">
+        <p>Quick access to your practice dashboard, speech history, badges, and AI-powered feedback.</p>
+        <p class="menu-context-note">On mobile, tap the top menu icon to open navigation and switch sections easily.</p>
+      </div>
       <ion-list class="nav-list">
         <ion-menu-toggle auto-hide="false">
           <ion-item routerLink="/web/dashboard" routerLinkActive="active" detail="false" class="nav-item">
@@ -100,6 +104,9 @@
     </ion-header>
     
     <div class="content-wrapper">
+      <div class="mobile-info-banner">
+        <strong>Mobile UI tip:</strong> Tap the menu icon to jump between sections, and use this view for fast on-the-go practice.
+      </div>
       <router-outlet></router-outlet>
     </div>
   </div>
