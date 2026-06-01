@@ -351,3 +351,24 @@ body {
     padding-bottom: 96px !important;
   }
 }
+
+/* DEBUG HELPERS: force mobile bottom nav and icons visible during testing */
+.mobile-bottom-nav, ion-footer.mobile-bottom-nav {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+}
+
+.mobile-bottom-nav ion-icon,
+.mobile-bottom-nav .bottom-nav-button ion-icon {
+  color: #ffffff !important;
+  font-size: 1.6rem !important;
+}
+
+/* make sure ionic buttons render their inner icon element */
+ion-button.bottom-nav-button {
+  display: inline-flex !important;
+}
+

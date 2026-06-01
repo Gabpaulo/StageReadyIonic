@@ -310,7 +310,8 @@ ion-menu {
   }
 
   /* Mobile-specific overrides: hide left sidebar and ensure bottom nav is visible */
-  @media (max-width: 767px) {
+  /* Broadened breakpoint to catch tablet/phone viewports where menu still appears */
+  @media (max-width: 900px) {
     ion-menu.sidenav, .sidenav {
       display: none !important;
       visibility: hidden !important;
@@ -324,8 +325,10 @@ ion-menu {
       bottom: 0 !important;
       left: 0 !important;
       right: 0 !important;
-      z-index: 9999 !important;
+      z-index: 99999 !important;
       transform: translateZ(0);
+      opacity: 1 !important;
+      pointer-events: auto !important;
     }
 
     /* Hide the split-pane menu when collapsed to avoid duplicated tabs */
@@ -335,8 +338,25 @@ ion-menu {
 
     /* Ensure content is not obscured */
     .main-content, #main-content {
-      padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px));
     }
+  }
+
+  /* Strong fallback: if something still hides the footer, force visible */
+  .mobile-bottom-nav[role], .mobile-bottom-nav, ion-footer.mobile-bottom-nav {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Make nav buttons fully opaque and visible */
+  .mobile-bottom-nav .bottom-nav .bottom-nav-button,
+  .mobile-bottom-nav .bottom-nav ion-button {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+    opacity: 1 !important;
+    display: inline-flex !important;
   }
 }
 
