@@ -1,8 +1,7 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-web-shell',
@@ -11,7 +10,6 @@ import { MatSidenav } from '@angular/material/sidenav';
   standalone: false
 })
 export class WebShellComponent implements OnInit {
-  @ViewChild('sidenav') sidenav!: MatSidenav;
   sidebarOpen = true;
 
   constructor(
@@ -26,13 +24,6 @@ export class WebShellComponent implements OnInit {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
-    if (this.sidenav) {
-      if (this.sidebarOpen) {
-        this.sidenav.open();
-      } else {
-        this.sidenav.close();
-      }
-    }
   }
 
   logout() {

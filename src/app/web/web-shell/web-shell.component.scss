@@ -236,10 +236,64 @@ ion-menu {
   color: #e8f1f9;
 }
 
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  --background: rgba(11, 16, 22, 0.96);
+  --color: #e8f1f9;
+}
+
+.mobile-bottom-nav .bottom-nav {
+  display: flex;
+  gap: 8px;
+  padding: 8px 6px;
+  overflow-x: auto;
+  align-items: center;
+}
+
+.bottom-nav-button {
+  flex: 1 0 auto;
+  min-width: 98px;
+  justify-content: center;
+  --color: rgba(232, 241, 249, 0.85);
+  --padding-start: 10px;
+  --padding-end: 10px;
+}
+
+.bottom-nav-button span {
+  margin-left: 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.bottom-nav-button.active {
+  --color: #ffffff;
+  background: rgba(34, 167, 240, 0.14);
+  border-radius: 14px;
+}
+
 // Responsive design
 @media (max-width: 768px) {
   ion-menu {
     --width: 200px;
+  }
+
+  .mobile-bottom-nav {
+    display: block;
+  }
+
+  .content-wrapper {
+    padding-bottom: 96px;
+  }
+
+  .main-toolbar ion-menu-button {
+    display: none;
   }
 }
 
