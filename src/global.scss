@@ -304,3 +304,50 @@ body {
 .opaque-modal ion-text {
   color: var(--text) !important;
 }
+
+/* ------------------------------------------------------------------
+   Global mobile responsiveness overrides
+   These rules are intentionally broad to catch remaining fixed-width
+   and nowrap styles that cause horizontal overflow on smaller devices.
+   They apply only under the mobile breakpoint so desktop layout is
+   preserved.
+   ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .card, .mat-card, .badge-card, .pr-card, .wf-card, .action-row,
+  .nav-item-content, .badge-content, .badge-image-container, .level-block,
+  .level-left, .stats-row, .main-grid, .recent-item, .recent-grid,
+  .badges-grid, .history-card, .entry-info, .entry-top {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+
+  /* Override common nowrap uses across components */
+  .wf-script-title, .wf-script-reason, .pr-script-title, .pr-script-reason,
+  .badge-prog-lbl, .action-body, .pr-badge, .recent-item, .wf-dim-chip,
+  .nav-item-content ion-label, .metric-name, .metric-score {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* Allow flex rows to wrap so children can stack on narrow screens */
+  .col-left, .col-right, .level-left, .pr-header, .pr-script-row,
+  .badge-next-row, .wf-top-row, .stats-row, .action-list {
+    flex-wrap: wrap !important;
+  }
+
+  /* Force the main grid to a single column on mobile */
+  .main-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Extra content padding at bottom so fixed bottom nav doesn't cover content */
+  .content-wrapper {
+    padding-bottom: 96px !important;
+  }
+}

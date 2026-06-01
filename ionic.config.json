@@ -1,0 +1,7 @@
+{
+  "name": "StageReady",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
