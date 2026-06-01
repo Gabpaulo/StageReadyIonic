@@ -1,13 +1,16 @@
 ion-split-pane {
   --side-width: 250px; /* Default width for the side menu */
   --side-width-collapsed: 60px; /* Collapsed width */
+  min-width: 0;
 }
 
 .app-container {
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: auto;
+  max-width: 100%;
   background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
   position: relative;
+  overflow-x: hidden;
 
   // Stage background image with subtle fade
   &::before {
@@ -253,17 +256,19 @@ ion-menu {
 
 .mobile-bottom-nav .bottom-nav {
   display: flex;
-  justify-content: space-between;
-  gap: 6px;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 8px;
   padding: 10px 10px 14px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   align-items: center;
 }
 
 .bottom-nav-button {
-  flex: 1 1 auto;
-  min-width: 64px;
-  max-width: 100px;
+  flex: 0 0 auto;
+  min-width: 56px;
+  max-width: 92px;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
