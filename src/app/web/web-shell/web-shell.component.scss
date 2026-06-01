@@ -281,7 +281,8 @@ ion-menu {
 // Responsive design
 @media (max-width: 768px) {
   ion-menu {
-    --width: 200px;
+    display: none !important;
+    --width: 0;
   }
 
   .mobile-bottom-nav {
