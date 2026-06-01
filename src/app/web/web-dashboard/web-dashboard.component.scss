@@ -419,6 +419,77 @@
   }
 }
 
+@media (max-width: 768px) {
+  .wd {
+    padding: 16px 16px 120px;
+  }
+
+  .wd-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .level-block {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .stats-row {
+    flex-direction: column;
+  }
+
+  .stat-box {
+    padding: 18px 14px;
+  }
+
+  .stat-div {
+    display: none;
+  }
+
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .badge-next-card .badge-next-row,
+  .badge-prog-card,
+  .tip-card,
+  .challenge-card,
+  .quote-card,
+  .recent-card,
+  .card {
+    padding: 16px;
+  }
+
+  .pr-header,
+  .pr-stats-row,
+  .pr-script-row,
+  .badge-next-row,
+  .badge-prog-top,
+  .challenge-top,
+  .tip-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .pr-script-row {
+    padding: 14px 12px;
+  }
+
+  .pr-script-info {
+    min-width: 0;
+  }
+
+  .recent-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .level-left {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
 /* ── Badge Progress Card ── */
 .badge-prog-card {
   .badge-prog-top {
