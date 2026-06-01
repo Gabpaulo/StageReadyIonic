@@ -314,7 +314,9 @@
 @media (max-width: 768px) {
   .history-container {
     padding: 16px;
+    max-width: 100%;
     min-height: calc(100vh - 128px);
+    overflow-x: hidden;
   }
 
   .page-header {
@@ -347,11 +349,12 @@
   }
 
   .trend-chart {
-    min-width: 480px;
-    width: 100%;
+    min-width: 100%;
+    width: auto;
   }
 
   .x-labels {
+    display: flex;
     flex-wrap: wrap;
     gap: 10px;
     justify-content: space-between;

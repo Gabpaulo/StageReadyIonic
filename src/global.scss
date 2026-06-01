@@ -25,6 +25,15 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
+* {
+  box-sizing: border-box;
+}
+
+html, body, ion-app, app-root, ion-content {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
 /**
  * Ionic Dark Mode
  * -----------------------------------------------------

@@ -47,9 +47,30 @@ export class SpeechAnalysisApiService {
 
   private readonly WHISPER_MODEL = 'whisper-large-v3-turbo';
   private readonly API_BASE = environment.apiUrl;
+  private readonly REQUEST_TIMEOUT_MS = 30000;
 
   analyzeSpeech(audioBlob: Blob, category: string): Observable<AnalyzeSpeechForFeedbackOutput> {
     return from(this.analyzeWithGroq(audioBlob, category));
+  }
+
+  private createTimeoutController(timeoutMs = this.REQUEST_TIMEOUT_MS): AbortController {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+    controller.signal.addEventListener('abort', () => window.clearTimeout(timeoutId));
+    return controller;
+  }
+
+  private async fetchWithTimeout(input: RequestInfo, init: RequestInit = {}): Promise<Response> {
+    const controller = this.createTimeoutController();
+    const response = await fetch(input, { ...init, signal: controller.signal });
+    if (!response.ok) {
+      const text = await response.text();
+      if (response.status === 504) {
+        throw new Error('Server timeout (504): Remote analysis service is unavailable. Please try again later.');
+      }
+      throw new Error(`${response.status} ${response.statusText}: ${text}`);
+    }
+    return response;
   }
 
   private async analyzeWithGroq(
@@ -76,17 +97,11 @@ export class SpeechAnalysisApiService {
     formData.append('timestamp_granularities[]', 'word');
     formData.append('prompt', 'Um, uh, like, you know, basically, so, right, okay, hmm, mm.');
 
-    const response = await fetch(`${this.API_BASE}/api/transcribe`, {
+    const response = await this.fetchWithTimeout(`${this.API_BASE}/api/transcribe`, {
       method: 'POST',
       body: formData
     });
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`Whisper transcription failed (${response.status}): ${err}`);
-    }
-
-    // Response now includes acoustic_features extracted by the backend
     return response.json();
   }
 
@@ -117,7 +132,7 @@ export class SpeechAnalysisApiService {
       spectral_flux:      af?.spectral_flux      ?? 0,
     };
 
-    const response = await fetch(`${this.API_BASE}/api/analyze-rag`, {
+    const response = await this.fetchWithTimeout(`${this.API_BASE}/api/analyze-rag`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -129,11 +144,6 @@ export class SpeechAnalysisApiService {
         user_metrics: userMetrics,
       })
     });
-
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`RAG analysis failed (${response.status}): ${err}`);
-    }
 
     const data = await response.json();
     // Return both the LLM feedback AND the retrieval metadata
