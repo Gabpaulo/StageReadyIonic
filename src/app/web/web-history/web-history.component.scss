@@ -2,8 +2,7 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
-  min-height: 100vh;
+  background: transparent;
   color: #e8f1f9;
   
   // Force dark theme for all cards
@@ -309,112 +308,6 @@
   background: rgba(30, 47, 66, 0.95);
   border: 1px solid rgba(46, 61, 81, 0.95);
   border-radius: 18px;
-}
-
-@media (max-width: 768px) {
-  .history-container {
-    padding: 16px;
-    max-width: 100%;
-    min-height: calc(100vh - 128px);
-    overflow-x: hidden;
-  }
-
-  .page-header {
-    text-align: left;
-    margin-bottom: 24px;
-  }
-
-  .page-header h1 {
-    font-size: 2rem;
-  }
-
-  .page-header p {
-    font-size: 0.98rem;
-    max-width: 100%;
-  }
-
-  .refresh-btn {
-    position: static;
-    margin-top: 16px;
-    align-self: flex-start;
-  }
-
-  .summary-stats {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .chart-wrap {
-    overflow-x: auto;
-  }
-
-  .trend-chart {
-    min-width: 100%;
-    width: auto;
-  }
-
-  .x-labels {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: space-between;
-  }
-
-  .history-card {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .entry-info {
-    min-width: 0;
-  }
-
-  .entry-top,
-  .entry-meta,
-  .entry-scores {
-    flex-wrap: wrap;
-  }
-
-  .dim-row {
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .entry-scores {
-    justify-content: flex-start;
-  }
-
-  .history-card {
-    flex-direction: column;
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .entry-info {
-    min-width: 0;
-  }
-
-  .entry-top,
-  .entry-meta,
-  .entry-scores,
-  .ta-header,
-  .dim-row {
-    flex-wrap: wrap;
-  }
-
-  .ta-trend-badge,
-  .dim-label,
-  .entry-meta,
-  .score-chip,
-  .dim-bar-cell,
-  .entry-chevron {
-    white-space: normal;
-  }
-
-  .entry-chevron {
-    align-self: flex-end;
-  }
 }
 
 .history-item {
@@ -837,114 +730,181 @@ mat-dialog-content {
   margin-bottom: 20px;
 }
 
-/* ── Responsive design ─────────────────────────────────────────────────── */
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+
+  /* Container */
   .history-container {
-    padding: 16px;
+    padding: 12px 12px 0;
+    max-width: 100%;
+    overflow-x: hidden;
   }
-  
+
+  /* ── Header: compact single row ── */
   .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    text-align: left;
+
     h1 {
-      font-size: 2rem;
-      
-      mat-icon {
-        font-size: 2rem;
-        width: 2rem;
-        height: 2rem;
-      }
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin: 0 0 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    
-    p {
-      font-size: 1rem;
-    }
-    
+
+    p { display: none; }
+
     .refresh-btn {
       position: static;
-      margin-top: 16px;
+      flex-shrink: 0;
+      font-size: 1.2rem;
+      margin: 0;
     }
   }
-  
+
+  /* ── Summary: 4-column stat strip ── */
+  .summary-card {
+    border-radius: 14px !important;
+    margin-bottom: 12px !important;
+
+    ::ng-deep .mat-card-header { display: none; }
+  }
+
   .summary-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+
     .stat-item {
-      padding: 16px;
-      
+      padding: 10px 4px;
+      border-right: 1px solid #2b3b4c;
+
+      &:last-child { border-right: none; }
+
       .stat-value {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
+        margin-bottom: 2px;
+      }
+
+      .stat-label {
+        font-size: 0.62rem;
       }
     }
   }
-  
-  .history-item {
-    margin-bottom: 4px;
-  }
-  
-  .empty-state {
-    padding: 40px 16px;
 
-    .empty-image {
-      width: 100px;
-      height: 100px;
-    }
-
-    h3 {
-      font-size: 1.3rem;
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .history-container {
-    padding: 12px;
-  }
-
-  .page-header {
-    h1 {
-      font-size: 1.5rem;
-
-      mat-icon {
-        font-size: 1.5rem;
-        width: 1.5rem;
-        height: 1.5rem;
-      }
-    }
-
-    p { font-size: 0.9rem; }
-  }
-
-  .summary-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-
-    .stat-item {
-      padding: 12px 8px;
-
-      .stat-value { font-size: 1.3rem; }
-    }
-  }
-
-  .history-card {
-    padding: 10px 12px;
-    gap: 10px;
-  }
-
-  .entry-scores {
-    display: none;
+  /* ── Trend analytics ── */
+  .trend-analytics {
+    padding: 14px;
+    margin-bottom: 14px;
+    border-radius: 14px;
   }
 
   .ta-header {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
     gap: 8px;
+    margin-bottom: 12px;
   }
+
+  .ta-title { font-size: 0.95rem; }
+  .ta-sub   { font-size: 0.72rem; }
 
   .ta-trend-badge {
-    align-self: flex-start;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    padding: 3px 10px;
   }
 
-  .dim-label-cell {
-    width: 80px;
+  .chart-wrap { overflow-x: auto; margin-bottom: 2px; }
+
+  .trend-chart { min-width: 280px; }
+
+  .dim-breakdown { gap: 6px; }
+
+  .dim-row { gap: 6px; }
+
+  .dim-label-cell { width: 72px; }
+
+  .dim-label { font-size: 0.72rem; }
+
+  /* ── History section ── */
+  .history-section h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .history-list { gap: 8px; }
+
+  /* ── History card ── */
+  .history-card {
+    padding: 12px;
+    gap: 10px;
+    border-radius: 14px;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .entry-grade {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  .entry-info { min-width: 0; gap: 4px; }
+
+  .entry-top {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2px;
+
+    .entry-date { font-size: 0.82rem; }
+  }
+
+  .speech-type-badge { font-size: 0.62rem; padding: 1px 7px; }
+
+  .entry-meta { font-size: 0.76rem; margin-bottom: 4px; }
+
+  /* Keep chips visible — show 4 in a tight 2×2 wrap */
+  .entry-scores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .score-chip {
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+
+  .entry-chevron {
+    font-size: 1.2rem;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    padding: 32px 16px;
+    border-radius: 14px;
+
+    h3 { font-size: 1.1rem; }
+    p  { font-size: 0.88rem; }
+  }
+
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+  /* ── Page header flex fix ── */
+  .page-header {
+    flex-direction: row;
+    align-items: center;
   }
 }
 

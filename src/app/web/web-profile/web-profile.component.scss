@@ -2,8 +2,7 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
-  min-height: 100vh;
+  background: transparent;
   color: #e8f1f9;
   
   // Force dark theme for all cards
@@ -549,142 +548,156 @@
   }
 }
 
-// Responsive design
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+
+  /* Container */
   .profile-container {
-    padding: 16px;
+    padding: 12px 12px 0;
+    max-width: 100%;
   }
-  
+
+  /* Header — compact single line */
   .page-header {
+    text-align: left;
+    margin-bottom: 14px;
+
     h1 {
-      font-size: 2rem;
-      
-      mat-icon {
-        font-size: 2rem;
-        width: 2rem;
-        height: 2rem;
-      }
+      font-size: 1.25rem;
+      font-weight: 800;
+      justify-content: flex-start;
+      margin: 0;
     }
-    
-    p {
-      font-size: 1rem;
-    }
+
+    p { display: none; }
   }
-  
+
+  /* Single-column layout */
   .profile-content {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  
-  .profile-info {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-    
-    .profile-details {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-  }
-  
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    
-    .stat-item {
-      flex-direction: column;
-      text-align: center;
-      gap: 12px;
-      
-      .stat-info {
-        h3 {
-          font-size: 1.3rem;
-        }
-      }
-    }
-  }
-  
-  .settings-list {
-    .setting-item {
-      padding: 12px;
-      
-      .setting-info {
-        h4 {
-          font-size: 1rem;
-        }
-        
-        p {
-          font-size: 0.8rem;
-        }
-      }
-    }
-  }
-  
-  .action-buttons {
-    .action-btn {
-      padding: 10px 16px;
-
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-      }
-    }
-  }
-
-  .profile-form {
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .modal-overlay {
-    .edit-modal {
-      width: 95%;
-      max-height: 95vh;
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .profile-container {
-    padding: 12px;
-  }
-
-  .page-header {
-    margin-bottom: 24px;
-
-    h1 {
-      font-size: 1.5rem;
-
-      mat-icon {
-        font-size: 1.5rem;
-        width: 1.5rem;
-        height: 1.5rem;
-      }
-    }
-
-    p { font-size: 0.9rem; }
-  }
-
-  .profile-info {
-    .profile-avatar-section .profile-avatar {
-      width: 100px;
-      height: 100px;
-    }
-  }
-
-  .stats-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
+  /* Card chrome */
+  .profile-card mat-card,
+  .stats-card mat-card,
+  .settings-card mat-card,
+  .actions-card mat-card {
+    border-radius: 16px !important;
+
+    &:hover { transform: none; } /* disable lift on touch */
+
+    mat-card-header mat-card-title {
+      font-size: 0.95rem !important;
+    }
+  }
+
+  /* ── Profile info: centred avatar + details below ── */
+  .profile-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+
+    .profile-avatar-section {
+      .profile-avatar {
+        width: 88px;
+        height: 88px;
+        margin-bottom: 10px;
+      }
+
+      .change-photo-btn {
+        padding: 5px 14px;
+        font-size: 0.75rem;
+      }
+    }
+
+    .profile-details {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+
+      .detail-item {
+        label { font-size: 0.68rem; }
+        span  { font-size: 0.88rem; }
+      }
+    }
+  }
+
+  /* ── Stats: 4-column strip (no icons) ── */
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+
+    .stat-item {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 12px 4px;
+      border-radius: 0;
+      border-right: 1px solid rgba(43, 59, 76, 0.8);
+
+      &:last-child { border-right: none; }
+
+      mat-icon { display: none; }
+
+      .stat-info {
+        text-align: center;
+
+        h3 {
+          font-size: 1.2rem;
+          margin: 0 0 2px;
+          -webkit-text-fill-color: #e8f1f9;
+          background: none;
+        }
+
+        p {
+          font-size: 0.58rem;
+          letter-spacing: 0;
+        }
+      }
+    }
+  }
+
+  /* ── Settings: tighter rows ── */
+  .settings-list {
+    gap: 8px;
+
+    .setting-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+
+      .setting-info {
+        h4 { font-size: 0.88rem; margin-bottom: 2px; }
+        p  { font-size: 0.75rem; }
+      }
+    }
+  }
+
+  /* ── Actions: full-width stacked buttons ── */
   .action-buttons {
     flex-direction: column;
+    gap: 8px;
 
     .action-btn {
       width: 100%;
-      justify-content: flex-start;
+      justify-content: center;
+      padding: 12px 16px;
+      font-size: 0.9rem;
     }
+  }
+
+  /* ── Edit modal ── */
+  .modal-overlay .edit-modal {
+    width: 95%;
+    max-height: 95vh;
+
+    mat-card-content { padding: 16px; }
+  }
+
+  .profile-form .form-row {
+    grid-template-columns: 1fr;
   }
 }

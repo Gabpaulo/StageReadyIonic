@@ -209,178 +209,29 @@ ion-menu {
   overflow-x: hidden;
 }
 
-.mobile-bottom-nav {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .mobile-bottom-nav {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 1000;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    background: linear-gradient(180deg, rgba(11,16,22,0.92), rgba(8,12,16,0.86));
-    color: var(--color, #e8f1f9);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
-    padding: 8px 10px env(safe-area-inset-bottom, 12px);
-  }
-
-  .mobile-bottom-nav .bottom-nav {
-    display: flex;
-    justify-content: space-around;
-    gap: 8px;
-    padding: 6px 6px 2px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    align-items: center;
-  }
-
-  .bottom-nav-button {
-    flex: 0 1 auto;
-    min-width: 56px;
-    max-width: 110px;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: rgba(232, 241, 249, 0.92);
-    padding: 8px 12px;
-    --ripple-color: rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    transition: transform 0.15s ease, background 0.18s ease, box-shadow 0.18s ease;
-    background: rgba(255,255,255,0.02);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25) inset;
-  }
-
-  .bottom-nav-button:hover { transform: translateY(-3px); }
-
-  .bottom-nav-button ion-icon {
-    font-size: 1.45rem;
-    margin-bottom: 4px;
-    transition: color 0.15s ease, transform 0.15s ease;
-  }
-
-  .bottom-nav-button span {
-    display: block;
-    margin: 0;
-    font-size: 0.72rem;
-    line-height: 1.1;
-    white-space: nowrap;
-    opacity: 0.95;
-  }
-
-  /* Active pill and highlight */
-  .bottom-nav-button.activated, .bottom-nav-button.active {
-    color: #ffffff;
-    background: linear-gradient(135deg, #1b8fd3, #22a7f0);
-    box-shadow: 0 8px 26px rgba(34,167,240,0.18);
-    transform: translateY(-2px);
-  }
-
-  .bottom-nav-button.activated ion-icon, .bottom-nav-button.active ion-icon {
-    color: #fff;
-    transform: scale(1.05);
-  }
-
-  /* small active indicator under the icon */
-  .bottom-nav-button .active-dot {
-    display: block;
-    width: 6px;
-    height: 6px;
-    background: transparent;
-    border-radius: 999px;
-    margin-top: 6px;
-    transition: background 0.15s ease, transform 0.15s ease;
-  }
-
-  .bottom-nav-button.activated .active-dot, .bottom-nav-button.active .active-dot {
-    background: #fff;
-    transform: scale(1.1);
-  }
-
-  /* Ensure page content has room for the nav */
-  .content-wrapper {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
-  }
-
-  /* Mobile-specific overrides: hide left sidebar and ensure bottom nav is visible */
-  /* Broadened breakpoint to catch tablet/phone viewports where menu still appears */
-  @media (max-width: 900px) {
-    ion-menu.sidenav, .sidenav {
-      display: none !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-    }
-
-    /* make sure the footer is visible on mobile and floats above content */
-    .mobile-bottom-nav {
-      display: block !important;
-      position: fixed !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      z-index: 99999 !important;
-      transform: translateZ(0);
-      opacity: 1 !important;
-      pointer-events: auto !important;
-    }
-
-    /* Hide the split-pane menu when collapsed to avoid duplicated tabs */
-    ion-split-pane[when] ion-menu {
-      display: none !important;
-    }
-
-    /* Ensure content is not obscured */
-    .main-content, #main-content {
-      padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px));
-    }
-  }
-
-  /* Strong fallback: if something still hides the footer, force visible */
-  .mobile-bottom-nav[role], .mobile-bottom-nav, ion-footer.mobile-bottom-nav {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
-
-  /* Make nav buttons fully opaque and visible */
-  .mobile-bottom-nav .bottom-nav .bottom-nav-button,
-  .mobile-bottom-nav .bottom-nav ion-button {
-    color: #ffffff !important;
-    --color: #ffffff !important;
-    opacity: 1 !important;
-    display: inline-flex !important;
-  }
-}
 
 .main-toolbar {
   --background: transparent;
   --color: #e8f1f9;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  backdrop-filter: blur(6px);
+  border-bottom: none;
+  box-shadow: none;
+
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+    --box-shadow: none;
+  }
 
   ion-menu-button {
     --color: #e8f1f9;
   }
 
-  .app-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #e8f1f9;
-  }
-
   ion-button {
-    --color: #e8f1f9;
+    --color: rgba(232, 241, 249, 0.7);
+
+    &:hover {
+      --color: #e8f1f9;
+    }
   }
 }
 
@@ -393,13 +244,144 @@ ion-menu {
 }
 
 
-// Responsive design
-@media (max-width: 480px) {
-  .content-wrapper {
-    padding: 12px;
+/* ── Mobile toolbar logo (replaces truncating ion-title) ── */
+.mobile-logo-bar {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+
+  .mobile-logo-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
   }
 
-  .main-toolbar .app-title {
-    font-size: 1rem;
+  .mobile-logo-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #e8f1f9;
+    white-space: nowrap;
+  }
+}
+
+/* ── Floating Pill Bottom Nav ── */
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  /* Keep hamburger — opens slide-in drawer with full menu */
+  .desktop-menu-btn {
+    display: flex;
+  }
+
+  /* Scroll content clears the floating nav */
+  .content-wrapper {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* ── Floating pill ── */
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    left: 14px;
+    right: 14px;
+    z-index: 1000;
+    align-items: center;
+    height: 64px;
+    background: #141e2b;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 32px;
+    padding: 0 10px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+    overflow: visible;
+  }
+
+  /* Regular tabs */
+  .nav-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+    color: #4a6278;
+    transition: color 0.2s;
+
+    ion-icon {
+      font-size: 1.3rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    span {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    &.active {
+      color: #22a7f0;
+
+      ion-icon { transform: translateY(-1px); }
+    }
+  }
+
+  /* ── Centre FAB column ── */
+  .nav-fab-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    align-self: flex-start;   /* break out of the bar's vertical centering */
+    margin-top: -20px;        /* lift FAB above the pill */
+  }
+
+  /* The big circular button */
+  .nav-fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22a7f0 0%, #1567b0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-decoration: none;
+    box-shadow:
+      0 4px 16px rgba(34, 167, 240, 0.5),
+      0 0  0 4px rgba(20, 30, 43, 1);   /* dark ring separates FAB from pill */
+    transition: transform 0.18s, box-shadow 0.18s;
+
+    ion-icon {
+      font-size: 1.55rem;
+      color: #fff;
+    }
+
+    &:active { transform: scale(0.93); }
+
+    &.active {
+      box-shadow:
+        0 6px 24px rgba(34, 167, 240, 0.7),
+        0 0  0 4px rgba(20, 30, 43, 1);
+    }
+  }
+
+  /* Label below the FAB */
+  .nav-fab-lbl {
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: #22a7f0;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ── Small screen tweak ── */
+@media (max-width: 480px) {
+  .content-wrapper {
+    padding: 12px 12px calc(96px + env(safe-area-inset-bottom, 0px));
   }
 }
