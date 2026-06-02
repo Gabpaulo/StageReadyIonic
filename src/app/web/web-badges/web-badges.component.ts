@@ -16,6 +16,14 @@ export class WebBadgesComponent implements OnInit {
     this.badges$ = this.badgeService.userBadges$;
   }
 
+  getUnlockedCount(badges: Badge[]): number {
+    return badges.filter(badge => badge.isUnlocked).length;
+  }
+
+  getInProgressCount(badges: Badge[]): number {
+    return badges.filter(badge => badge.progress !== undefined && badge.maxProgress && badge.progress < badge.maxProgress).length;
+  }
+
   getBadgeIconPath(icon: string): string {
     if (!icon) {
       return 'assets/badges/first-step.svg';

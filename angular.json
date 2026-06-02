@@ -44,6 +44,11 @@
                 "output": "./svg"
               },
               {
+                "glob": "**/*",
+                "input": "node_modules/ionicons/dist/ionicons",
+                "output": "assets/ionicons"
+              },
+              {
                 "glob": "**/*.svg",
                 "input": "src/assets/badges",
                 "output": "svg"

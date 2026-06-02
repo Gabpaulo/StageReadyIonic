@@ -171,12 +171,6 @@ export class WebDashboardComponent implements OnInit {
     }
   }
 
-  readonly Math = Math;
-
-  get sessionsToUnlock(): number {
-    return Math.max(0, 5 - (this.weeklyPlan?.sessionCount ?? 0));
-  }
-
   humanLabel(dim: string): string {
     return this.adaptiveLearning.humanLabel(dim as any);
   }

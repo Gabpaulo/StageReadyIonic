@@ -1,4 +1,4 @@
-<ion-split-pane contentId="main-content" class="app-container">
+<ion-split-pane contentId="main-content" when="(min-width: 768px)" class="app-container">
   <!-- Left-side navigation menu -->
   <ion-menu contentId="main-content" type="overlay" class="sidenav" [class.mat-sidenav-closed]="!sidebarOpen">
     <ion-header class="sidenav-toolbar">
@@ -102,5 +102,37 @@
     <div class="content-wrapper">
       <router-outlet></router-outlet>
     </div>
+
+    <ion-footer class="mobile-bottom-nav">
+      <ion-toolbar>
+        <div class="bottom-nav">
+          <ion-button fill="clear" size="small" routerLink="/web/dashboard" routerLinkActive="active" class="bottom-nav-button" aria-label="Home">
+            <ion-icon name="home-outline"></ion-icon>
+            <span>Home</span>
+            <span class="active-dot" aria-hidden="true"></span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/history" routerLinkActive="active" class="bottom-nav-button" aria-label="History">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>History</span>
+            <span class="active-dot" aria-hidden="true"></span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/practice-mode" routerLinkActive="active" class="bottom-nav-button" aria-label="Practice">
+            <ion-icon name="musical-notes-outline"></ion-icon>
+            <span>Practice</span>
+            <span class="active-dot" aria-hidden="true"></span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/analysis" routerLinkActive="active" class="bottom-nav-button" aria-label="Analysis">
+            <ion-icon name="mic-outline"></ion-icon>
+            <span>Analysis</span>
+            <span class="active-dot" aria-hidden="true"></span>
+          </ion-button>
+          <ion-button fill="clear" size="small" routerLink="/web/profile" routerLinkActive="active" class="bottom-nav-button" aria-label="Profile">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>Profile</span>
+            <span class="active-dot" aria-hidden="true"></span>
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
   </div>
 </ion-split-pane>

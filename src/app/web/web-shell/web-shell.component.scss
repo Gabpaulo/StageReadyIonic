@@ -1,13 +1,16 @@
 ion-split-pane {
   --side-width: 250px; /* Default width for the side menu */
   --side-width-collapsed: 60px; /* Collapsed width */
+  min-width: 0;
 }
 
 .app-container {
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: auto;
+  max-width: 100%;
   background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
   position: relative;
+  overflow-x: hidden;
 
   // Stage background image with subtle fade
   &::before {
@@ -199,9 +202,162 @@ ion-menu {
 .main-content {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   background: transparent;
   flex: 1;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background: linear-gradient(180deg, rgba(11,16,22,0.92), rgba(8,12,16,0.86));
+    color: var(--color, #e8f1f9);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+    padding: 8px 10px env(safe-area-inset-bottom, 12px);
+  }
+
+  .mobile-bottom-nav .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+    padding: 6px 6px 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: center;
+  }
+
+  .bottom-nav-button {
+    flex: 0 1 auto;
+    min-width: 56px;
+    max-width: 110px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(232, 241, 249, 0.92);
+    padding: 8px 12px;
+    --ripple-color: rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    transition: transform 0.15s ease, background 0.18s ease, box-shadow 0.18s ease;
+    background: rgba(255,255,255,0.02);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25) inset;
+  }
+
+  .bottom-nav-button:hover { transform: translateY(-3px); }
+
+  .bottom-nav-button ion-icon {
+    font-size: 1.45rem;
+    margin-bottom: 4px;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .bottom-nav-button span {
+    display: block;
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    opacity: 0.95;
+  }
+
+  /* Active pill and highlight */
+  .bottom-nav-button.activated, .bottom-nav-button.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #1b8fd3, #22a7f0);
+    box-shadow: 0 8px 26px rgba(34,167,240,0.18);
+    transform: translateY(-2px);
+  }
+
+  .bottom-nav-button.activated ion-icon, .bottom-nav-button.active ion-icon {
+    color: #fff;
+    transform: scale(1.05);
+  }
+
+  /* small active indicator under the icon */
+  .bottom-nav-button .active-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: transparent;
+    border-radius: 999px;
+    margin-top: 6px;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .bottom-nav-button.activated .active-dot, .bottom-nav-button.active .active-dot {
+    background: #fff;
+    transform: scale(1.1);
+  }
+
+  /* Ensure page content has room for the nav */
+  .content-wrapper {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Mobile-specific overrides: hide left sidebar and ensure bottom nav is visible */
+  /* Broadened breakpoint to catch tablet/phone viewports where menu still appears */
+  @media (max-width: 900px) {
+    ion-menu.sidenav, .sidenav {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* make sure the footer is visible on mobile and floats above content */
+    .mobile-bottom-nav {
+      display: block !important;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 99999 !important;
+      transform: translateZ(0);
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    /* Hide the split-pane menu when collapsed to avoid duplicated tabs */
+    ion-split-pane[when] ion-menu {
+      display: none !important;
+    }
+
+    /* Ensure content is not obscured */
+    .main-content, #main-content {
+      padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* Strong fallback: if something still hides the footer, force visible */
+  .mobile-bottom-nav[role], .mobile-bottom-nav, ion-footer.mobile-bottom-nav {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Make nav buttons fully opaque and visible */
+  .mobile-bottom-nav .bottom-nav .bottom-nav-button,
+  .mobile-bottom-nav .bottom-nav ion-button {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+    opacity: 1 !important;
+    display: inline-flex !important;
+  }
 }
 
 .main-toolbar {
@@ -236,13 +392,8 @@ ion-menu {
   color: #e8f1f9;
 }
 
-// Responsive design
-@media (max-width: 768px) {
-  ion-menu {
-    --width: 200px;
-  }
-}
 
+// Responsive design
 @media (max-width: 480px) {
   .content-wrapper {
     padding: 12px;

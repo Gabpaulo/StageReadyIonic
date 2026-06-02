@@ -419,6 +419,124 @@
   }
 }
 
+@media (max-width: 768px) {
+  .wd {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px 16px 140px;
+    box-sizing: border-box;
+  }
+
+  .wd-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .level-block {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .stats-row {
+    flex-direction: column;
+  }
+
+  .stat-box {
+    padding: 18px 14px;
+  }
+
+  .stat-div {
+    display: none;
+  }
+
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .badge-next-card .badge-next-row,
+  .badge-prog-card,
+  .tip-card,
+  .challenge-card,
+  .quote-card,
+  .recent-card,
+  .card {
+    padding: 16px;
+  }
+
+  .pr-header,
+  .pr-stats-row,
+  .pr-script-row,
+  .badge-next-row,
+  .badge-prog-top,
+  .challenge-top,
+  .tip-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .pr-script-row {
+    padding: 14px 12px;
+  }
+
+  .pr-script-info {
+    min-width: 0;
+  }
+
+  .recent-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .level-left {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .action-row {
+    padding: 14px 14px;
+  }
+
+  .recent-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wf-script-title,
+  .wf-script-reason,
+  .badge-prog-lbl,
+  .metric-label-row,
+  .pr-script-info,
+  .action-body,
+  .pr-badge,
+  .badge-next-info,
+  .tip-text,
+  .challenge-text,
+  .quote-text,
+  .recent-item h4,
+  .recent-item p {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .badge-next-row,
+  .pr-header,
+  .pr-stats-row,
+  .badge-prog-top,
+  .challenge-top,
+  .tip-top,
+  .wf-top-row {
+    flex-wrap: wrap;
+  }
+
+  .recent-grid,
+  .main-grid,
+  .stats-row,
+  .wf-dim-chips {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 /* ── Badge Progress Card ── */
 .badge-prog-card {
   .badge-prog-top {
@@ -703,6 +821,7 @@
   transition: width 0.5s ease;
 }
 
+<<<<<<< HEAD
 /* ── Practice Recommendations card ── */
 .pr-card {
   background: var(--surface);
@@ -711,6 +830,9 @@
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 14px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pr-header {
@@ -718,6 +840,7 @@
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .pr-icon {
@@ -730,12 +853,15 @@
 .pr-header-text {
   flex: 1;
   min-width: 0;
+  width: 100%;
 
   h3 {
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--text);
     margin: 0 0 3px;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   p {
@@ -772,6 +898,7 @@
   font-weight: 700;
   color: #ff6b35;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .pr-unlock-wrap {
@@ -869,12 +996,14 @@
   padding: 10px 12px;
   cursor: pointer;
   transition: border-color .2s, background .2s, transform .15s;
+  flex-wrap: wrap;
+  min-width: 0;
+}
 
-  &:hover {
-    border-color: #667eea;
-    background: rgba(102,126,234,.07);
-    transform: translateX(2px);
-  }
+.pr-script-row:hover {
+  border-color: #667eea;
+  background: rgba(102,126,234,.07);
+  transform: translateX(2px);
 }
 
 .pr-script-info {
@@ -889,17 +1018,18 @@
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  margin-right: 4px;
 }
 
 .pr-script-reason {
   font-size: 0.75rem;
   color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pr-arr {
@@ -937,6 +1067,8 @@
   .pr-empty-icon { font-size: 1.3rem; flex-shrink: 0; }
 }
 
+=======
+>>>>>>> parent of 71e1270 (1)
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .main-grid {
