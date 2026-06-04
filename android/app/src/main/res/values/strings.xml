@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">StageReady</string>
+    <string name="title_activity_main">StageReady</string>
+    <string name="package_name">com.stageready.app</string>
+    <string name="custom_url_scheme">com.stageready.app</string>
+</resources>

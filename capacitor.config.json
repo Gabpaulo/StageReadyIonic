@@ -1,0 +1,8 @@
+{
+  "appId": "com.stageready.app",
+  "appName": "StageReady",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
