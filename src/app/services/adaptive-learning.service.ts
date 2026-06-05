@@ -48,7 +48,7 @@ export class AdaptiveLearningService {
     const history = await this.firebase.getSpeechHistory(uid, 30);
     if (!history || history.length === 0) return null;
 
-    const sessions = history.filter(e => e.feedback?.overall != null);
+    const sessions = history.filter(e => (e.feedback?.overall ?? 0) > 0);
     if (sessions.length === 0) return null;
 
     // ── Step 2: compute per-dimension averages ────────────────────────────────
