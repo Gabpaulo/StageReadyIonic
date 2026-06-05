@@ -48,7 +48,7 @@ export class AdaptiveLearningService {
     const history = await this.firebase.getSpeechHistory(uid, 30);
     if (!history || history.length === 0) return null;
 
-    const sessions = history.filter(e => (e.feedback?.overall ?? 0) > 0);
+    const sessions = history.filter(e => e.feedback?.overall != null);
     if (sessions.length === 0) return null;
 
     // ── Step 2: compute per-dimension averages ────────────────────────────────
@@ -140,7 +140,7 @@ export class AdaptiveLearningService {
     const yTensor = tf.tensor2d(y, [n, 1]);
 
     await model.fit(xTensor, yTensor, {
-      epochs: 150,
+      epochs: 50,
       batchSize: Math.min(n, 8),
       verbose: 0
     });

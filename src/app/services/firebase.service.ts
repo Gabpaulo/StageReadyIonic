@@ -395,22 +395,19 @@ export class FirebaseService {
         audioMimeType: data['audioMimeType']
       };
 
-      // Map scores object to flat feedback structure.
-      // Use empty object fallback so legacy documents without a 'scores' field
-      // still produce a feedback object (all zeros) rather than undefined.
-      {
-        const scores = data['scores'] ?? {};
-        const fd = data['feedbackDetails'] ?? {};
+      // Map scores object to flat feedback structure
+      if (data['scores']) {
+        const fd = data['feedbackDetails'] || {};
         entry.feedback = {
           // Scores
-          speech_pace:          scores['speech_pace']          || 0,
-          pausing_fluency:      scores['pausing_fluency']      || 0,
-          loud_control:         scores['loudness_control']     || 0,
-          pitch_variation:      scores['pitch_variation']      || 0,
-          articulation_clarity: scores['articulation_clarity'] || 0,
-          expressive_emph:      scores['expressive_emphasis']  || 0,
-          filler_words_score:   scores['filler_words']         || 0,
-          overall:              scores['overall']              || 0,
+          speech_pace:          data['scores'].speech_pace          || 0,
+          pausing_fluency:      data['scores'].pausing_fluency      || 0,
+          loud_control:         data['scores'].loudness_control     || 0,
+          pitch_variation:      data['scores'].pitch_variation      || 0,
+          articulation_clarity: data['scores'].articulation_clarity || 0,
+          expressive_emph:      data['scores'].expressive_emphasis  || 0,
+          filler_words_score:   data['scores'].filler_words         || 0,
+          overall:              data['scores'].overall              || 0,
 
           // Per-dimension feedback
           pace_feedback:        fd.pace_feedback     || '',
