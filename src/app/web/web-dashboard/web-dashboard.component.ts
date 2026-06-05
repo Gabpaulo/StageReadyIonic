@@ -86,7 +86,8 @@ export class WebDashboardComponent implements OnInit {
       if (user) {
         this.userId = user.uid;
         const profile = await this.firebaseService.getUserProfile(user.uid);
-        this.firstName = profile.firstName || '';
+        const rawName = profile.firstName || '';
+        this.firstName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '';
         this.userPhotoURL = user.photoURL || null;
 
         // Load actual speech count
