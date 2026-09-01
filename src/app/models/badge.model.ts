@@ -41,3 +41,17 @@ export interface BadgeCriteria {
   ratingType?: 'clarity' | 'pace' | 'tone' | 'overall' | 'profile' | 'interests' | 'bio';
   ratingValue?: 'excellent' | 'good' | 'fair' | 'poor';
 }
+
+export interface BadgeDefinition {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: BadgeCategory;
+  rarity: BadgeRarity;
+  maxProgress: number;
+  active: boolean;
+  criteria: BadgeCriteria;
+  createdAt?: Date;
+  updatedAt?: Date;
+}

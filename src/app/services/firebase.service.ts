@@ -3,7 +3,7 @@ import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, GoogleAuthProvider, signInWithPopup, UserCredential } from 'firebase/auth';
 import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp, collection, collectionGroup, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
-import { UserBadgeProgress } from '../models/badge.model';
+import { UserBadgeProgress, BadgeDefinition } from '../models/badge.model';
 import { SpeechHistoryEntry, SpeechHistorySummary } from '../models/speech-history.model';
 import { UserGamification, DailyChallenge, DAILY_CHALLENGES, XP_REWARDS } from '../models/gamification.model';
 import { getStorage, FirebaseStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -139,6 +139,25 @@ export class FirebaseService {
       unlockedBadges: badgeProgress.unlockedBadges,
       lastUpdated: Timestamp.now(),
     });
+  }
+
+  async getBadgeDefinitions(): Promise<BadgeDefinition[]> {
+    try {
+      const snapshot = await getDocs(collection(this.firestore, 'badgeDefinitions'));
+      const definitions = snapshot.docs.map(d => {
+        const data = d.data() as any;
+        return {
+          ...data,
+          id: d.id,
+          createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+          updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
+        } as BadgeDefinition;
+      });
+      return definitions.filter(def => def.active !== false);
+    } catch (error) {
+      console.error('Error loading badge definitions:', error);
+      return [];
+    }
   }
 
   async getUserSpeechCount(uid: string): Promise<number> {
