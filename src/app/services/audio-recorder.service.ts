@@ -304,14 +304,26 @@ export class AudioRecorderService {
     }
   }
 
-  /** Convert audio blob to WAV format using Web Audio API */
+  /** Convert audio blob to WAV format using Web Audio API, resampled to 16kHz for Whisper */
   private async convertToWav(blob: Blob): Promise<Blob> {
     const arrayBuffer = await blob.arrayBuffer();
     const audioContext = new AudioContext();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-    // Convert AudioBuffer to WAV
-    const wavBuffer = this.audioBufferToWav(audioBuffer);
+    // Resample to 16kHz — sufficient for Whisper and 3x smaller than 48kHz recordings
+    const targetRate = 16000;
+    const offlineCtx = new OfflineAudioContext(
+      1,
+      Math.ceil(audioBuffer.duration * targetRate),
+      targetRate
+    );
+    const source = offlineCtx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(offlineCtx.destination);
+    source.start();
+    const resampled = await offlineCtx.startRendering();
+
+    const wavBuffer = this.audioBufferToWav(resampled);
     return new Blob([wavBuffer], { type: 'audio/wav' });
   }
 
