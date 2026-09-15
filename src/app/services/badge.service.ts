@@ -3,8 +3,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { FirebaseService } from './firebase.service';
 import { BadgeNotificationService } from './badge-notification.service';
 import { GamificationService } from './gamification.service';
-import { Badge, UserBadgeProgress, BadgeCategory, BadgeRarity } from '../models/badge.model';
-import { BADGE_DEFINITIONS, BADGE_CRITERIA } from '../data/badges.data';
+import { Badge, UserBadgeProgress, BadgeCategory, BadgeRarity, BadgeDefinition, BadgeCriteria } from '../models/badge.model';
+import { BADGE_DEFINITIONS as LEGACY_BADGE_DEFINITIONS, BADGE_CRITERIA as LEGACY_BADGE_CRITERIA } from '../data/badges.data';
 import { AnalyzeSpeechForFeedbackOutput } from '../models/speech-analysis.model';
 
 @Injectable({
@@ -15,6 +15,10 @@ export class BadgeService {
   public userBadges$ = this.userBadgesSubject.asObservable();
 
   private currentUserId: string | null = null;
+
+  private badgeDefinitions: BadgeDefinition[] = [];
+  private badgeCriteriaMap: Record<string, BadgeCriteria> = {};
+  private definitionsLoaded: Promise<void> | null = null;
 
   // XP rewards based on badge rarity
   private readonly BADGE_XP_REWARDS = {
@@ -36,6 +40,7 @@ export class BadgeService {
     this.firebaseService.auth.onAuthStateChanged(async (user) => {
       if (user) {
         this.currentUserId = user.uid;
+        await this.loadBadgeDefinitions();
         await this.loadUserBadges();
       } else {
         this.currentUserId = null;
@@ -44,20 +49,67 @@ export class BadgeService {
     });
   }
 
+  private loadBadgeDefinitions(): Promise<void> {
+    if (this.definitionsLoaded) return this.definitionsLoaded;
+
+    this.definitionsLoaded = (async () => {
+      try {
+        const definitions = await this.firebaseService.getBadgeDefinitions();
+        if (definitions && definitions.length > 0) {
+          this.badgeDefinitions = definitions;
+          this.badgeCriteriaMap = Object.fromEntries(definitions.map(def => [def.id, def.criteria]));
+          return;
+        }
+      } catch (error) {
+        console.error('Error loading badge definitions from Firestore, falling back to defaults:', error);
+      }
+
+      // Fallback to legacy static definitions if Firestore has none or the read failed
+      this.badgeDefinitions = LEGACY_BADGE_DEFINITIONS.map(badge => ({
+        id: badge.id,
+        name: badge.name,
+        description: badge.description,
+        icon: badge.icon,
+        category: badge.category,
+        rarity: badge.rarity,
+        maxProgress: badge.maxProgress || 1,
+        active: true,
+        criteria: LEGACY_BADGE_CRITERIA[badge.id]
+      }));
+      this.badgeCriteriaMap = { ...LEGACY_BADGE_CRITERIA };
+    })();
+
+    return this.definitionsLoaded;
+  }
+
+  private definitionToBadge(def: BadgeDefinition): Badge {
+    return {
+      id: def.id,
+      name: def.name,
+      description: def.description,
+      icon: def.icon,
+      category: def.category,
+      rarity: def.rarity,
+      maxProgress: def.maxProgress,
+      isUnlocked: false,
+      progress: 0
+    };
+  }
+
   async loadUserBadges(): Promise<void> {
     if (!this.currentUserId) return;
 
     try {
       const userBadgeData = await this.firebaseService.getUserBadges(this.currentUserId);
       if (userBadgeData && userBadgeData.badges && userBadgeData.badges.length > 0) {
-        // Merge with BADGE_DEFINITIONS to ensure icon paths are correct
+        // Merge with badgeDefinitions to ensure icon/name/etc. are up to date
         const mergedBadges = userBadgeData.badges.map(savedBadge => {
-          const definition = BADGE_DEFINITIONS.find(def => def.id === savedBadge.id);
+          const definition = this.badgeDefinitions.find(def => def.id === savedBadge.id);
           if (definition) {
-            // Preserve user progress but use correct icon path from definition
+            // Preserve user progress but use correct data from definition
             return {
               ...savedBadge,
-              icon: definition.icon, // Always use the correct icon path from definition
+              icon: definition.icon,
               name: definition.name,
               description: definition.description,
               category: definition.category,
@@ -65,25 +117,40 @@ export class BadgeService {
               maxProgress: definition.maxProgress
             };
           }
+          // Definition no longer exists (e.g. deactivated) - keep last-known saved data
           return savedBadge;
         });
-        this.userBadgesSubject.next(mergedBadges);
+
+        // Reconcile any newly added (active) definitions the user doesn't have yet
+        const savedIds = new Set(mergedBadges.map(b => b.id));
+        const missingDefs = this.badgeDefinitions.filter(def => def.active !== false && !savedIds.has(def.id));
+
+        if (missingDefs.length > 0) {
+          const reconciled = [...mergedBadges, ...missingDefs.map(def => this.definitionToBadge(def))];
+          await this.saveUserBadges(reconciled);
+          this.userBadgesSubject.next(reconciled);
+        } else {
+          this.userBadgesSubject.next(mergedBadges);
+        }
       } else {
         // Initialize with default badges if none exist
-        const defaultBadges = BADGE_DEFINITIONS.map(badge => ({ ...badge }));
+        const defaultBadges = this.badgeDefinitions.map(def => this.definitionToBadge(def));
         await this.saveUserBadges(defaultBadges);
         this.userBadgesSubject.next(defaultBadges);
       }
     } catch (error) {
       console.error('Error loading user badges:', error);
       // Fallback to default badges on error
-      const defaultBadges = BADGE_DEFINITIONS.map(badge => ({ ...badge }));
+      const defaultBadges = this.badgeDefinitions.map(def => this.definitionToBadge(def));
       this.userBadgesSubject.next(defaultBadges);
     }
   }
 
   async checkAndAwardBadges(eventType: string, data?: any): Promise<Badge[]> {
     if (!this.currentUserId) return [];
+    if (this.badgeDefinitions.length === 0) {
+      await this.loadBadgeDefinitions();
+    }
 
     const currentBadges = this.userBadgesSubject.value;
     const newlyUnlockedBadges: Badge[] = [];
@@ -121,7 +188,7 @@ export class BadgeService {
   }
 
   private async checkBadgeCriteria(badgeId: string, eventType: string, data?: any): Promise<boolean> {
-    const criteria = BADGE_CRITERIA[badgeId];
+    const criteria = this.badgeCriteriaMap[badgeId];
     if (!criteria) return false;
 
     switch (criteria.type) {
@@ -231,7 +298,7 @@ export class BadgeService {
   }
 
   private async updateBadgeProgress(badge: Badge, eventType: string, data?: any): Promise<void> {
-    const criteria = BADGE_CRITERIA[badge.id];
+    const criteria = this.badgeCriteriaMap[badge.id];
     if (!criteria) return;
 
     let newProgress = badge.progress || 0;
@@ -278,7 +345,7 @@ export class BadgeService {
 
     // Ensure all badges have correct icon paths from definitions before saving
     const badgesWithCorrectIcons = badges.map(badge => {
-      const definition = BADGE_DEFINITIONS.find(def => def.id === badge.id);
+      const definition = this.badgeDefinitions.find(def => def.id === badge.id);
       if (definition) {
         return {
           ...badge,
@@ -296,7 +363,7 @@ export class BadgeService {
     const userBadgeProgress: UserBadgeProgress = {
       userId: this.currentUserId,
       badges: badgesWithCorrectIcons,
-      totalBadges: BADGE_DEFINITIONS.length,
+      totalBadges: this.badgeDefinitions.length,
       unlockedBadges: badgesWithCorrectIcons.filter(b => b.isUnlocked).length,
       lastUpdated: new Date()
     };

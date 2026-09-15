@@ -64,12 +64,13 @@ export class AdaptiveLearningService {
 
     // ── Step 3 & 4: regression (≥3 sessions) or fallback ─────────────────────
     let highImpactDimensions: DimensionKey[];
-    let modelReady = false;
+    let modelReady = sessions.length >= 3;
+    let tfModelUsed = false;
 
-    if (sessions.length >= 3) {
+    if (modelReady) {
       try {
         highImpactDimensions = await this.trainAndExtract(sessions, avgScore);
-        modelReady = true;
+        tfModelUsed = true;
       } catch {
         highImpactDimensions = this.fallbackDimensions(avgScore);
       }
@@ -91,7 +92,7 @@ export class AdaptiveLearningService {
 
     // ── Step 7: select scripts ────────────────────────────────────────────────
     const recommendedScripts = this.selectScripts(
-      highImpactDimensions, targetDifficulty, modelReady
+      highImpactDimensions, targetDifficulty, tfModelUsed
     );
 
     return {
@@ -139,7 +140,7 @@ export class AdaptiveLearningService {
     const yTensor = tf.tensor2d(y, [n, 1]);
 
     await model.fit(xTensor, yTensor, {
-      epochs: 150,
+      epochs: 50,
       batchSize: Math.min(n, 8),
       verbose: 0
     });
