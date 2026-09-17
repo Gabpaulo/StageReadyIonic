@@ -1,7 +1,8 @@
 import { Component, OnDestroy, NgZone, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
-import { PRACTICE_SCRIPTS, PracticeScript, DimensionKey } from '../../data/practice-scripts.data';
+import { PracticeScript, DimensionKey } from '../../data/practice-scripts.data';
+import { PracticeScriptService } from '../../services/practice-script.service';
 import { AdaptiveLearningService, WeeklyPlan, RecommendedScript } from '../../services/adaptive-learning.service';
 import { FirebaseService } from '../../services/firebase.service';
 import { AudioRecorderService } from '../../services/audio-recorder.service';
@@ -51,7 +52,12 @@ export class PracticeModePage implements OnInit, OnDestroy {
   weeklyPlan: WeeklyPlan | null = null;
   planLoading = false;
 
-  readonly allScripts = PRACTICE_SCRIPTS;
+  // Loaded from Firestore (admin-managed) with a bundled fallback — see PracticeScriptService.
+  allScripts: PracticeScript[] = [];
+  scriptsLoading = true;
+  scriptsError   = false;
+  categoryCounts: Record<Category, number> = { informative: 0, persuasive: 0, motivational: 0 };
+
   readonly Math       = Math;
 
   readonly categoryMeta: Record<Category, { icon: string; color: string; description: string }> = {
@@ -72,6 +78,7 @@ export class PracticeModePage implements OnInit, OnDestroy {
     private location: Location,
     private router: Router,
     private adaptiveLearning: AdaptiveLearningService,
+    private practiceScripts: PracticeScriptService,
     private firebaseService: FirebaseService,
     private audioRecorder: AudioRecorderService,
     private analysisApi: SpeechAnalysisApiService
@@ -85,14 +92,25 @@ export class PracticeModePage implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // If a recommended script was passed via navigation state, jump straight to it
+    // If a recommended script was passed via navigation state, jump straight to it.
+    // Stays first and synchronous: the script travels by reference in the nav state,
+    // so this path never touches allScripts and must not wait on the load — awaiting
+    // first would flash the category screen before jumping.
     if (this._pendingRecommendation) {
       this.startFromRecommendation(this._pendingRecommendation);
       this._pendingRecommendation = null;
     }
 
+    // Kick off the script load before the uid check. If it were started after the
+    // early return below, a signed-out user would sit on a spinner forever.
+    const scriptsPromise = this.loadScripts();
+
     const uid = this.firebaseService.auth.currentUser?.uid;
-    if (!uid) return;
+    if (!uid) {
+      await scriptsPromise;
+      return;
+    }
+
     this.planLoading = true;
     try {
       this.weeklyPlan = await this.adaptiveLearning.generatePlan(uid);
@@ -101,6 +119,33 @@ export class PracticeModePage implements OnInit, OnDestroy {
     } finally {
       this.planLoading = false;
     }
+
+    await scriptsPromise;
+  }
+
+  private async loadScripts(): Promise<void> {
+    try {
+      // Shared single-flight cache, so this and generatePlan cause one read between them.
+      this.allScripts = await this.practiceScripts.getScripts();
+      this.categoryCounts = {
+        informative:  this.allScripts.filter(s => s.category === 'informative').length,
+        persuasive:   this.allScripts.filter(s => s.category === 'persuasive').length,
+        motivational: this.allScripts.filter(s => s.category === 'motivational').length,
+      };
+      this.scriptsError = false;
+    } catch (e) {
+      console.error('Failed to load practice scripts:', e);
+      this.scriptsError = true;
+    } finally {
+      this.scriptsLoading = false;
+    }
+  }
+
+  async retryLoadScripts(): Promise<void> {
+    this.scriptsLoading = true;
+    this.scriptsError   = false;
+    this.practiceScripts.reload();
+    await this.loadScripts();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

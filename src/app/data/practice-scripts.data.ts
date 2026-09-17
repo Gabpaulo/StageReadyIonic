@@ -1,3 +1,14 @@
+/**
+ * LEGACY FALLBACK ONLY.
+ *
+ * The runtime source of truth for practice scripts is the `practiceScripts`
+ * Firestore collection, managed from the admin panel. PracticeScriptService
+ * falls back to the array below when Firestore is empty or unreachable, so
+ * Practice Mode keeps working offline and before the collection is seeded.
+ *
+ * Kept as a static import (not a lazy chunk) on purpose: a dynamically imported
+ * fallback could itself fail to download in the exact offline case it exists for.
+ */
 export type DimensionKey =
   'speech_pace' | 'pausing_fluency' | 'loud_control' |
   'pitch_variation' | 'articulation_clarity' |
@@ -21,6 +32,10 @@ export interface PracticeScript {
   scriptTargetPitch:        ScriptTargetLevel;
   scriptTargetFiller:       ScriptTargetLevel;
   scriptTargetArticulation: ScriptTargetLevel;
+  /** Display order. Optional so the bundled fallback entries below still type-check. */
+  sortOrder?: number;
+  /** Soft-delete flag set from the admin panel. Absent means active. */
+  active?: boolean;
 }
 
 export const PRACTICE_SCRIPTS: PracticeScript[] = [

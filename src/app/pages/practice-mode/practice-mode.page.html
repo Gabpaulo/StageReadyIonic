@@ -109,7 +109,7 @@
           <h2>Informative</h2>
           <p>Share knowledge and educate your audience with clear, structured content</p>
           <div class="card-meta">
-            <span class="tag">15 scripts</span>
+            <span class="tag" *ngIf="!scriptsLoading">{{ categoryCounts.informative }} script{{ categoryCounts.informative === 1 ? '' : 's' }}</span>
             <span class="tag">1–2 min</span>
           </div>
         </div>
@@ -124,7 +124,7 @@
           <h2>Persuasive</h2>
           <p>Convince and influence your audience through compelling arguments</p>
           <div class="card-meta">
-            <span class="tag">15 scripts</span>
+            <span class="tag" *ngIf="!scriptsLoading">{{ categoryCounts.persuasive }} script{{ categoryCounts.persuasive === 1 ? '' : 's' }}</span>
             <span class="tag">1–2 min</span>
           </div>
         </div>
@@ -139,7 +139,7 @@
           <h2>Motivational</h2>
           <p>Inspire and energize your audience with powerful, uplifting messages</p>
           <div class="card-meta">
-            <span class="tag">15 scripts</span>
+            <span class="tag" *ngIf="!scriptsLoading">{{ categoryCounts.motivational }} script{{ categoryCounts.motivational === 1 ? '' : 's' }}</span>
             <span class="tag">1–2 min</span>
           </div>
         </div>
@@ -168,7 +168,19 @@
       <p>Select the speech you want to practice</p>
     </div>
 
-    <div class="script-list">
+    <div class="script-loading" *ngIf="scriptsLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading scripts…</p>
+    </div>
+
+    <div class="script-empty" *ngIf="!scriptsLoading && filteredScripts.length === 0">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <p *ngIf="scriptsError">Couldn't load scripts. Check your connection and try again.</p>
+      <p *ngIf="!scriptsError">No scripts available in this category right now.</p>
+      <ion-button fill="outline" size="small" (click)="retryLoadScripts()">Retry</ion-button>
+    </div>
+
+    <div class="script-list" *ngIf="!scriptsLoading && filteredScripts.length > 0">
       <div
         class="script-card"
         *ngFor="let script of filteredScripts"

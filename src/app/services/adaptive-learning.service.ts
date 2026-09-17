@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as tf from '@tensorflow/tfjs';
 import { FirebaseService } from './firebase.service';
-import { PRACTICE_SCRIPTS, PracticeScript, DimensionKey } from '../data/practice-scripts.data';
+import { PracticeScript, DimensionKey } from '../data/practice-scripts.data';
+import { PracticeScriptService } from './practice-script.service';
 
 export interface RecommendedScript {
   script: PracticeScript;
@@ -37,7 +38,10 @@ const DIM_LABELS: Record<DimensionKey, string> = {
 @Injectable({ providedIn: 'root' })
 export class AdaptiveLearningService {
 
-  constructor(private firebase: FirebaseService) {}
+  constructor(
+    private firebase: FirebaseService,
+    private practiceScripts: PracticeScriptService
+  ) {}
 
   humanLabel(dim: DimensionKey): string {
     return DIM_LABELS[dim] ?? dim;
@@ -91,8 +95,9 @@ export class AdaptiveLearningService {
     else if (paceScore < 2.5 && avgWpm < 115) wpmGoal = Math.round(avgWpm * 1.10);
 
     // ── Step 7: select scripts ────────────────────────────────────────────────
+    const scripts = await this.practiceScripts.getScripts();
     const recommendedScripts = this.selectScripts(
-      highImpactDimensions, targetDifficulty, tfModelUsed
+      scripts, highImpactDimensions, targetDifficulty, tfModelUsed
     );
 
     return {
@@ -172,6 +177,7 @@ export class AdaptiveLearningService {
   // ── Script selection ─────────────────────────────────────────────────────────
 
   private selectScripts(
+    scripts: PracticeScript[],
     highImpactDims: DimensionKey[],
     difficulty: 'beginner' | 'intermediate' | 'advanced',
     modelReady: boolean
@@ -180,7 +186,7 @@ export class AdaptiveLearningService {
     const diffIdx = difficultyOrder.indexOf(difficulty);
 
     // Filter scripts that overlap with high-impact dimensions
-    const relevant = PRACTICE_SCRIPTS.filter(s =>
+    const relevant = scripts.filter(s =>
       s.targetDimensions.some(d => highImpactDims.includes(d))
     );
 
@@ -205,7 +211,7 @@ export class AdaptiveLearningService {
 
     // If still < 3, fill from remaining scripts
     if (picked.length < 3) {
-      for (const script of PRACTICE_SCRIPTS) {
+      for (const script of scripts) {
         if (picked.length >= 3) break;
         if (!picked.includes(script)) picked.push(script);
       }

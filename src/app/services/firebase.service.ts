@@ -5,6 +5,7 @@ import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp, collection, co
 import { environment } from '../../environments/environment';
 import { UserBadgeProgress, BadgeDefinition } from '../models/badge.model';
 import { SpeechHistoryEntry, SpeechHistorySummary } from '../models/speech-history.model';
+import { PracticeScript } from '../data/practice-scripts.data';
 import { UserGamification, DailyChallenge, DAILY_CHALLENGES, XP_REWARDS } from '../models/gamification.model';
 import { getStorage, FirebaseStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -156,6 +157,49 @@ export class FirebaseService {
       return definitions.filter(def => def.active !== false);
     } catch (error) {
       console.error('Error loading badge definitions:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Loads admin-managed practice scripts.
+   *
+   * Every field is normalized to a safe default: the practice-mode template
+   * dereferences rawText, targetWpmRange and targetDimensions without optional
+   * chaining, so a malformed document would otherwise take down the whole view.
+   *
+   * Deliberately no orderBy/where in the query — Firestore silently EXCLUDES
+   * documents missing the field being ordered or filtered on, which would make
+   * a script vanish with no error. Filtering and sorting happen in memory.
+   */
+  async getPracticeScripts(): Promise<PracticeScript[]> {
+    try {
+      const snapshot = await getDocs(collection(this.firestore, 'practiceScripts'));
+      const scripts = snapshot.docs.map(d => {
+        const data = d.data() as any;
+        return {
+          id: d.id,
+          title: data.title || 'Untitled',
+          category: data.category || 'informative',
+          difficulty: data.difficulty || 'beginner',
+          rawText: data.rawText || '',
+          estimatedDuration: Number(data.estimatedDuration) || 60,
+          targetDimensions: Array.isArray(data.targetDimensions) ? data.targetDimensions : [],
+          targetWpmRange: {
+            min: Number(data.targetWpmRange?.min) || 110,
+            max: Number(data.targetWpmRange?.max) || 130,
+          },
+          scriptTargetPausing: data.scriptTargetPausing || 'medium',
+          scriptTargetPitch: data.scriptTargetPitch || 'medium',
+          scriptTargetFiller: data.scriptTargetFiller || 'medium',
+          scriptTargetArticulation: data.scriptTargetArticulation || 'medium',
+          sortOrder: typeof data.sortOrder === 'number' ? data.sortOrder : Number.MAX_SAFE_INTEGER,
+          active: data.active !== false,
+        } as PracticeScript;
+      });
+      return scripts.filter(s => s.active !== false);
+    } catch (error) {
+      console.error('Error loading practice scripts:', error);
       return [];
     }
   }
