@@ -1,144 +1,95 @@
-<!-- Slide-in drawer: full page list (secondary pages live here) -->
-<ion-menu contentId="main-content" type="overlay" class="sidenav">
-  <ion-header class="sidenav-toolbar">
-    <ion-toolbar>
-      <div class="brand-section">
-        <div class="brand-icon">
-          <ion-icon name="mic-outline"></ion-icon>
+<!--
+  One shell, two layouts:
+  - Website on wide screens (≥ 992px): persistent sidebar (split pane).
+  - Phones, tablets, narrow windows and the native Android app: top app bar,
+    slide-in drawer and floating bottom nav.
+-->
+<ion-split-pane contentId="main-content" [when]="sidebarQuery" (ionSplitPaneVisible)="onSplitPaneVisible($event)">
+  <ion-menu contentId="main-content" type="overlay" class="sidenav">
+    <ion-header class="sidenav-toolbar">
+      <ion-toolbar>
+        <div class="brand-section">
+          <div class="brand-icon">
+            <ion-icon name="mic-outline"></ion-icon>
+          </div>
+          <ion-title>StageReady</ion-title>
         </div>
-        <ion-title>StageReady</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list class="nav-list">
+        <ion-menu-toggle auto-hide="false" *ngFor="let item of navItems">
+          <ion-item [routerLink]="item.path" routerLinkActive="active" detail="false" lines="none" class="nav-item"
+                    [class.practice-mode-nav]="item.highlight">
+            <div class="nav-item-content">
+              <ion-icon slot="start" [name]="item.icon"></ion-icon>
+              <ion-label>{{ item.label }}</ion-label>
+            </div>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false">
+          <ion-item button detail="false" lines="none" class="nav-item logout-item" (click)="logout()">
+            <div class="nav-item-content">
+              <ion-icon slot="start" name="log-out-outline"></ion-icon>
+              <ion-label>Log out</ion-label>
+            </div>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <div id="main-content" class="main-content" [class.wide]="sidebarVisible">
+    <ion-header class="main-toolbar">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-menu-button aria-label="Open menu"></ion-menu-button>
+        </ion-buttons>
+        <div class="app-bar-brand" *ngIf="!sidebarVisible">
+          <img src="assets/icon/stageready-mark.png" alt="" class="app-bar-logo" />
+          <span>StageReady</span>
+        </div>
+        <ion-buttons slot="end">
+          <ion-button (click)="logout()" aria-label="Log out">
+            <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="app-content" #appContent>
+      <div class="content-wrapper">
+        <router-outlet></router-outlet>
       </div>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content>
-    <ion-list class="nav-list">
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/dashboard" routerLinkActive="active" detail="false" class="nav-item">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="home-outline"></ion-icon>
-            <ion-label>Dashboard</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/badges" routerLinkActive="active" detail="false" class="nav-item">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="trophy-outline"></ion-icon>
-            <ion-label>Badges</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/history" routerLinkActive="active" detail="false" class="nav-item">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="stats-chart-outline"></ion-icon>
-            <ion-label>Speech History</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/practice-mode" routerLinkActive="active" detail="false" class="nav-item practice-mode-nav">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="musical-notes-outline"></ion-icon>
-            <ion-label>Practice Mode</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/analysis" routerLinkActive="active" detail="false" class="nav-item">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="mic-outline"></ion-icon>
-            <ion-label>Speech Analysis</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/feedback" routerLinkActive="active" detail="false" class="nav-item">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="chatbubbles-outline"></ion-icon>
-            <ion-label>Speech Feedback</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/knowledge-base" routerLinkActive="active" detail="false" class="nav-item">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="library-outline"></ion-icon>
-            <ion-label>Knowledge Base</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item routerLink="/web/profile" routerLinkActive="active" detail="false" class="nav-item">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="person-outline"></ion-icon>
-            <ion-label>Profile</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-      <ion-menu-toggle auto-hide="false">
-        <ion-item button detail="false" class="nav-item logout-item" (click)="logout()">
-          <div class="nav-item-content">
-            <ion-icon slot="start" name="log-out-outline"></ion-icon>
-            <ion-label>Log out</ion-label>
-          </div>
-        </ion-item>
-      </ion-menu-toggle>
-    </ion-list>
-  </ion-content>
-</ion-menu>
+    </ion-content>
 
-<!-- Phone-width app column (full width on phones, centred on larger screens) -->
-<div id="main-content" class="app-container">
-  <ion-header class="main-toolbar">
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-menu-button aria-label="Open menu"></ion-menu-button>
-      </ion-buttons>
-      <div class="app-bar-brand">
-        <img src="assets/icon/stageready-mark.png" alt="" class="app-bar-logo" />
-        <span>StageReady</span>
-      </div>
-      <ion-buttons slot="end">
-        <ion-button (click)="logout()" aria-label="Log out">
-          <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-content class="app-content" #appContent>
-    <div class="content-wrapper">
-      <router-outlet></router-outlet>
-    </div>
-  </ion-content>
-
-  <!-- Floating pill bottom nav -->
-  <nav class="mobile-nav">
-    <a class="nav-tab" routerLink="/web/dashboard" routerLinkActive="active">
-      <ion-icon name="home-outline"></ion-icon>
-      <span>Home</span>
-    </a>
-    <a class="nav-tab" routerLink="/web/practice-mode" routerLinkActive="active">
-      <ion-icon name="musical-notes-outline"></ion-icon>
-      <span>Practice</span>
-    </a>
-
-    <!-- Elevated centre FAB — Free Speech -->
-    <div class="nav-fab-col">
-      <a class="nav-fab" routerLink="/web/analysis" routerLinkActive="active" aria-label="Free Speech">
-        <ion-icon name="mic-outline"></ion-icon>
+    <!-- Floating pill bottom nav (mobile layout only) -->
+    <nav class="mobile-nav" *ngIf="!sidebarVisible">
+      <a class="nav-tab" routerLink="/web/dashboard" routerLinkActive="active">
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Home</span>
       </a>
-      <span class="nav-fab-lbl">Free Speech</span>
-    </div>
+      <a class="nav-tab" routerLink="/web/practice-mode" routerLinkActive="active">
+        <ion-icon name="musical-notes-outline"></ion-icon>
+        <span>Practice</span>
+      </a>
 
-    <a class="nav-tab" routerLink="/web/history" routerLinkActive="active">
-      <ion-icon name="stats-chart-outline"></ion-icon>
-      <span>History</span>
-    </a>
-    <a class="nav-tab" routerLink="/web/profile" routerLinkActive="active">
-      <ion-icon name="person-outline"></ion-icon>
-      <span>Profile</span>
-    </a>
-  </nav>
-</div>
+      <!-- Elevated centre FAB — Free Speech -->
+      <div class="nav-fab-col">
+        <a class="nav-fab" routerLink="/web/analysis" routerLinkActive="active" aria-label="Free Speech">
+          <ion-icon name="mic-outline"></ion-icon>
+        </a>
+        <span class="nav-fab-lbl">Free Speech</span>
+      </div>
+
+      <a class="nav-tab" routerLink="/web/history" routerLinkActive="active">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+        <span>History</span>
+      </a>
+      <a class="nav-tab" routerLink="/web/profile" routerLinkActive="active">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Profile</span>
+      </a>
+    </nav>
+  </div>
+</ion-split-pane>

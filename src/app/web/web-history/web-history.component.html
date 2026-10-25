@@ -172,7 +172,7 @@
 
   <!-- Empty State -->
   <div *ngIf="speechHistory.length === 0 && !loading && !error" class="empty-state">
-    <div class="empty-icon">🎤</div>
+    <img src="assets/illustrations/public-speaking.svg" alt="" class="empty-illustration">
     <h3>No Speech History Yet</h3>
     <p>Start practicing to see your speech analysis history here!</p>
     <button mat-raised-button color="primary" routerLink="/web/analysis">

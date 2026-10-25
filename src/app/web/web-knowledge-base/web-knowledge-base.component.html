@@ -85,7 +85,7 @@
 
     <!-- Empty State -->
     <div *ngIf="!loading && filteredResources.length === 0" class="empty-state">
-      <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+      <img src="assets/illustrations/not-found.svg" alt="" class="empty-illustration">
       <p>No resources found for this category.</p>
       <button class="show-all-btn" (click)="filterByCategory('All')">Show All</button>
     </div>

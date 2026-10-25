@@ -71,12 +71,57 @@
   }
 }
 
+.login-layout {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(32px, 6vw, 96px);
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.login-hero {
+  display: none;
+  flex: 1 1 0;
+  max-width: 520px;
+  text-align: center;
+  animation: fadeIn 0.8s ease-out;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 12px 40px rgba(34, 167, 240, 0.18));
+  }
+
+  p {
+    margin: 16px 0 0;
+    color: rgba(232, 241, 249, 0.75);
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+}
+
+/* Wide, tall-enough screens: illustration beside the form */
+@media (min-width: 900px) and (min-height: 600px) {
+  .login-hero { display: block; }
+}
+
 .login-content {
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
   z-index: 3;
   position: relative;
+}
+
+.login-layout .login-content {
+  flex: 0 1 420px;
+  margin: 0;
 }
 
 .login-header {

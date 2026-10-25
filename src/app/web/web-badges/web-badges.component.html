@@ -61,8 +61,7 @@
   </div>
 
   <div class="empty-state" *ngIf="!(badges$ | async)?.length">
-    <img src="/assets/icon/logo.svg" 
-         alt="No badges yet" class="empty-image">
+    <img src="assets/illustrations/winners.svg" alt="" class="empty-illustration">
     <h3>No badges yet</h3>
     <p>Start practicing your speeches to unlock your first badge!</p>
     <button mat-raised-button color="primary" routerLink="/web/analysis">

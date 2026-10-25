@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none" role="img" aria-labelledby="t">
+  <title id="t">Speaker on stage in front of an audience</title>
+  <defs>
+    <linearGradient id="cs-beam" x1="200" y1="0" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e8f1f9" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#22a7f0" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cs-stage" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3b4c"/>
+      <stop offset="1" stop-color="#17232f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- curtains -->
+  <path d="M0 0h70c-6 60-6 140 0 210H0z" fill="#1b8fd3" opacity=".35"/>
+  <path d="M400 0h-70c6 60 6 140 0 210h70z" fill="#1b8fd3" opacity=".35"/>
+  <path d="M0 0h400v18H0z" fill="#1e2c3a"/>
+
+  <!-- spotlight beam -->
+  <path d="M186 18h28l66 184H120z" fill="url(#cs-beam)"/>
+  <circle cx="200" cy="18" r="10" fill="#e8f1f9"/>
+
+  <!-- stage -->
+  <path d="M40 200h320l20 30H20z" fill="url(#cs-stage)"/>
+  <ellipse cx="200" cy="202" rx="70" ry="8" fill="#22a7f0" opacity=".3"/>
+
+  <!-- speaker -->
+  <circle cx="200" cy="104" r="16" fill="#f1c7a3"/>
+  <path d="M184 100c0-12 7-19 16-19s16 7 16 18c-5-4-10-6-16-6s-11 3-16 7z" fill="#1b2a38"/>
+  <path d="M178 176c0-34 10-56 22-56s22 22 22 56z" fill="#22a7f0"/>
+  <path d="M184 176h12v24h-12zM204 176h12v24h-12z" fill="#1e2c3a"/>
+  <path d="M218 134c12-6 18-16 20-26" stroke="#1b8fd3" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="239" cy="104" r="5" fill="#f1c7a3"/>
+  <!-- mic stand -->
+  <path d="M160 200v-60" stroke="#9bb2c8" stroke-width="3"/>
+  <path d="M160 140l16-10" stroke="#9bb2c8" stroke-width="3" stroke-linecap="round"/>
+  <rect x="173" y="122" width="9" height="14" rx="4.5" fill="#e8f1f9" transform="rotate(-30 177 129)"/>
+  <path d="M150 200h20" stroke="#9bb2c8" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- audience -->
+  <g fill="#0f1923">
+    <circle cx="60" cy="252" r="16"/><path d="M34 300c0-22 12-34 26-34s26 12 26 34z"/>
+    <circle cx="130" cy="256" r="16"/><path d="M104 300c0-22 12-34 26-34s26 12 26 34z"/>
+    <circle cx="200" cy="252" r="16"/><path d="M174 300c0-22 12-34 26-34s26 12 26 34z"/>
+    <circle cx="270" cy="256" r="16"/><path d="M244 300c0-22 12-34 26-34s26 12 26 34z"/>
+    <circle cx="340" cy="252" r="16"/><path d="M314 300c0-22 12-34 26-34s26 12 26 34z"/>
+  </g>
+  <g stroke="#22a7f0" stroke-opacity=".35" stroke-width="2">
+    <circle cx="60" cy="252" r="16"/><circle cx="130" cy="256" r="16"/><circle cx="200" cy="252" r="16"/>
+    <circle cx="270" cy="256" r="16"/><circle cx="340" cy="252" r="16"/>
+  </g>
+
+  <!-- applause sparkles -->
+  <path d="M100 80l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#ffc409" opacity=".85"/>
+  <path d="M300 70l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#22a7f0"/>
+  <path d="M300 140l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#00bcd4" opacity=".8"/>
+</svg>

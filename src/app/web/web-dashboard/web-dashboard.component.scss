@@ -855,6 +855,24 @@
   }
 }
 
+/* Narrow phones: 4 stats in one row get too tight — use a 2×2 grid */
+@container (max-width: 420px) {
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .stat-div { display: none; }
+
+    .stat-box {
+      padding: 12px 6px;
+
+      /* boxes sit at children 1,3,5,7 (dividers between them) */
+      &:nth-child(n + 5) { border-top: 1px solid var(--border); }
+      &:nth-child(4n + 1) { border-right: 1px solid var(--border); }
+    }
+  }
+}
+
 @container (max-width: 480px) {
   .greeting h1 {
     font-size: 1.3rem;

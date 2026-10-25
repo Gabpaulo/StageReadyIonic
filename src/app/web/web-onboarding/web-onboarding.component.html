@@ -17,9 +17,7 @@
     <!-- STEP 0: Welcome                    -->
     <!-- ─────────────────────────────────── -->
     <div class="step fade-in" *ngIf="currentStep === 0">
-      <div class="hero-icon">
-        <mat-icon>mic</mat-icon>
-      </div>
+      <img src="assets/illustrations/conference-speaker.svg" alt="" class="hero-illustration">
       <h1 class="hero-title">Welcome to <span class="brand">StageReady</span></h1>
       <p class="hero-sub">Your AI-powered speech coach. Analyze your delivery, track your growth, and become a confident speaker.</p>
 
@@ -118,6 +116,7 @@
     <!-- STEP 2: Goals & Interests          -->
     <!-- ─────────────────────────────────── -->
     <div class="step fade-in" *ngIf="currentStep === 2">
+      <img src="assets/onboarding/trackprogress.svg" alt="" class="hero-illustration small">
       <h2 class="step-title">Your speaking goals</h2>
       <p class="step-sub">Select the areas you want to improve — we'll tailor your coaching.</p>
 
@@ -162,9 +161,7 @@
     <!-- STEP 3: All Set                    -->
     <!-- ─────────────────────────────────── -->
     <div class="step fade-in" *ngIf="currentStep === 3">
-      <div class="hero-icon success">
-        <mat-icon>check_circle</mat-icon>
-      </div>
+      <img src="assets/onboarding/shineonstage.svg" alt="" class="hero-illustration">
       <h2 class="hero-title">You're all set<span *ngIf="formData.firstName">, {{ formData.firstName }}</span>!</h2>
       <p class="hero-sub">Your profile is ready. Record your first speech and get instant AI coaching feedback.</p>
 

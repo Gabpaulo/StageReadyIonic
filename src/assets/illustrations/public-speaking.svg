@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none" role="img" aria-labelledby="t">
+  <title id="t">Speaker at a podium</title>
+  <defs>
+    <linearGradient id="ps-glow" x1="200" y1="20" x2="200" y2="280" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22a7f0" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#22a7f0" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ps-podium" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3b4c"/>
+      <stop offset="1" stop-color="#1e2c3a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- spotlight -->
+  <path d="M170 10h60l70 260H100z" fill="url(#ps-glow)"/>
+  <ellipse cx="200" cy="270" rx="140" ry="12" fill="#22a7f0" opacity=".12"/>
+
+  <!-- speech bubble -->
+  <rect x="262" y="52" width="104" height="58" rx="16" fill="#1e2c3a" stroke="#22a7f0" stroke-width="2"/>
+  <path d="M280 110l-8 18 22-18" fill="#1e2c3a" stroke="#22a7f0" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="278" y="70" width="56" height="6" rx="3" fill="#22a7f0"/>
+  <rect x="278" y="84" width="72" height="6" rx="3" fill="#9bb2c8" opacity=".6"/>
+
+  <!-- sound waves -->
+  <path d="M120 120a30 30 0 0 0 0 42" stroke="#00bcd4" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+  <path d="M104 108a50 50 0 0 0 0 66" stroke="#00bcd4" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+  <path d="M88 96a70 70 0 0 0 0 90" stroke="#00bcd4" stroke-width="4" stroke-linecap="round" opacity=".25"/>
+
+  <!-- person -->
+  <circle cx="200" cy="86" r="22" fill="#f1c7a3"/>
+  <path d="M178 82c0-16 10-26 22-26s22 10 22 24c-6-6-14-9-22-9s-16 4-22 11z" fill="#1b2a38"/>
+  <path d="M160 168c0-30 18-50 40-50s40 20 40 50z" fill="#22a7f0"/>
+  <path d="M192 118l8 14 8-14" fill="#e8f1f9"/>
+  <!-- arm holding mic -->
+  <path d="M228 140c14 4 22 0 26-10" stroke="#1b8fd3" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="256" cy="126" r="6" fill="#f1c7a3"/>
+  <rect x="252" y="100" width="12" height="22" rx="6" fill="#e8f1f9"/>
+  <rect x="254" y="104" width="8" height="2" rx="1" fill="#9bb2c8"/>
+  <rect x="254" y="109" width="8" height="2" rx="1" fill="#9bb2c8"/>
+
+  <!-- podium -->
+  <path d="M146 166h108l-10 104h-88z" fill="url(#ps-podium)"/>
+  <rect x="138" y="158" width="124" height="14" rx="5" fill="#384a5e"/>
+  <circle cx="200" cy="212" r="16" fill="#17232f" stroke="#22a7f0" stroke-width="2"/>
+  <rect x="196" y="201" width="8" height="13" rx="4" fill="#22a7f0"/>
+  <path d="M191 210a9 9 0 0 0 18 0M200 219v4m-4 0h8" stroke="#22a7f0" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- sparkles -->
+  <path d="M60 60l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#ffc409" opacity=".85"/>
+  <path d="M340 160l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#22a7f0"/>
+  <circle cx="330" cy="30" r="3" fill="#9bb2c8" opacity=".6"/>
+  <circle cx="72" cy="220" r="3" fill="#9bb2c8" opacity=".6"/>
+</svg>

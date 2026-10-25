@@ -1,23 +1,14 @@
-/* Phone-width app column. Full width on phones; centred "device" column on
-   tablets/desktop so the app always renders its mobile layout. */
-$app-max-width: 520px;
+/* Layout switch lives in the component (split pane `when`):
+   - .main-content.wide → website sidebar layout
+   - otherwise          → mobile layout (app bar, drawer, bottom nav)
+   Both layouts are fluid; pages adapt to the space they get via
+   @container queries on .content-wrapper. */
+
+$nav-max-width: 560px;
 
 :host {
   display: block;
-  min-height: 100%;
   background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
-}
-
-.app-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: $app-max-width;
-  height: 100%;
-  margin: 0 auto;
-  overflow: hidden;
-  color: #e8f1f9;
 
   // Stage background image with subtle fade
   &::before {
@@ -29,26 +20,22 @@ $app-max-width: 520px;
     background-position: center;
     background-repeat: no-repeat;
     opacity: 0.15;
-    pointer-events: none !important;
-    z-index: -1;
+    pointer-events: none;
   }
 }
 
-/* Larger screens: frame the column so it reads as an app, not a stretched site */
-@media (min-width: 600px) {
-  .app-container {
-    border-left: 1px solid rgba(255, 255, 255, 0.06);
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
-  }
+ion-split-pane {
+  --side-width: 250px;
+  --side-max-width: 250px;
+  --border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* ── Drawer ── */
+/* ── Sidebar / drawer ── */
 ion-menu {
   --width: 280px;
   --max-width: 85vw;
   --background: linear-gradient(180deg, #1a2733 0%, #0f1923 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
 }
 
 .sidenav-toolbar {
@@ -102,6 +89,7 @@ ion-menu {
   ion-item {
     --background: transparent;
     --background-activated: rgba(34, 167, 240, 0.12);
+    --background-hover: transparent;
     --color: rgba(255, 255, 255, 0.7);
     --padding-start: 0;
     --padding-end: 0;
@@ -119,7 +107,7 @@ ion-menu {
       padding: 12px 16px;
       border-radius: 10px;
       border: 1px solid transparent;
-      transition: background 0.2s, border-color 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     ion-icon {
@@ -127,12 +115,32 @@ ion-menu {
       margin-right: 16px;
       width: 24px;
       color: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     ion-label {
       color: rgba(255, 255, 255, 0.85);
       font-size: 15px;
       font-weight: 500;
+    }
+
+    /* Hover only where a mouse exists (website) — avoids sticky hover on touch */
+    @media (hover: hover) {
+      &:hover:not(.active) {
+        .nav-item-content {
+          transform: translateX(4px);
+          background: rgba(255, 255, 255, 0.05);
+        }
+
+        ion-icon {
+          color: #22a7f0;
+          transform: scale(1.1);
+        }
+
+        ion-label {
+          color: white;
+        }
+      }
     }
 
     &.active {
@@ -159,6 +167,7 @@ ion-menu {
 
       ion-icon {
         color: #22a7f0;
+        filter: drop-shadow(0 2px 4px rgba(34, 167, 240, 0.3));
       }
 
       ion-label {
@@ -170,6 +179,9 @@ ion-menu {
     &.practice-mode-nav:not(.active) .nav-item-content {
       background: linear-gradient(135deg, rgba(34, 167, 240, 0.08), rgba(0, 188, 212, 0.05));
       border-color: rgba(34, 167, 240, 0.2);
+
+      ion-icon { color: #22a7f0; }
+      ion-label { color: white; font-weight: 600; }
     }
 
     &.logout-item {
@@ -183,7 +195,17 @@ ion-menu {
   }
 }
 
-/* ── Top app bar ── */
+/* ── Main column ── */
+.main-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  color: #e8f1f9;
+}
+
+/* ── Top bar ── */
 .main-toolbar {
   z-index: 100;
   box-shadow: none;
@@ -207,6 +229,14 @@ ion-menu {
   }
 }
 
+/* Website: transparent top bar like the original desktop layout */
+.main-content.wide .main-toolbar ion-toolbar {
+  --background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+}
+
 .app-bar-brand {
   display: flex;
   align-items: center;
@@ -226,8 +256,8 @@ ion-menu {
 /* ── Page content ──
    ion-content is the scroller; transparent so the stage backdrop shows.
    .content-wrapper is the query container: page styles use
-   @container (max-width: …) so they respond to the app column, not the
-   browser window. */
+   @container (max-width: …) so they respond to the space they actually
+   get (sidebar or not), not the browser window. */
 .app-content {
   flex: 1;
   --background: transparent;
@@ -235,25 +265,23 @@ ion-menu {
 
 .content-wrapper {
   container-type: inline-size;
-  padding: 16px 16px calc(104px + env(safe-area-inset-bottom, 0px));
-  background: transparent;
+  /* fluid gutters: 12px on small phones → 24px on tablets */
+  padding: clamp(12px, 3vw, 24px);
+  padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
   color: #e8f1f9;
 }
 
-@media (max-width: 380px) {
-  .content-wrapper {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
+.main-content.wide .content-wrapper {
+  padding: 24px;
 }
 
-/* ── Floating pill bottom nav ── */
+/* ── Floating pill bottom nav (mobile layout) ── */
 .mobile-nav {
   position: fixed;
   bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
-  width: calc(min(100vw, #{$app-max-width}) - 28px);
+  width: min(calc(100% - 28px), #{$nav-max-width});
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -266,7 +294,6 @@ ion-menu {
   overflow: visible;
 }
 
-/* Regular tabs */
 .nav-tab {
   flex: 1;
   display: flex;
@@ -298,7 +325,6 @@ ion-menu {
   }
 }
 
-/* ── Centre FAB column ── */
 .nav-fab-col {
   flex: 1;
   display: flex;
@@ -345,4 +371,25 @@ ion-menu {
   color: #22a7f0;
   white-space: nowrap;
   letter-spacing: 0.02em;
+}
+
+/* Landscape phones: slimmer bars so content keeps vertical space */
+@media (orientation: landscape) and (max-height: 500px) {
+  .main-toolbar ion-toolbar { --min-height: 48px; }
+
+  .mobile-nav {
+    height: 54px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .nav-fab {
+    width: 48px;
+    height: 48px;
+  }
+
+  .nav-fab-col { margin-top: -14px; }
+
+  .content-wrapper {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
 }

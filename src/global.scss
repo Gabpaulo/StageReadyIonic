@@ -43,8 +43,10 @@ img, svg, picture, video, iframe {
   height: auto;
 }
 
+/* Wrap long words only when they can't fit; word-break: break-word split
+   ordinary words mid-word ("SPEECHE S") in narrow flex items. */
 button, a, span, p, h1, h2, h3, h4, h5, h6 {
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 html, body, ion-app, app-root, ion-content {
@@ -105,6 +107,16 @@ ion-toast {
   --color: #e8f1f9;
   --button-color: #22a7f0;
   --border-radius: 14px;
+}
+
+/* Empty-state illustrations (src/assets/illustrations) — scale with the space */
+.empty-illustration {
+  display: block;
+  width: min(260px, 80%);
+  height: auto;
+  margin: 0 auto 16px;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Global font styles */
@@ -338,8 +350,7 @@ body {
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
+    overflow-wrap: break-word !important;
     white-space: normal !important;
   }
 
@@ -348,8 +359,7 @@ body {
   .badge-prog-lbl, .action-body, .pr-badge, .recent-item, .wf-dim-chip,
   .nav-item-content ion-label, .metric-name, .metric-score {
     white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   /* Allow flex rows to wrap so children can stack on narrow screens */

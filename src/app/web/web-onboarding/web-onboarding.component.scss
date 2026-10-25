@@ -101,6 +101,22 @@
 }
 
 /* ── Hero (welcome / done) ── */
+/* Step illustrations: shrink on short/narrow screens so buttons stay visible */
+.hero-illustration {
+  display: block;
+  width: min(240px, 60%);
+  max-height: 28vh;
+  height: auto;
+  margin: 0 auto 16px;
+  object-fit: contain;
+  pointer-events: none;
+
+  &.small {
+    width: min(140px, 40%);
+    max-height: 16vh;
+  }
+}
+
 .hero-icon {
   width: 80px;
   height: 80px;
