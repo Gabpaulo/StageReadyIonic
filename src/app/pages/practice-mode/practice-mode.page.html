@@ -24,7 +24,7 @@
 
     <!-- ── Adaptive Plan Loading ── -->
     <div class="plan-loading" *ngIf="planLoading">
-      <ion-spinner name="dots" style="width:20px;height:20px;--color:var(--primary)"></ion-spinner>
+      <ion-spinner name="dots"></ion-spinner>
       <span>Building your personalized plan…</span>
     </div>
 
@@ -100,8 +100,8 @@
 
     <div class="category-cards">
       <div class="category-card informative" (click)="selectCategory('informative')">
-        <div class="card-icon-wrap" style="background: rgba(34,167,240,0.15); border-color: rgba(34,167,240,0.4)">
-          <ion-icon name="information-circle-outline" style="color: #22a7f0"></ion-icon>
+        <div class="card-icon-wrap">
+          <ion-icon name="information-circle-outline"></ion-icon>
         </div>
         <div class="card-body">
           <h2>Informative</h2>
@@ -115,8 +115,8 @@
       </div>
 
       <div class="category-card persuasive" (click)="selectCategory('persuasive')">
-        <div class="card-icon-wrap" style="background: rgba(156,39,176,0.15); border-color: rgba(156,39,176,0.4)">
-          <ion-icon name="megaphone-outline" style="color: #9c27b0"></ion-icon>
+        <div class="card-icon-wrap">
+          <ion-icon name="megaphone-outline"></ion-icon>
         </div>
         <div class="card-body">
           <h2>Persuasive</h2>
@@ -130,8 +130,8 @@
       </div>
 
       <div class="category-card motivational" (click)="selectCategory('motivational')">
-        <div class="card-icon-wrap" style="background: rgba(255,107,53,0.15); border-color: rgba(255,107,53,0.4)">
-          <ion-icon name="flame-outline" style="color: #ff6b35"></ion-icon>
+        <div class="card-icon-wrap">
+          <ion-icon name="flame-outline"></ion-icon>
         </div>
         <div class="card-body">
           <h2>Motivational</h2>

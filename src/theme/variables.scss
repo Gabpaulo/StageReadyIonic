@@ -1,13 +1,15 @@
 // Ionic Variables and Theming. For more info, please see:
 // http://ionicframework.com/docs/theming/
 
+@import './tokens';
+
 /** Ionic CSS Variables **/
 :root {
   /* Primary color — StageReady brand blue (matches #22a7f0 used across pages) */
-  --ion-color-primary: #22a7f0;
+  --ion-color-primary: var(--sr-primary);
   --ion-color-primary-rgb: 34,167,240;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-contrast: var(--sr-on-primary); /* white on #22a7f0 fails contrast */
+  --ion-color-primary-contrast-rgb: 18,28,37;
   --ion-color-primary-shade: #1e93d3;
   --ion-color-primary-tint: #38b0f2;
 
@@ -28,12 +30,12 @@
   --ion-color-tertiary-tint: #845dae;
 
   /* Success color */
-  --ion-color-success: #2dd36f;
-  --ion-color-success-rgb: 45,211,111;
-  --ion-color-success-contrast: #ffffff;
-  --ion-color-success-contrast-rgb: 255,255,255;
-  --ion-color-success-shade: #28ba62;
-  --ion-color-success-tint: #42d77d;
+  --ion-color-success: var(--sr-success);
+  --ion-color-success-rgb: 76,175,80;
+  --ion-color-success-contrast: var(--sr-on-primary); /* white on green fails contrast */
+  --ion-color-success-contrast-rgb: 18,28,37;
+  --ion-color-success-shade: #439a46;
+  --ion-color-success-tint: #5eb762;
 
   /* Warning color */
   --ion-color-warning: #ffc409;
@@ -76,16 +78,16 @@
   --ion-color-light-tint: #f5f6f9;
 
   /* Custom colors for dark theme */
-  --ion-background-color: #121c25;
+  --ion-background-color: var(--sr-bg);
   --ion-background-color-rgb: 18,28,37;
-  --ion-text-color: #e8f1f9;
+  --ion-text-color: var(--sr-text);
   --ion-text-color-rgb: 232,241,249;
-  --ion-toolbar-background: #1e2c3a;
-  --ion-toolbar-text-color: #e8f1f9;
-  --ion-tab-bar-background: #1e2c3a;
-  --ion-tab-bar-text-color: #9bb2c8;
-  --ion-item-background: #1e2c3a;
-  --ion-item-text-color: #e8f1f9;
+  --ion-toolbar-background: var(--sr-surface);
+  --ion-toolbar-text-color: var(--sr-text);
+  --ion-tab-bar-background: var(--sr-surface);
+  --ion-tab-bar-text-color: var(--sr-text-muted);
+  --ion-item-background: var(--sr-surface);
+  --ion-item-text-color: var(--sr-text);
 
   /* Step colors for dark theme */
   --ion-color-step-50: #1e2c3a;

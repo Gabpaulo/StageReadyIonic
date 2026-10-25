@@ -1,49 +1,43 @@
 .practice-calendar {
-  background: var(--surface, #1e2c3a);
-  border: 1px solid var(--border, #2b3b4c);
-  border-radius: 16px;
-  padding: 24px;
-  color: var(--text, #e8f1f9);
+  background: var(--sr-surface);
+  border: 1px solid var(--sr-border);
+  border-radius: var(--sr-radius-lg);
+  box-shadow: var(--sr-highlight);
+  padding: var(--sr-space-6);
+  color: var(--sr-text);
 
   .calendar-header {
-    margin-bottom: 24px;
+    margin-bottom: var(--sr-space-6);
 
     h3 {
       font-size: 1.5rem;
       font-weight: 700;
-      margin: 0 0 16px 0;
-      color: var(--text, #e8f1f9);
+      margin: 0 0 var(--sr-space-4);
+      color: var(--sr-text);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--sr-space-2);
 
       &::before {
         content: '📊';
-        font-size: 1.8rem;
+        font-size: 1.75rem;
       }
     }
 
     .calendar-stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 12px;
-      margin-top: 16px;
+      gap: var(--sr-space-3);
+      margin-top: var(--sr-space-4);
 
       .stat-item {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px;
-        background: rgba(34, 167, 240, 0.1);
-        border: 1px solid rgba(34, 167, 240, 0.2);
-        border-radius: 12px;
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: rgba(34, 167, 240, 0.15);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(34, 167, 240, 0.2);
-        }
+        gap: var(--sr-space-3);
+        padding: var(--sr-space-3);
+        background: var(--sr-primary-soft);
+        border: 1px solid var(--sr-primary-soft);
+        border-radius: var(--sr-radius-md);
 
         .stat-icon {
           font-size: 2rem;
@@ -57,14 +51,15 @@
           .stat-value {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary, #22a7f0);
+            color: var(--sr-primary);
             line-height: 1;
+            font-variant-numeric: tabular-nums;
           }
 
           .stat-label {
             font-size: 0.75rem;
-            color: var(--muted, #9bb2c8);
-            margin-top: 4px;
+            color: var(--sr-text-muted);
+            margin-top: var(--sr-space-1);
           }
         }
       }
@@ -75,28 +70,31 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    background: rgba(34, 167, 240, 0.05);
-    border-radius: 12px;
+    margin-bottom: var(--sr-space-5);
+    padding: var(--sr-space-2) var(--sr-space-3);
+    background: var(--sr-surface-2);
+    border-radius: var(--sr-radius-md);
 
     .nav-btn {
-      background: rgba(34, 167, 240, 0.2);
-      border: 1px solid rgba(34, 167, 240, 0.3);
-      color: var(--primary, #22a7f0);
-      border-radius: 8px;
-      width: 36px;
-      height: 36px;
+      background: var(--sr-primary-soft);
+      border: 1px solid var(--sr-primary-soft);
+      color: var(--sr-primary);
+      border-radius: var(--sr-radius-sm);
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1.2rem;
+      transition: background-color var(--sr-duration-fast) var(--sr-ease);
 
-      &:hover:not(:disabled) {
-        background: rgba(34, 167, 240, 0.3);
-        transform: scale(1.1);
+      @media (hover: hover) {
+        &:hover:not(:disabled) { background: var(--sr-primary-glow); }
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--sr-primary);
+        outline-offset: 2px;
       }
 
       &:disabled {
@@ -104,15 +102,13 @@
         cursor: not-allowed;
       }
 
-      ion-icon {
-        font-size: 20px;
-      }
+      ion-icon { font-size: 20px; }
     }
 
     .month-year {
-      font-size: 1.1rem;
+      font-size: 1.125rem;
       font-weight: 600;
-      color: var(--text, #e8f1f9);
+      color: var(--sr-text);
       margin: 0;
     }
   }
@@ -120,38 +116,38 @@
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: var(--sr-space-2);
+    margin-bottom: var(--sr-space-5);
 
     .day-label {
       text-align: center;
       font-size: 0.75rem;
       font-weight: 600;
-      color: var(--muted, #9bb2c8);
-      padding: 8px 4px;
+      color: var(--sr-text-muted);
+      padding: var(--sr-space-2) var(--sr-space-1);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .calendar-day {
       aspect-ratio: 1;
-      border: 1px solid var(--border, #2b3b4c);
-      border-radius: 8px;
-      padding: 6px;
+      border: 1px solid var(--sr-border);
+      border-radius: var(--sr-radius-sm);
+      padding: var(--sr-space-1);
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      background: rgba(255, 255, 255, 0.02);
+      transition: background-color var(--sr-duration-fast) var(--sr-ease), border-color var(--sr-duration-fast) var(--sr-ease);
+      background: var(--sr-surface-2);
 
       .day-number {
-        font-size: 0.85rem;
+        font-size: 0.875rem;
         font-weight: 500;
-        color: var(--text, #e8f1f9);
-        margin-bottom: 4px;
+        color: var(--sr-text);
+        margin-bottom: var(--sr-space-1);
+        font-variant-numeric: tabular-nums;
       }
 
       .practice-indicator {
@@ -163,82 +159,64 @@
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: var(--primary, #22a7f0);
-          box-shadow: 0 0 6px rgba(34, 167, 240, 0.6);
+          background: var(--sr-primary);
 
-          &.multiple {
-            background: #4CAF50;
-            box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
-          }
+          &.multiple { background: var(--sr-success); }
         }
 
         .speech-count {
-          font-size: 0.6rem;
+          font-size: 0.625rem;
           font-weight: 700;
-          color: #4CAF50;
+          color: var(--sr-success);
         }
       }
 
       &.practiced {
-        background: rgba(34, 167, 240, 0.15);
-        border-color: rgba(34, 167, 240, 0.4);
-
-        &:hover {
-          background: rgba(34, 167, 240, 0.25);
-          border-color: rgba(34, 167, 240, 0.6);
-          transform: scale(1.05);
-          box-shadow: 0 4px 12px rgba(34, 167, 240, 0.3);
-        }
+        background: var(--sr-primary-soft);
+        border-color: var(--sr-primary-glow);
 
         &[data-count="2"],
         &[data-count="3"],
         &[data-count="4"],
         &[data-count="5"] {
-          background: rgba(76, 175, 80, 0.15);
-          border-color: rgba(76, 175, 80, 0.4);
-
-          &:hover {
-            background: rgba(76, 175, 80, 0.25);
-            border-color: rgba(76, 175, 80, 0.6);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-          }
+          background: var(--sr-success-soft);
+          border-color: var(--sr-success);
         }
 
         &[data-count]:not([data-count="0"]):not([data-count="1"])::after {
           content: attr(data-count);
           position: absolute;
           top: 2px;
-          right: 4px;
-          font-size: 0.6rem;
+          right: var(--sr-space-1);
+          font-size: 0.625rem;
           font-weight: 700;
-          color: #4CAF50;
-          background: rgba(76, 175, 80, 0.2);
-          padding: 1px 4px;
-          border-radius: 4px;
+          color: var(--sr-success);
+          background: var(--sr-success-soft);
+          padding: 1px var(--sr-space-1);
+          border-radius: var(--sr-space-1);
         }
       }
 
       &.not-current-month {
-        opacity: 0.3;
+        opacity: 0.4;
 
-        .day-number {
-          color: var(--muted, #9bb2c8);
-        }
+        .day-number { color: var(--sr-text-muted); }
       }
 
       &.today {
-        border: 2px solid var(--primary, #22a7f0);
-        box-shadow: 0 0 12px rgba(34, 167, 240, 0.4);
+        border: 2px solid var(--sr-primary);
 
         .day-number {
-          color: var(--primary, #22a7f0);
+          color: var(--sr-primary);
           font-weight: 700;
         }
       }
 
-      &:hover:not(.not-current-month) {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(34, 167, 240, 0.4);
+      @media (hover: hover) {
+        &:hover:not(.not-current-month) {
+          background: var(--sr-surface-hover);
+          border-color: var(--sr-primary);
+        }
       }
     }
   }
@@ -246,94 +224,83 @@
   .calendar-legend {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: var(--sr-space-4);
     flex-wrap: wrap;
-    padding-top: 16px;
-    border-top: 1px solid var(--border, #2b3b4c);
+    padding-top: var(--sr-space-4);
+    border-top: 1px solid var(--sr-border);
 
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: var(--sr-space-2);
 
       .legend-dot {
         width: 16px;
         height: 16px;
-        border-radius: 4px;
-        border: 1px solid var(--border, #2b3b4c);
+        border-radius: var(--sr-space-1);
+        border: 1px solid var(--sr-border);
 
-        &.no-practice {
-          background: rgba(255, 255, 255, 0.02);
-        }
+        &.no-practice { background: var(--sr-surface-2); }
 
         &.one-practice {
-          background: rgba(34, 167, 240, 0.15);
-          border-color: rgba(34, 167, 240, 0.4);
-          box-shadow: 0 0 4px rgba(34, 167, 240, 0.3);
+          background: var(--sr-primary-soft);
+          border-color: var(--sr-primary-glow);
         }
 
         &.multiple-practice {
-          background: rgba(76, 175, 80, 0.15);
-          border-color: rgba(76, 175, 80, 0.4);
-          box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+          background: var(--sr-success-soft);
+          border-color: var(--sr-success);
         }
       }
 
       .legend-label {
-        font-size: 0.8rem;
-        color: var(--muted, #9bb2c8);
+        font-size: 0.8125rem;
+        color: var(--sr-text-muted);
       }
     }
   }
 }
 
-// Mobile Responsive
+@media (prefers-reduced-motion: reduce) {
+  .practice-calendar .calendar-day,
+  .practice-calendar .nav-btn {
+    transition: none;
+  }
+}
+
+// Mobile (app column)
 @container (max-width: 768px) {
   .practice-calendar {
-    padding: 16px;
+    padding: var(--sr-space-4);
 
     .calendar-header {
-      h3 {
-        font-size: 1.2rem;
-      }
+      h3 { font-size: 1.25rem; }
 
       .calendar-stats {
         grid-template-columns: 1fr;
 
         .stat-item {
-          padding: 10px;
+          padding: var(--sr-space-3);
 
-          .stat-icon {
-            font-size: 1.5rem;
-          }
-
-          .stat-content {
-            .stat-value {
-              font-size: 1.2rem;
-            }
-
-            .stat-label {
-              font-size: 0.7rem;
-            }
-          }
+          .stat-icon { font-size: 1.5rem; }
+          .stat-content .stat-value { font-size: 1.25rem; }
+          .stat-content .stat-label { font-size: 0.75rem; }
         }
       }
     }
 
     .calendar-grid {
-      gap: 4px;
+      gap: var(--sr-space-1);
 
       .day-label {
-        font-size: 0.65rem;
-        padding: 4px 2px;
+        font-size: 0.75rem;
+        padding: var(--sr-space-1) 2px;
       }
 
       .calendar-day {
-        padding: 4px;
+        padding: var(--sr-space-1);
 
-        .day-number {
-          font-size: 0.75rem;
-        }
+        .day-number { font-size: 0.75rem; }
 
         .practice-indicator .practice-dot {
           width: 4px;
@@ -343,7 +310,7 @@
     }
 
     .calendar-legend {
-      gap: 12px;
+      gap: var(--sr-space-3);
 
       .legend-item {
         .legend-dot {
@@ -351,9 +318,7 @@
           height: 12px;
         }
 
-        .legend-label {
-          font-size: 0.7rem;
-        }
+        .legend-label { font-size: 0.75rem; }
       }
     }
   }

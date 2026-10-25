@@ -98,15 +98,20 @@ html {
     typography: (plain-family: 'Roboto, sans-serif', brand-family: 'Roboto, sans-serif'),
     density: 0,
   ));
+
+  // Every mat-card uses the app surface instead of M3's neutral grey (Material 19 reads --mdc-*)
+  --mdc-elevated-card-container-color: var(--sr-surface);
+  --mdc-elevated-card-container-shape: var(--sr-radius-lg);
+  --mdc-elevated-card-container-elevation: none;
 }
 
 /* Toasts stay inside the 520px app column (see web-shell) */
 ion-toast {
   --max-width: 488px;
-  --background: #1e2c3a;
-  --color: #e8f1f9;
-  --button-color: #22a7f0;
-  --border-radius: 14px;
+  --background: var(--sr-surface-raised);
+  --color: var(--sr-text);
+  --button-color: var(--sr-primary);
+  --border-radius: var(--sr-radius-md);
 }
 
 /* Empty-state illustrations (src/assets/illustrations) — scale with the space */
@@ -121,218 +126,50 @@ ion-toast {
 
 /* Global font styles */
 body {
-  font-family: 'Roboto', sans-serif; /* Using Roboto as a common, readable font */
+  font-family: var(--sr-font);
   -webkit-tap-highlight-color: transparent;
-}
-
-/* ===== Opaque Modal Styles (for speech history) ===== */
-.opaque-modal {
-  --bg:            #17232f;
-  --surface:       #1e2c3a;
-  --surface-2:     #1a2734;
-  --primary:       #22a7f0;
-  --primary-700:   #1b8fd3;
-  --primary-glow:  rgba(34, 167, 240, 0.35);
-  --text:          #e8f1f9;
-  --muted:         #9bb2c8;
-  --border:        #2b3b4c;
-
-  /* Make sure base background & text are solid */
-  --background: var(--surface) !important;
-  --color: var(--text) !important;
-
-  /* Backdrop darkness */
-  --backdrop-opacity: 0.65 !important;
-
-  /* Extra-hardening: ensure no element renders black text or transparent bg */
-  --ion-background-color: var(--surface) !important;
-  --ion-text-color: var(--text) !important;
-}
-
-/* Dark blurred backdrop behind the modal */
-.opaque-modal::part(backdrop) {
-  background: rgba(0, 0, 0, 0.8) !important;
-  backdrop-filter: blur(4px) !important;
-}
-
-/* The sheet/card itself */
-.opaque-modal::part(content) {
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 24px var(--primary-glow) !important;
-  overflow: hidden !important;
-}
-
-/* Prevent any transparent gradients leaking in the modal body */
-.opaque-modal ion-content {
-  --background: var(--surface) !important;
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  padding: 16px !important;
-}
-
-/* Solid toolbar */
-.opaque-modal ion-toolbar {
-  --background: var(--surface) !important;
-  --color: var(--text) !important;
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border-bottom: 1px solid var(--border) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-.opaque-modal ion-title {
-  color: var(--text) !important;
-  font-weight: 700 !important;
-}
-
-/* Lists & items inside modal */
-.opaque-modal ion-list {
-  background: transparent !important;
-}
-
-.opaque-modal ion-item {
-  --background: var(--surface) !important;
-  --border-color: var(--border) !important;
-  --color: var(--text) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  margin-bottom: 10px !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2) !important;
-}
-
-/* Cards inside modal */
-.opaque-modal ion-card {
-  --background: var(--surface) !important;
-  --color: var(--text) !important;
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 24px var(--primary-glow) !important;
-  margin: 12px 0 !important;
-}
-
-.opaque-modal ion-card-header {
-  background: var(--surface) !important;
-  color: var(--text) !important;
-}
-
-.opaque-modal ion-card-title {
-  color: var(--text) !important;
-  font-weight: 700 !important;
-}
-
-.opaque-modal ion-card-content {
-  background: var(--surface) !important;
-  color: var(--text) !important;
-
-  p {
-    color: var(--text) !important;
-    margin: 8px 0 !important;
-
-    strong {
-      color: var(--primary) !important;
-    }
-  }
-
-  ion-item {
-    --background: transparent !important;
-    --border-color: transparent !important;
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    box-shadow: none !important;
-    margin-bottom: 4px !important;
-
-    ion-label {
-      font-weight: 500 !important;
-      color: var(--text) !important;
-      min-width: 60px;
-      margin-right: 12px;
-    }
-
-    ion-progress-bar {
-      height: 8px;
-      border-radius: 4px;
-      --background: var(--surface-2);
-      --progress-background: var(--primary);
-      flex-grow: 1;
-      margin-right: 12px;
-    }
-
-    ion-text {
-      font-weight: 600;
-      min-width: 70px;
-      text-align: end;
-    }
-  }
-}
-
-.opaque-modal .ion-page,
-.opaque-modal .content,
-.opaque-modal .scroll-content,
-.opaque-modal .inner-scroll {
-  background: var(--surface) !important;
 }
 
 /* ===== Angular Material Dialog — session-dialog dark theme ===== */
 .session-dialog {
   .mat-mdc-dialog-container {
-    --mdc-dialog-container-color: #1e2c3a;
-    background: #1e2c3a !important;
+    --mdc-dialog-container-color: var(--sr-surface);
   }
 
   .mat-mdc-dialog-surface {
-    background: #1e2c3a !important;
-    color: #e8f1f9 !important;
-    border: 1px solid #2b3b4c !important;
-    border-radius: 16px !important;
-    box-shadow: 0 8px 40px rgba(0,0,0,.7) !important;
+    background: var(--sr-surface) !important;
+    color: var(--sr-text) !important;
+    border: 1px solid var(--sr-border) !important;
+    border-radius: var(--sr-radius-lg) !important;
+    box-shadow: var(--sr-shadow-lg) !important;
   }
 
   .mdc-dialog__title,
   .mat-mdc-dialog-title,
   [mat-dialog-title] {
-    color: #e8f1f9 !important;
-    border-bottom: 1px solid #2b3b4c;
-    padding-bottom: 12px !important;
+    color: var(--sr-text) !important;
+    border-bottom: 1px solid var(--sr-border);
+    padding-bottom: var(--sr-space-3) !important;
     margin-bottom: 0 !important;
   }
 
   .mat-mdc-dialog-content {
-    background: #1e2c3a !important;
-    color: #e8f1f9 !important;
+    color: var(--sr-text) !important;
     max-height: 75vh;
   }
 
   .mat-mdc-dialog-actions {
-    background: #1e2c3a !important;
-    border-top: 1px solid #2b3b4c;
+    border-top: 1px solid var(--sr-border);
 
     button {
-      color: #22a7f0 !important;
+      color: var(--sr-primary) !important;
     }
   }
 
   /* Spinner inside dialog */
   .mat-mdc-progress-spinner circle {
-    stroke: #22a7f0 !important;
+    stroke: var(--sr-primary) !important;
   }
-}
-
-.opaque-modal h1,
-.opaque-modal h2,
-.opaque-modal h3,
-.opaque-modal h4,
-.opaque-modal h5,
-.opaque-modal h6,
-.opaque-modal p,
-.opaque-modal span,
-.opaque-modal ion-label,
-.opaque-modal ion-text {
-  color: var(--text) !important;
 }
 
 /* ------------------------------------------------------------------
@@ -374,3 +211,11 @@ body {
   }
 }
 
+/* Motion: honour the OS setting. Transitions only here — spinners/progress
+   keyframes must keep running, so pages guard their own decorative keyframes. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
