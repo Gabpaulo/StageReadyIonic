@@ -9,6 +9,8 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
+@use '@angular/material' as mat;
+
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 
@@ -50,14 +52,10 @@ html, body, ion-app, app-root, ion-content {
   overflow-x: hidden;
 }
 
-@media (max-width: 768px) {
-  html, body, ion-app, app-root, ion-page, .ion-page, ion-split-pane, .app-container, .main-content, .content-wrapper {
-    overflow-x: hidden !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  .content-wrapper, .history-container, .wd, .card, .mat-card, .recent-grid, .trend-analytics,
+/* Page-level mobile rules. These query the app column (.content-wrapper in
+   the shell), so they apply on every screen size now the app is mobile-only. */
+@container (max-width: 768px) {
+  .history-container, .wd, .card, .mat-card, .recent-grid, .trend-analytics,
   .history-card, .entry-info, .entry-top, .entry-meta, .entry-scores, .wf-script-row,
   .pr-script-row, .badge-next-row, .ta-header, .dim-row {
     min-width: 0 !important;
@@ -87,12 +85,32 @@ html, body, ion-app, app-root, ion-content {
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
 
-/* Remove Angular Material prebuilt theme as we are using Ionic now */
-// @import "@angular/material/prebuilt-themes/indigo-pink.css";
+/* Angular Material is still used for cards, form fields, dialogs and
+   snackbars. Without a theme those render with missing colours, so give it a
+   dark theme matching the app (component overrides still win). */
+html {
+  color-scheme: dark;
+  @include mat.theme((
+    color: (theme-type: dark, primary: mat.$azure-palette),
+    // Same stack as body — plain "Roboto" falls back to serif when the font isn't installed
+    typography: (plain-family: 'Roboto, sans-serif', brand-family: 'Roboto, sans-serif'),
+    density: 0,
+  ));
+}
+
+/* Toasts stay inside the 520px app column (see web-shell) */
+ion-toast {
+  --max-width: 488px;
+  --background: #1e2c3a;
+  --color: #e8f1f9;
+  --button-color: #22a7f0;
+  --border-radius: 14px;
+}
 
 /* Global font styles */
 body {
   font-family: 'Roboto', sans-serif; /* Using Roboto as a common, readable font */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ===== Opaque Modal Styles (for speech history) ===== */
@@ -309,10 +327,9 @@ body {
    Global mobile responsiveness overrides
    These rules are intentionally broad to catch remaining fixed-width
    and nowrap styles that cause horizontal overflow on smaller devices.
-   They apply only under the mobile breakpoint so desktop layout is
-   preserved.
+   They query the app column, so they always apply inside the shell.
    ------------------------------------------------------------------ */
-@media (max-width: 768px) {
+@container (max-width: 768px) {
   .card, .mat-card, .badge-card, .pr-card, .wf-card, .action-row,
   .nav-item-content, .badge-content, .badge-image-container, .level-block,
   .level-left, .stats-row, .main-grid, .recent-item, .recent-grid,
@@ -345,30 +362,5 @@ body {
   .main-grid {
     grid-template-columns: 1fr !important;
   }
-
-  /* Extra content padding at bottom so fixed bottom nav doesn't cover content */
-  .content-wrapper {
-    padding-bottom: 96px !important;
-  }
-}
-
-/* DEBUG HELPERS: force mobile bottom nav and icons visible during testing */
-.mobile-bottom-nav, ion-footer.mobile-bottom-nav {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  z-index: 99999 !important;
-}
-
-.mobile-bottom-nav ion-icon,
-.mobile-bottom-nav .bottom-nav-button ion-icon {
-  color: #ffffff !important;
-  font-size: 1.6rem !important;
-}
-
-/* make sure ionic buttons render their inner icon element */
-ion-button.bottom-nav-button {
-  display: inline-flex !important;
 }
 

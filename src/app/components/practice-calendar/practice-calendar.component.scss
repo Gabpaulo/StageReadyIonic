@@ -288,7 +288,7 @@
 }
 
 // Mobile Responsive
-@media (max-width: 768px) {
+@container (max-width: 768px) {
   .practice-calendar {
     padding: 16px;
 

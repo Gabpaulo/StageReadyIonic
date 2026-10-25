@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, DestroyRef, ViewChild, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { IonContent } from '@ionic/angular';
+import { filter } from 'rxjs/operators';
 import { FirebaseService } from '../../services/firebase.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -9,21 +12,18 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./web-shell.component.scss'],
   standalone: false
 })
-export class WebShellComponent implements OnInit {
-  sidebarOpen = true;
+export class WebShellComponent {
+  @ViewChild('appContent') private appContent?: IonContent;
 
   constructor(
     private router: Router,
     private firebaseService: FirebaseService,
     private snackBar: MatSnackBar
-  ) {}
-
-  ngOnInit() {
-    // No specific logic needed here for routing, AuthGuard handles it.
-  }
-
-  toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+  ) {
+    // One scroller is shared by every tab — start each page at the top.
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd), takeUntilDestroyed(inject(DestroyRef)))
+      .subscribe(() => this.appContent?.scrollToTop(0));
   }
 
   logout() {

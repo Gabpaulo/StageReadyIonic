@@ -1,15 +1,13 @@
-<ion-header class="custom-header">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="goBack()" fill="clear" class="back-btn">
-        <ion-icon name="chevron-back-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Practice Mode</ion-title>
-  </ion-toolbar>
-</ion-header>
+<!-- Rendered inside the shell's ion-content, so this is a plain in-page bar
+     (a nested ion-header/ion-content would stack a second toolbar and collapse). -->
+<div class="custom-header">
+  <ion-button (click)="goBack()" fill="clear" class="back-btn" aria-label="Back">
+    <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+  </ion-button>
+  <h2 class="custom-title">Practice Mode</h2>
+</div>
 
-<ion-content class="custom-content">
+<div class="custom-content">
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        STEP 1 — CATEGORY SELECTION
@@ -503,4 +501,4 @@
     </ng-container>
   </div>
 
-</ion-content>
+</div>

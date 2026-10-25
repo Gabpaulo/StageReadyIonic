@@ -1,25 +1,29 @@
-ion-split-pane {
-  --side-width: 250px; /* Default width for the side menu */
-  --side-width-collapsed: 60px; /* Collapsed width */
-  min-width: 0;
+/* Phone-width app column. Full width on phones; centred "device" column on
+   tablets/desktop so the app always renders its mobile layout. */
+$app-max-width: 520px;
+
+:host {
+  display: block;
+  min-height: 100%;
+  background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
 }
 
 .app-container {
-  min-height: 100vh;
-  width: auto;
-  max-width: 100%;
-  background: radial-gradient(60% 60% at 50% 10%, #1b2a38 0%, #16222d 60%, #121c25 100%), #17232f;
   position: relative;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: $app-max-width;
+  height: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  color: #e8f1f9;
 
   // Stage background image with subtle fade
   &::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-image: url('/assets/stage.jpg');
     background-size: cover;
     background-position: center;
@@ -30,16 +34,21 @@ ion-split-pane {
   }
 }
 
+/* Larger screens: frame the column so it reads as an app, not a stretched site */
+@media (min-width: 600px) {
+  .app-container {
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ── Drawer ── */
 ion-menu {
-  --width: var(--side-width);
+  --width: 280px;
+  --max-width: 85vw;
   --background: linear-gradient(180deg, #1a2733 0%, #0f1923 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
-  transition: var(--width) 0.3s ease;
-
-  &.mat-sidenav-closed {
-    --width: var(--side-width-collapsed);
-  }
 }
 
 .sidenav-toolbar {
@@ -48,10 +57,13 @@ ion-menu {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 8px 0;
 
+  ion-toolbar {
+    --background: transparent;
+  }
+
   .brand-section {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 12px;
     padding: 12px 16px;
 
@@ -72,6 +84,7 @@ ion-menu {
     }
 
     ion-title {
+      padding: 0;
       font-weight: 700;
       font-size: 20px;
       background: linear-gradient(135deg, #ffffff 0%, #a8d0e6 100%);
@@ -88,6 +101,7 @@ ion-menu {
 
   ion-item {
     --background: transparent;
+    --background-activated: rgba(34, 167, 240, 0.12);
     --color: rgba(255, 255, 255, 0.7);
     --padding-start: 0;
     --padding-end: 0;
@@ -97,7 +111,6 @@ ion-menu {
     margin-bottom: 4px;
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     .nav-item-content {
       display: flex;
@@ -105,50 +118,29 @@ ion-menu {
       width: 100%;
       padding: 12px 16px;
       border-radius: 10px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s;
     }
 
     ion-icon {
       font-size: 22px;
       margin-right: 16px;
       width: 24px;
-      text-align: center;
       color: rgba(255, 255, 255, 0.7);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     ion-label {
       color: rgba(255, 255, 255, 0.85);
       font-size: 15px;
       font-weight: 500;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    &:hover:not(.active) {
-      --background: rgba(255, 255, 255, 0.05);
-
-      .nav-item-content {
-        transform: translateX(4px);
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      ion-icon {
-        color: #22a7f0;
-        transform: scale(1.1);
-      }
-
-      ion-label {
-        color: white;
-      }
     }
 
     &.active {
-      --background: transparent;
       position: relative;
 
       .nav-item-content {
         background: linear-gradient(135deg, rgba(34, 167, 240, 0.2) 0%, rgba(27, 143, 211, 0.15) 100%);
-        border: 1px solid rgba(34, 167, 240, 0.3);
+        border-color: rgba(34, 167, 240, 0.3);
         box-shadow: 0 4px 12px rgba(34, 167, 240, 0.15);
       }
 
@@ -167,7 +159,6 @@ ion-menu {
 
       ion-icon {
         color: #22a7f0;
-        filter: drop-shadow(0 2px 4px rgba(34, 167, 240, 0.3));
       }
 
       ion-label {
@@ -176,50 +167,35 @@ ion-menu {
       }
     }
 
-    &.practice-mode-nav {
-      .nav-item-content {
-        background: linear-gradient(135deg, rgba(34,167,240,0.08), rgba(0,188,212,0.05));
-        border: 1px solid rgba(34,167,240,0.2);
+    &.practice-mode-nav:not(.active) .nav-item-content {
+      background: linear-gradient(135deg, rgba(34, 167, 240, 0.08), rgba(0, 188, 212, 0.05));
+      border-color: rgba(34, 167, 240, 0.2);
+    }
+
+    &.logout-item {
+      margin-top: 16px;
+
+      ion-icon,
+      ion-label {
+        color: #ff8a80;
       }
-      ion-icon { color: #22a7f0; }
-      ion-label { color: white; font-weight: 600; }
     }
   }
-
-  .nav-badge {
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    color: #00bcd4;
-    background: rgba(0,188,212,0.12);
-    border: 1px solid rgba(0,188,212,0.3);
-    border-radius: 6px;
-    padding: 2px 6px;
-    margin-right: 8px;
-  }
 }
 
-.main-content {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: transparent;
-  flex: 1;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-
+/* ── Top app bar ── */
 .main-toolbar {
-  --background: transparent;
-  --color: #e8f1f9;
-  border-bottom: none;
+  z-index: 100;
   box-shadow: none;
 
   ion-toolbar {
-    --background: transparent;
+    --background: rgba(18, 28, 37, 0.85);
+    --color: #e8f1f9;
     --border-width: 0;
-    --box-shadow: none;
+    --min-height: 56px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   ion-menu-button {
@@ -228,160 +204,145 @@ ion-menu {
 
   ion-button {
     --color: rgba(232, 241, 249, 0.7);
-
-    &:hover {
-      --color: #e8f1f9;
-    }
   }
 }
 
-.content-wrapper {
+.app-bar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e8f1f9;
+  white-space: nowrap;
+
+  .app-bar-logo {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* ── Page content ──
+   ion-content is the scroller; transparent so the stage backdrop shows.
+   .content-wrapper is the query container: page styles use
+   @container (max-width: …) so they respond to the app column, not the
+   browser window. */
+.app-content {
   flex: 1;
-  padding: 24px;
-  overflow-y: auto;
+  --background: transparent;
+}
+
+.content-wrapper {
+  container-type: inline-size;
+  padding: 16px 16px calc(104px + env(safe-area-inset-bottom, 0px));
   background: transparent;
   color: #e8f1f9;
 }
 
-
-/* ── Mobile toolbar logo (replaces truncating ion-title) ── */
-.mobile-logo-bar {
-  display: none;
-  align-items: center;
-  gap: 8px;
-  padding: 0 4px;
-
-  .mobile-logo-img {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-  }
-
-  .mobile-logo-text {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #e8f1f9;
-    white-space: nowrap;
-  }
-}
-
-/* ── Floating Pill Bottom Nav ── */
-.mobile-nav {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  /* Keep hamburger — opens slide-in drawer with full menu */
-  .desktop-menu-btn {
-    display: flex;
-  }
-
-  /* Scroll content clears the floating nav */
+@media (max-width: 380px) {
   .content-wrapper {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* ── Floating pill bottom nav ── */
+.mobile-nav {
+  position: fixed;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(min(100vw, #{$app-max-width}) - 28px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  height: 64px;
+  background: #141e2b;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 32px;
+  padding: 0 10px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+  overflow: visible;
+}
+
+/* Regular tabs */
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 48px; /* comfortable touch target */
+  text-decoration: none;
+  color: #6b8299;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+
+  ion-icon {
+    font-size: 1.3rem;
+    transition: transform 0.2s;
   }
 
-  /* ── Floating pill ── */
-  .mobile-nav {
-    display: flex;
-    position: fixed;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    left: 14px;
-    right: 14px;
-    z-index: 1000;
-    align-items: center;
-    height: 64px;
-    background: #141e2b;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 32px;
-    padding: 0 10px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
-    overflow: visible;
-  }
-
-  /* Regular tabs */
-  .nav-tab {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    text-decoration: none;
-    color: #4a6278;
-    transition: color 0.2s;
-
-    ion-icon {
-      font-size: 1.3rem;
-      transition: color 0.2s, transform 0.2s;
-    }
-
-    span {
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    &.active {
-      color: #22a7f0;
-
-      ion-icon { transform: translateY(-1px); }
-    }
-  }
-
-  /* ── Centre FAB column ── */
-  .nav-fab-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    align-self: flex-start;   /* break out of the bar's vertical centering */
-    margin-top: -20px;        /* lift FAB above the pill */
-  }
-
-  /* The big circular button */
-  .nav-fab {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #22a7f0 0%, #1567b0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    text-decoration: none;
-    box-shadow:
-      0 4px 16px rgba(34, 167, 240, 0.5),
-      0 0  0 4px rgba(20, 30, 43, 1);   /* dark ring separates FAB from pill */
-    transition: transform 0.18s, box-shadow 0.18s;
-
-    ion-icon {
-      font-size: 1.55rem;
-      color: #fff;
-    }
-
-    &:active { transform: scale(0.93); }
-
-    &.active {
-      box-shadow:
-        0 6px 24px rgba(34, 167, 240, 0.7),
-        0 0  0 4px rgba(20, 30, 43, 1);
-    }
-  }
-
-  /* Label below the FAB */
-  .nav-fab-lbl {
-    font-size: 0.58rem;
-    font-weight: 700;
-    color: #22a7f0;
-    white-space: nowrap;
+  span {
+    font-size: 0.65rem;
+    font-weight: 600;
     letter-spacing: 0.02em;
   }
+
+  &.active {
+    color: #22a7f0;
+
+    ion-icon { transform: translateY(-1px); }
+  }
 }
 
-/* ── Small screen tweak ── */
-@media (max-width: 480px) {
-  .content-wrapper {
-    padding: 12px 12px calc(96px + env(safe-area-inset-bottom, 0px));
+/* ── Centre FAB column ── */
+.nav-fab-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;   /* break out of the bar's vertical centering */
+  margin-top: -20px;        /* lift FAB above the pill */
+}
+
+.nav-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22a7f0 0%, #1567b0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-decoration: none;
+  box-shadow:
+    0 4px 16px rgba(34, 167, 240, 0.5),
+    0 0 0 4px rgba(20, 30, 43, 1);   /* dark ring separates FAB from pill */
+  transition: transform 0.18s, box-shadow 0.18s;
+  -webkit-tap-highlight-color: transparent;
+
+  ion-icon {
+    font-size: 1.55rem;
+    color: #fff;
   }
+
+  &:active { transform: scale(0.93); }
+
+  &.active {
+    box-shadow:
+      0 6px 24px rgba(34, 167, 240, 0.7),
+      0 0 0 4px rgba(20, 30, 43, 1);
+  }
+}
+
+.nav-fab-lbl {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #22a7f0;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }

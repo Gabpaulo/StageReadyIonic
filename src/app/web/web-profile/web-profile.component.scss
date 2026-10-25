@@ -549,7 +549,7 @@
 }
 
 /* ── Mobile ──────────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+@container (max-width: 768px) {
 
   /* Container */
   .profile-container {

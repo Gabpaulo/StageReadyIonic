@@ -399,7 +399,7 @@
 }
 
 // Responsive design
-@media (max-width: 768px) {
+@container (max-width: 768px) {
   .badges-container {
     padding: 16px;
   }
@@ -420,30 +420,61 @@
     }
   }
   
-  .badges-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  /* Three summary stats in one row instead of 2 + an orphan */
+  .badge-summary {
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin-bottom: 20px;
   }
-  
+
+  .summary-card {
+    min-width: 0;
+    padding: 14px 8px;
+
+    strong { font-size: 1.6rem; }
+  }
+
+  .summary-title {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-category {
+    flex-wrap: wrap;
+  }
+
+  .category-tag,
+  .rarity-tag {
+    white-space: nowrap;
+    word-break: normal;
+    font-size: 0.65rem;
+  }
+
+  /* Two badges per row: one full-width card per badge made the page very long */
+  .badges-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
   .badge-card {
     .badge-image-container {
-      padding: 20px;
-      
+      padding: 16px;
+
       .badge-image {
-        width: 60px;
-        height: 60px;
+        width: 56px;
+        height: 56px;
       }
     }
-    
+
     .badge-content {
-      padding: 16px;
-      
+      padding: 12px;
+
       .badge-name {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
       }
-      
+
       .badge-description {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
       }
     }
   }
@@ -462,7 +493,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@container (max-width: 480px) {
   .badges-container {
     padding: 12px;
   }

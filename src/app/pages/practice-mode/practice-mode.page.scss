@@ -19,27 +19,35 @@
 }
 
 /* ── Header ── */
-.custom-header ion-toolbar {
-  --background: transparent;
-  --color: var(--text);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  backdrop-filter: blur(6px);
+.custom-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: -4px 0 4px -8px;
+  color: var(--text);
+}
+
+.custom-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .back-btn {
   --color: var(--muted);
-  font-size: 1.4rem;
+  --padding-start: 6px;
+  --padding-end: 6px;
+  font-size: 1.2rem;
 }
 
 /* ── Content ── */
 .custom-content {
-  --background: linear-gradient(180deg, #17232f 0%, #1e2c3a 100%);
-  --color: var(--text);
+  color: var(--text);
 }
 
 /* ── Shared screen container ── */
 .screen {
-  padding: 1rem 1.25rem 6rem;
+  padding: 0.5rem 0 1rem; /* shell already pads the column and clears the bottom nav */
   max-width: 640px;
   margin: 0 auto;
   animation: fadeIn 0.4s ease-out;
@@ -1302,7 +1310,7 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 400px) {
+@container (max-width: 400px) {
   .comparison-wrap {
     grid-template-columns: 1fr;
     gap: 0;
@@ -1314,7 +1322,7 @@
   }
 }
 
-@media (max-width: 400px) {
+@container (max-width: 400px) {
   .script-text { font-size: 0.95rem; }
   .stat-chip   { padding: 0.4rem 0.65rem; font-size: 0.78rem; }
   .grade-ring  { width: 62px; height: 62px; min-width: 62px; }

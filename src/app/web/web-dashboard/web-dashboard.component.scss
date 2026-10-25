@@ -419,7 +419,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@container (max-width: 768px) {
   .wd {
     width: 100%;
     max-width: 100%;
@@ -488,9 +488,11 @@
     padding: 14px 14px;
   }
 
+  /* Keep icon + text side by side: stacked cards waste a lot of height on phones */
   .recent-item {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
   }
 
   .wf-script-title,
@@ -815,7 +817,7 @@
 
 
 /* ── Responsive ── */
-@media (max-width: 900px) {
+@container (max-width: 900px) {
   .main-grid {
     grid-template-columns: 1fr;
   }
@@ -839,7 +841,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@container (max-width: 600px) {
   .greeting h1 {
     font-size: 1.6rem;
   }
@@ -853,7 +855,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@container (max-width: 480px) {
   .greeting h1 {
     font-size: 1.3rem;
   }

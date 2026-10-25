@@ -731,7 +731,7 @@ mat-dialog-content {
 }
 
 /* ── Mobile ─────────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+@container (max-width: 768px) {
 
   /* Container */
   .history-container {
@@ -827,7 +827,7 @@ mat-dialog-content {
 
   .dim-row { gap: 6px; }
 
-  .dim-label-cell { width: 72px; }
+  .dim-label-cell { width: 96px; } /* 72px split "Expressiveness" mid-word */
 
   .dim-label { font-size: 0.72rem; }
 

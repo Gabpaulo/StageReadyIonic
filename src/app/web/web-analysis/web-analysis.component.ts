@@ -254,29 +254,32 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
           }
         }
 
-        if (user) {
-          Promise.all([
-            this.firebaseService.saveSpeechHistory(user.uid, {
-              feedback,
-              transcript: feedback.transcript || '',
-              duration: feedback.duration || 0,
-              audioBlob,
-              speechType
-            }),
-            this.firebaseService.saveSpeechAnalysis(user.uid, {
-              feedback,
-              audioBlob,
-              speechType,
-              timestamp: new Date()
-            })
-          ]).catch(err => console.error('Error saving speech data:', err));
-        }
+        // Badge criteria count saved speeches, so they must run after the save.
+        const saved = user
+          ? Promise.all([
+              this.firebaseService.saveSpeechHistory(user.uid, {
+                feedback,
+                transcript: feedback.transcript || '',
+                duration: feedback.duration || 0,
+                audioBlob,
+                speechType
+              }),
+              this.firebaseService.saveSpeechAnalysis(user.uid, {
+                feedback,
+                audioBlob,
+                speechType,
+                timestamp: new Date()
+              })
+            ]).catch(err => console.error('Error saving speech data:', err))
+          : Promise.resolve();
 
-        Promise.all([
-          this.badgeService.onSpeechCompleted(feedback),
-          this.badgeService.onSpeechAnalyzed(feedback),
-          this.gamificationService.onSpeechCompleted()
-        ]).catch(err => console.error('Badge/Gamification service error:', err));
+        saved
+          .then(() => Promise.all([
+            this.badgeService.onSpeechCompleted(feedback),
+            this.badgeService.onSpeechAnalyzed(feedback),
+            this.gamificationService.onSpeechCompleted()
+          ]))
+          .catch(err => console.error('Badge/Gamification service error:', err));
       },
       error: (err: any) => {
         console.error('Analysis error', err);

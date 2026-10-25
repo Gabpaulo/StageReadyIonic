@@ -9,7 +9,6 @@ import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
   standalone: false,
 })
 export class AppComponent {
-  canInstall = false;
   private deferredPrompt: any = null;
 
   constructor(
@@ -31,20 +30,29 @@ export class AppComponent {
       this.presentToast('Installing…', 'primary');
     }
     this.deferredPrompt = null;
-    this.canInstall = false;
   };
 
   private setupInstallPromptListener() {
-    window.addEventListener('beforeinstallprompt', (event: Event) => {
+    // Offer install as a toast — a header here would sit on top of the
+    // shell's app bar and hide the menu/logout buttons.
+    window.addEventListener('beforeinstallprompt', async (event: Event) => {
       event.preventDefault();
       this.deferredPrompt = event as any;
-      this.canInstall = true;
+      const toast = await this.toastController.create({
+        message: 'Install StageReady on this device?',
+        position: 'top',
+        duration: 8000,
+        buttons: [
+          { text: 'Install', handler: () => { this.installApp(); } },
+          { text: 'Not now', role: 'cancel' }
+        ]
+      });
+      await toast.present();
     });
 
     window.addEventListener('appinstalled', () => {
       this.presentToast('App installed', 'success');
       this.deferredPrompt = null;
-      this.canInstall = false;
     });
   }
 

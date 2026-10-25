@@ -559,13 +559,13 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 860px) {
+@container (max-width: 860px) {
   .wa-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 480px) {
+@container (max-width: 480px) {
   .wa-header {
     margin-bottom: 16px;
 

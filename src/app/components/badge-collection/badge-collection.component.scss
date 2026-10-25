@@ -257,7 +257,7 @@ ion-content {
     color: var(--text);
   }
 
-  @media (max-width: 480px) {
+  @container (max-width: 480px) {
     min-width: 160px;
     max-width: 200px;
     padding: 8px 10px;
@@ -334,7 +334,7 @@ ion-content {
 }
 
 /* ===== Responsive Design ===== */
-@media (max-width: 768px) {
+@container (max-width: 768px) {
   .badge-collection-container {
     padding: 10px;
   }
@@ -356,7 +356,7 @@ ion-content {
   }
 }
 
-@media (max-width: 480px) {
+@container (max-width: 480px) {
   .badge-collection-container {
     max-width: 100%;
   }

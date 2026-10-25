@@ -440,14 +440,14 @@ $border:      #2b3b4c;
 .try-again-button { padding: 12px 32px; border-radius: 8px; font-size: 1rem; font-weight: 600; }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+@container (max-width: 768px) {
   .feedback-container { padding: 16px; }
   .feedback-details   { flex-direction: column; }
   .analysis-grid      { grid-template-columns: 1fr; }
   .scores-grid        { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 480px) {
+@container (max-width: 480px) {
   .feedback-container {
     padding: 12px;
   }
