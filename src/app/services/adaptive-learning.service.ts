@@ -3,6 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 import { FirebaseService } from './firebase.service';
 import { PracticeScript, DimensionKey } from '../data/practice-scripts.data';
 import { PracticeScriptService } from './practice-script.service';
+import { environment } from '../../environments/environment';
 
 export interface RecommendedScript {
   script: PracticeScript;
@@ -17,6 +18,44 @@ export interface WeeklyPlan {
   sessionCount: number;
   modelReady: boolean;
   avgScores: Record<DimensionKey, number>;
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface GeneratedQuiz {
+  questions: QuizQuestion[];
+  focus: string[];
+  sources: string[];
+}
+
+/** Validates the LLM's JSON and shuffles options, dropping malformed questions. */
+export function parseQuiz(raw: unknown): QuizQuestion[] {
+  const items = typeof raw === 'string' ? JSON.parse(raw)?.questions : null;
+  if (!Array.isArray(items)) throw new Error('Quiz response had no questions array');
+  const valid = items.filter(q =>
+    typeof q?.question === 'string' && typeof q.explanation === 'string' &&
+    Array.isArray(q.options) && q.options.length === 4 && q.options.every((o: unknown) => typeof o === 'string') &&
+    Number.isInteger(q.correctIndex) && q.correctIndex >= 0 && q.correctIndex < 4
+  );
+  if (!valid.length) throw new Error('Quiz response had no valid questions');
+
+  // LLMs tend to put the answer in A/B; shuffle so position gives nothing away.
+  return valid.map(q => {
+    const options = [...q.options];
+    let correctIndex = q.correctIndex;
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+      if (correctIndex === i) correctIndex = j;
+      else if (correctIndex === j) correctIndex = i;
+    }
+    return { question: q.question, options, correctIndex, explanation: q.explanation };
+  });
 }
 
 const DIMS: DimensionKey[] = [
@@ -56,15 +95,7 @@ export class AdaptiveLearningService {
     if (sessions.length === 0) return null;
 
     // ── Step 2: compute per-dimension averages ────────────────────────────────
-    const avgScore: Record<DimensionKey, number> = {} as any;
-    for (const dim of DIMS) {
-      const vals = sessions
-        .map(s => (s.feedback as any)[dim] ?? (s.feedback as any)[this.feedbackKey(dim)])
-        .filter((v): v is number => typeof v === 'number');
-      avgScore[dim] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 3;
-    }
-
-    const overallAvg = sessions.reduce((a, s) => a + (s.feedback?.overall ?? 3), 0) / sessions.length;
+    const avgScore = this.averageScores(sessions);
 
     // ── Step 3 & 4: regression (≥3 sessions) or fallback ─────────────────────
     let highImpactDimensions: DimensionKey[];
@@ -83,8 +114,7 @@ export class AdaptiveLearningService {
     }
 
     // ── Step 5: difficulty ────────────────────────────────────────────────────
-    const targetDifficulty: 'beginner' | 'intermediate' | 'advanced' =
-      overallAvg < 2.5 ? 'beginner' : overallAvg <= 3.5 ? 'intermediate' : 'advanced';
+    const targetDifficulty = this.difficultyFor(sessions);
 
     // ── Step 6: WPM goal ──────────────────────────────────────────────────────
     const wpms = sessions.map(s => s.averagePace).filter((v): v is number => typeof v === 'number' && v > 0);
@@ -109,6 +139,66 @@ export class AdaptiveLearningService {
       modelReady,
       avgScores: avgScore
     };
+  }
+
+  // ── Personalized quiz ───────────────────────────────────────────────────────
+
+  async generateQuiz(uid: string | null, category: string): Promise<GeneratedQuiz> {
+    const history = uid ? await this.firebase.getSpeechHistory(uid, 30) : [];
+    const sessions = history.filter(e => e.feedback?.overall != null);
+    const sameType = sessions.filter(s => s.speechType === category);
+    const pool = sameType.length ? sameType : sessions;
+
+    let profile = 'No recorded speeches yet. Level: beginner.';
+    let focus: DimensionKey[] = [];
+    if (pool.length) {
+      const avg = this.averageScores(pool);
+      focus = this.fallbackDimensions(avg);
+      const wpms = pool.map(s => s.averagePace).filter((v): v is number => typeof v === 'number' && v > 0);
+      const notes = ([] as string[]).concat(...pool.slice(0, 3).map(s => s.feedback?.improvements ?? [])).slice(0, 5);
+      profile = [
+        `Speeches analysed: ${pool.length} (${sameType.length ? category : 'all types'})`,
+        `Level: ${this.difficultyFor(pool)}`,
+        `Weakest delivery skills (1-5 scale): ${focus.map(d => `${this.humanLabel(d)} ${avg[d].toFixed(1)}`).join(', ')}`,
+        wpms.length ? `Average pace: ${Math.round(wpms.reduce((a, b) => a + b, 0) / wpms.length)} WPM` : '',
+        notes.length ? `Recent coach notes: ${notes.join(' | ')}` : '',
+      ].filter(Boolean).join('\n');
+    }
+
+    // Backend retrieves Corpus 2 expert excerpts for these weak spots and grounds the questions in them.
+    const res = await fetch(`${environment.apiUrl}/api/generate-quiz`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category,
+        profile,
+        weak_dimensions: focus.map(d => this.humanLabel(d).toLowerCase()),
+      }),
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!res.ok) throw new Error(`Quiz generation failed: ${res.status}`);
+    const data = await res.json();
+    return {
+      questions: parseQuiz(data?.content),
+      focus: focus.map(d => this.humanLabel(d)),
+      sources: Array.isArray(data?.sources) ? data.sources : [],
+    };
+  }
+
+  private averageScores(sessions: any[]): Record<DimensionKey, number> {
+    const avgScore: Record<DimensionKey, number> = {} as any;
+    for (const dim of DIMS) {
+      const vals = sessions
+        .map(s => (s.feedback as any)[dim] ?? (s.feedback as any)[this.feedbackKey(dim)])
+        .filter((v): v is number => typeof v === 'number');
+      avgScore[dim] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 3;
+    }
+    return avgScore;
+  }
+
+  private difficultyFor(sessions: any[]): 'beginner' | 'intermediate' | 'advanced' {
+    const overallAvg = sessions.reduce((a, s) => a + (s.feedback?.overall ?? 3), 0) / sessions.length;
+    return overallAvg < 2.5 ? 'beginner' : overallAvg <= 3.5 ? 'intermediate' : 'advanced';
   }
 
   // ── TF.js regression ────────────────────────────────────────────────────────

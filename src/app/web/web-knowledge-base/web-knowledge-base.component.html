@@ -101,7 +101,7 @@
         <ion-icon name="game-controller-outline" class="quiz-intro-icon"></ion-icon>
         <div>
           <h2>Speech Knowledge Quiz</h2>
-          <p>Choose a category and test what you know. Each quiz has 10 questions with instant feedback and explanations after each answer.</p>
+          <p>Choose a category. Each quiz is generated fresh from your recorded speeches and targets the skills you score lowest on, with instant feedback after each answer.</p>
         </div>
       </div>
 
@@ -121,7 +121,7 @@
             <div class="qcat-footer">
               <span class="qcat-count">
                 <ion-icon name="help-circle-outline"></ion-icon>
-                {{ cat.questions.length }} questions
+                Personalized for you
               </span>
               <span class="qcat-start">
                 Start Quiz
@@ -130,6 +130,16 @@
             </div>
           </div>
         </div>
+      </div>
+    </ng-container>
+
+    <!-- Generating / Failed -->
+    <ng-container *ngIf="selectedQuizCategoryId && (quizLoading || quizError)">
+      <div class="empty-state">
+        <ion-spinner *ngIf="quizLoading"></ion-spinner>
+        <p>{{ quizError || 'Building a quiz from your speech history...' }}</p>
+        <button *ngIf="quizError" class="show-all-btn" (click)="restartCategory()">Try Again</button>
+        <button class="show-all-btn" (click)="resetQuiz()">All Categories</button>
       </div>
     </ng-container>
 
@@ -147,7 +157,7 @@
             <span class="quiz-label">{{ currentCategory?.label }}</span>
             <span class="quiz-score-pill">
               <ion-icon name="star-outline"></ion-icon>
-              {{ quizScore }} / {{ currentCategory?.questions?.length }}
+              {{ quizScore }} / {{ questions.length }}
             </span>
           </div>
         </div>
@@ -157,7 +167,8 @@
           <div class="quiz-progress-bar">
             <div class="quiz-progress-fill" [style.width.%]="progressPercent"></div>
           </div>
-          <span class="quiz-progress-text">Question {{ currentQuestionIndex + 1 }} of {{ currentCategory?.questions?.length }}</span>
+          <span class="quiz-progress-text">Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span>
+          <span *ngIf="quizFocus.length" class="quiz-progress-text">Focus: {{ quizFocus.join(', ') }}</span>
         </div>
 
         <!-- Question + Options Layout -->
@@ -198,7 +209,7 @@
 
             <!-- Next Button -->
             <button *ngIf="answered" class="next-btn" (click)="nextQuestion()">
-              {{ currentQuestionIndex < (currentCategory?.questions?.length ?? 0) - 1 ? 'Next Question' : 'See Results' }}
+              {{ currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'See Results' }}
               <ion-icon name="arrow-forward-outline"></ion-icon>
             </button>
           </div>
@@ -221,13 +232,14 @@
         <div class="results-score-display">
           <span class="score-big">{{ quizScore }}</span>
           <span class="score-slash">/</span>
-          <span class="score-total">{{ currentCategory.questions.length }}</span>
+          <span class="score-total">{{ questions.length }}</span>
         </div>
 
         <div class="results-bar-wrap">
           <div class="results-bar-fill" [style.width.%]="scorePercent" [style.background]="currentCategory.color"></div>
         </div>
         <p class="results-pct">{{ scorePercent }}% correct</p>
+        <p *ngIf="quizSources.length" class="results-category">Based on: {{ quizSources.join(', ') }}</p>
 
         <!-- Score breakdown -->
         <div class="score-breakdown">
@@ -237,14 +249,14 @@
           </div>
           <div class="breakdown-item wrong-count">
             <ion-icon name="close-circle-outline"></ion-icon>
-            <span>{{ (currentCategory.questions.length - quizScore) }} incorrect</span>
+            <span>{{ (questions.length - quizScore) }} incorrect</span>
           </div>
         </div>
 
         <div class="results-actions">
           <button class="action-btn primary" (click)="restartCategory()">
             <ion-icon name="refresh-outline"></ion-icon>
-            Try Again
+            New Quiz
           </button>
           <button class="action-btn secondary" (click)="resetQuiz()">
             <ion-icon name="grid-outline"></ion-icon>
