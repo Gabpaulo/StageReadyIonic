@@ -574,3 +574,66 @@
     gap: var(--sr-space-2);
   }
 }
+
+/* ── Focus mode while recording: only the mic, centred and larger ── */
+.record-card {
+  .mic-wrap,
+  .pulse-ring,
+  .mic-btn {
+    transition: width 320ms var(--sr-ease), height 320ms var(--sr-ease), transform var(--sr-duration-fast) var(--sr-ease), background-color var(--sr-duration-fast) var(--sr-ease);
+  }
+}
+
+.wa-page.focus {
+  .wa-header,
+  .type-row,
+  .wa-right { display: none; }
+
+  .wa-grid { grid-template-columns: 1fr; }
+
+  .record-card {
+    min-height: 65vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    animation: focusIn 320ms var(--sr-ease);
+
+    .mic-wrap,
+    .pulse-ring,
+    .mic-btn {
+      width: 220px;
+      height: 220px;
+    }
+
+    .mic-btn mat-icon { font-size: 4rem; width: 4rem; height: 4rem; }
+    .visualizer { width: 100%; max-width: 420px; }
+  }
+}
+
+@container (max-width: 480px) {
+  .wa-page.focus .record-card {
+    .mic-wrap,
+    .pulse-ring,
+    .mic-btn {
+      width: 168px;
+      height: 168px;
+    }
+
+    .mic-btn mat-icon { font-size: 3.2rem; width: 3.2rem; height: 3.2rem; }
+  }
+}
+
+@keyframes focusIn {
+  from { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .record-card .mic-wrap,
+  .record-card .pulse-ring,
+  .record-card .mic-btn,
+  .wa-page.focus .record-card { transition: none; animation: none; }
+}
