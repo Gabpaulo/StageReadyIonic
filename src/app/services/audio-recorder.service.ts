@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Platform } from '@ionic/angular';
 
@@ -20,7 +20,7 @@ export class AudioRecorderService {
   /** Emits when WAV conversion is complete (for submission) */
   public wavReady$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private platform: Platform) {}
+  constructor(private platform: Platform, private zone: NgZone) {}
 
   /** Check if microphone permission is granted (web only) */
   async checkPermissions(): Promise<boolean> {
@@ -100,7 +100,8 @@ export class AudioRecorderService {
         this.audioChunks.push(e.data);
       };
 
-      this.mediaRecorder.onstop = async () => {
+      // zone.js doesn't patch MediaRecorder events; without zone.run the UI only refreshes on the next unrelated event
+      this.mediaRecorder.onstop = () => this.zone.run(async () => {
         console.log('MediaRecorder stopped. Chunks:', this.audioChunks.length);
         // onstop fired — the async gap is now closed
         this.isStopping = false;
@@ -127,14 +128,14 @@ export class AudioRecorderService {
         } finally {
           this.isConverting = false;
         }
-      };
+      });
 
-      this.mediaRecorder.onerror = (event) => {
+      this.mediaRecorder.onerror = (event) => this.zone.run(() => {
         console.error('MediaRecorder error:', event);
         this.stopStream();
         this.isRecording$.next(false);
         alert('Error recording audio. Please check microphone permissions.');
-      };
+      });
 
       this.mediaRecorder.start();
       console.log('MediaRecorder started.');
@@ -193,7 +194,7 @@ export class AudioRecorderService {
         this.audioChunks.push(e.data);
       };
 
-      this.mediaRecorder.onstop = async () => {
+      this.mediaRecorder.onstop = () => this.zone.run(async () => {
         this.isStopping = false;
         this.isRecording$.next(false);
         this.wavReady$.next(false);
@@ -214,7 +215,7 @@ export class AudioRecorderService {
         } finally {
           this.isConverting = false;
         }
-      };
+      });
 
       this.mediaRecorder.start();
       this.isRecording$.next(true);
