@@ -132,8 +132,8 @@ export class BadgeDisplayComponent implements OnInit {
     if (!this.badge || !this.badge.icon) {
       return '/assets/badges/first-step.svg';
     }
-    // Ensure path starts with / for absolute path from root
-    if (this.badge.icon.startsWith('/')) {
+    // Admin-set icons are full URLs; only bare asset paths need the leading /
+    if (/^(\/|https?:|data:)/.test(this.badge.icon)) {
       return this.badge.icon;
     }
     return '/' + this.badge.icon;
