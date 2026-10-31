@@ -53,34 +53,35 @@
 
       <!-- Quick Actions -->
       <div class="section-head">Practice</div>
-      <div class="action-list">
-        <a class="action-row primary" routerLink="/web/practice-mode">
-          <div class="action-body">
-            <span class="action-name">Script Practice</span>
-            <span class="action-desc">Follow a script and get a delivery score</span>
+      <div class="action-grid">
+        <a class="tile tile-hero" routerLink="/web/practice-mode">
+          <ion-icon name="document-text-outline" class="tile-watermark" aria-hidden="true"></ion-icon>
+          <div class="tile-icon"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon></div>
+          <div class="tile-body">
+            <span class="tile-name">Script Practice</span>
+            <span class="tile-desc">Follow a script and get a delivery score</span>
           </div>
-          <span class="action-arr">→</span>
+          <span class="tile-cta">Start <ion-icon name="arrow-forward" aria-hidden="true"></ion-icon></span>
         </a>
-        <a class="action-row" routerLink="/web/analysis">
-          <div class="action-body">
-            <span class="action-name">Free Speech</span>
-            <span class="action-desc">Record, get AI feedback on your delivery</span>
+
+        <a class="tile tile-mic" routerLink="/web/analysis">
+          <div class="tile-icon"><ion-icon name="mic" aria-hidden="true"></ion-icon></div>
+          <div class="tile-body">
+            <span class="tile-name">Free Speech</span>
+            <span class="tile-desc">Record, get AI feedback on your delivery</span>
           </div>
-          <span class="action-arr">→</span>
         </a>
-        <a class="action-row" routerLink="/web/history">
-          <div class="action-body">
-            <span class="action-name">History</span>
-            <span class="action-desc">Review your past sessions</span>
-          </div>
-          <span class="action-arr">→</span>
+
+        <a class="tile tile-stat" routerLink="/web/history">
+          <span class="tile-top"><ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>History</span>
+          <span class="tile-num">{{ totalSpeeches }}</span>
+          <span class="tile-desc">{{ totalSpeeches === 1 ? 'session' : 'sessions' }} recorded</span>
         </a>
-        <a class="action-row" routerLink="/web/badges">
-          <div class="action-body">
-            <span class="action-name">Badges</span>
-            <span class="action-desc">Track your achievements</span>
-          </div>
-          <span class="action-arr">→</span>
+
+        <a class="tile tile-stat" routerLink="/web/badges">
+          <span class="tile-top"><ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>Badges</span>
+          <span class="tile-num">{{ badgeProgress.unlocked }}<small>/{{ badgeProgress.total }}</small></span>
+          <span class="tile-bar" aria-hidden="true"><span [style.width.%]="badgeProgress.percentage"></span></span>
         </a>
       </div>
 
