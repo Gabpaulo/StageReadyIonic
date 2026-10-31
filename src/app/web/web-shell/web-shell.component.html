@@ -4,7 +4,8 @@
   - Phones, tablets, narrow windows and the native Android app: top app bar,
     slide-in drawer and floating bottom nav.
 -->
-<ion-split-pane contentId="main-content" [when]="sidebarQuery" (ionSplitPaneVisible)="onSplitPaneVisible($event)">
+<ion-split-pane contentId="main-content" [when]="sidebarQuery" (ionSplitPaneVisible)="onSplitPaneVisible($event)"
+                [class.recording]="recorder.isRecording$ | async">
   <ion-menu contentId="main-content" type="overlay" class="sidenav">
     <ion-header class="sidenav-toolbar">
       <ion-toolbar>

@@ -405,3 +405,12 @@ ion-menu {
     padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* While recording, hide all navigation so the page shows only the mic. */
+ion-split-pane.recording {
+  .sidenav,
+  .main-toolbar,
+  .mobile-nav { display: none; }
+
+  .content-wrapper { padding-bottom: 0; }
+}

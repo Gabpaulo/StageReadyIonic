@@ -4,6 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { IonContent, Platform } from '@ionic/angular';
 import { filter } from 'rxjs/operators';
 import { FirebaseService } from '../../services/firebase.service';
+import { AudioRecorderService } from '../../services/audio-recorder.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -34,6 +35,7 @@ export class WebShellComponent {
     private router: Router,
     private firebaseService: FirebaseService,
     private snackBar: MatSnackBar,
+    readonly recorder: AudioRecorderService,
     platform: Platform
   ) {
     this.sidebarQuery = platform.is('capacitor') ? false : '(min-width: 992px)';
