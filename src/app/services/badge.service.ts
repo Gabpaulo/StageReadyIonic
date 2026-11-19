@@ -199,11 +199,11 @@ export class BadgeService {
       case 'total_days':
         return await this.checkTotalDaysCriteria(criteria, eventType, data);
       case 'rating_achievement':
-        return await this.checkRatingAchievementCriteria(criteria, eventType, data);
+        return await this.checkRatingAchievementCriteria(badgeId, criteria, eventType, data);
       case 'profile_completion':
         return await this.checkProfileCompletionCriteria(criteria, eventType, data);
       case 'time_based':
-        return await this.checkTimeBasedCriteria(criteria, eventType, data);
+        return await this.checkTimeBasedCriteria(badgeId, criteria, eventType, data);
       default:
         return false;
     }
@@ -230,12 +230,23 @@ export class BadgeService {
     return this.evaluateCondition(totalDays, criteria.value, criteria.condition);
   }
 
-  private async checkRatingAchievementCriteria(criteria: any, eventType: string, data?: any): Promise<boolean> {
+  // Rating badges seeded from the admin app may omit ratingType; infer it from the badge id.
+  private readonly DEFAULT_RATING_TYPE: Record<string, NonNullable<BadgeCriteria['ratingType']>> = {
+    clarity_master: 'clarity',
+    pace_perfect:   'pace',
+    tone_expert:    'tone',
+    filler_fighter: 'filler',
+    perfectionist:  'all',
+  };
+
+  private async checkRatingAchievementCriteria(badgeId: string, criteria: BadgeCriteria, eventType: string, data?: any): Promise<boolean> {
     if (eventType !== 'speech_analyzed' || !data) return false;
-    
+
     const feedback: AnalyzeSpeechForFeedbackOutput = data;
-    const rating = this.getRatingFromFeedback(feedback, criteria.ratingType);
-    return rating === criteria.ratingValue;
+    const ratingType = criteria.ratingType || this.DEFAULT_RATING_TYPE[badgeId];
+    if (!ratingType) return false;
+    const target = criteria.ratingValue || 'excellent';
+    return this.getRatingFromFeedback(feedback, ratingType) === target;
   }
 
   private async checkProfileCompletionCriteria(criteria: any, eventType: string, data?: any): Promise<boolean> {
@@ -256,9 +267,17 @@ export class BadgeService {
     return false;
   }
 
-  private async checkTimeBasedCriteria(criteria: any, eventType: string, data?: any): Promise<boolean> {
+  private async checkTimeBasedCriteria(badgeId: string, criteria: BadgeCriteria, eventType: string, data?: any): Promise<boolean> {
     if (eventType !== 'speech_completed') return false;
-    
+
+    if (badgeId === 'comeback_kid') {
+      // Returned after 7+ days away: the gap between the two most recent saved speeches.
+      const recent = await this.firebaseService.getSpeechHistory(this.currentUserId!, 2);
+      if (recent.length < 2) return false;
+      const gapDays = (recent[0].createdAt.getTime() - recent[1].createdAt.getTime()) / 86_400_000;
+      return gapDays >= 7;
+    }
+
     const currentHour = new Date().getHours();
     return currentHour >= 22; // 10 PM or later for night owl badge
   }
@@ -276,14 +295,26 @@ export class BadgeService {
     }
   }
 
+  // Ratings come from the 1-5 dimension scores. The *_feedback fields are the LLM's
+  // narrative text, so they can never equal a rating word.
   private getRatingFromFeedback(feedback: AnalyzeSpeechForFeedbackOutput, ratingType: string): string {
     switch (ratingType) {
       case 'clarity':
-        return feedback.clarity_feedback?.toLowerCase() || this.scoreToRating(feedback.articulation_clarity);
+        return this.scoreToRating(feedback.articulation_clarity);
       case 'pace':
-        return feedback.pace_feedback?.toLowerCase() || this.scoreToRating(feedback.speech_pace);
+        return this.scoreToRating(feedback.speech_pace);
       case 'tone':
-        return feedback.tone_feedback?.toLowerCase() || this.scoreToRating(feedback.pitch_variation);
+        return this.scoreToRating(feedback.pitch_variation);
+      case 'filler':
+        return this.scoreToRating(feedback.filler_words);
+      case 'overall':
+        return this.scoreToRating(feedback.overall);
+      case 'all': {
+        const scores = [feedback.speech_pace, feedback.pausing_fluency, feedback.loudness_control,
+                        feedback.pitch_variation, feedback.articulation_clarity,
+                        feedback.expressive_emphasis, feedback.filler_words];
+        return scores.every(s => typeof s === 'number' && s >= 4) ? 'excellent' : 'fair';
+      }
       default:
         return 'fair';
     }

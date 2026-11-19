@@ -279,6 +279,7 @@ export class WebAnalysisComponent implements OnInit, OnDestroy {
             this.badgeService.onSpeechAnalyzed(feedback),
             this.gamificationService.onSpeechCompleted()
           ]))
+          .then(() => this.gamificationService.checkDailyChallenge(feedback))
           .catch(err => console.error('Badge/Gamification service error:', err));
       },
       error: (err: any) => {
