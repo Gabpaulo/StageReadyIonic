@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FirebaseService } from './firebase.service';
-import { UserGamification, XP_REWARDS, XP_PER_LEVEL } from '../models/gamification.model';
+import { UserGamification, XP_REWARDS, XP_PER_LEVEL, DAILY_CHALLENGES } from '../models/gamification.model';
+import { AnalyzeSpeechForFeedbackOutput } from '../models/speech-analysis.model';
 
 @Injectable({
   providedIn: 'root'
@@ -109,6 +110,44 @@ export class GamificationService {
 
     // Reload gamification data
     await this.loadUserGamification();
+  }
+
+  /**
+   * Marks today's challenge complete when the analysed speech meets it, then awards its XP.
+   * Call after the speech is saved, so "three sessions today" counts it.
+   */
+  async checkDailyChallenge(feedback: AnalyzeSpeechForFeedbackOutput): Promise<boolean> {
+    if (!this.currentUserId) return false;
+    const gamification = this.userGamificationSubject.value;
+    if (!gamification || gamification.dailyChallenge.completed) return false;
+
+    if (!(await this.meetsChallenge(gamification.dailyChallenge.challenge, feedback))) return false;
+    await this.completeDailyChallenge();
+    return true;
+  }
+
+  private async meetsChallenge(challenge: string, f: AnalyzeSpeechForFeedbackOutput): Promise<boolean> {
+    switch (DAILY_CHALLENGES.indexOf(challenge)) {
+      case 0: // Complete a 2-minute practice speech
+        return (f.duration ?? 0) >= 120;
+      case 1: // Practice speaking without filler words
+        return (f.filler_word_details?.count ?? 1) === 0;
+      case 2: // Record a speech on a new topic (topic is not checked; any completed speech counts)
+        return true;
+      case 3: // Practice speaking at a moderate pace (the 120-155 WPM range the coach uses)
+        return f.averagePace >= 120 && f.averagePace <= 155;
+      case 4: // Deliver a speech with clear articulation
+        return (f.articulation_clarity ?? 0) >= 4;
+      case 5: // Practice speaking with varied pitch
+        return (f.pitch_variation ?? 0) >= 4;
+      case 6: { // Complete three practice sessions today
+        const recent = await this.firebaseService.getSpeechHistory(this.currentUserId!, 10);
+        const today = new Date().toDateString();
+        return recent.filter(s => s.createdAt.toDateString() === today).length >= 3;
+      }
+      default:
+        return false;
+    }
   }
 
   async onBadgeUnlocked(): Promise<void> {
