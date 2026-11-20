@@ -29,8 +29,8 @@ export class WebBadgesComponent implements OnInit {
       return 'assets/badges/first-step.svg';
     }
     // Ensure path starts with / for absolute path from root
-    // Angular/Ionic serves assets from root, so /assets/... is correct
-    if (icon.startsWith('/')) {
+  
+    if (icon.startsWith('/') || icon.startsWith('http:') || icon.startsWith('https:') || icon.startsWith('data:')){
       return icon;
     }
     return '/' + icon;
