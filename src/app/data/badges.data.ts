@@ -231,6 +231,26 @@ export const BADGE_CRITERIA: Record<string, BadgeCriteria> = {
     ratingType: 'tone',
     ratingValue: 'excellent'
   },
+  filler_fighter: {
+    type: 'rating_achievement',
+    value: 1,
+    ratingType: 'filler',
+    ratingValue: 'excellent'
+  },
+  perfectionist: {
+    type: 'rating_achievement',
+    value: 1,
+    ratingType: 'all',
+    ratingValue: 'excellent'
+  },
+  comeback_kid: {
+    type: 'time_based',
+    value: 7
+  },
+  night_owl: {
+    type: 'time_based',
+    value: 22
+  },
   speed_demon: {
     type: 'speech_count',
     value: 10
