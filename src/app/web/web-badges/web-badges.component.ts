@@ -29,8 +29,8 @@ export class WebBadgesComponent implements OnInit {
       return 'assets/badges/first-step.svg';
     }
     // Ensure path starts with / for absolute path from root
-  
-    if (icon.startsWith('/') || icon.startsWith('http:') || icon.startsWith('https:') || icon.startsWith('data:')){
+    // check ang image file route. please check ko fix
+    if (icon.startsWith('/') || icon.startsWith('.')) {
       return icon;
     }
     return '/' + icon;
