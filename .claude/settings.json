@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "agent-architecture-designer@anthropic-plugin-directory": true
+  }
+}
